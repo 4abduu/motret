@@ -5,7 +5,25 @@
 @section('content')
     <div class="container">
         <h1 class="my-4">Manage Users</h1>
+
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <span id="success-countdown" class="float-end"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <span id="error-countdown" class="float-end"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createUserModal">Create User</button>
+
         @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
@@ -15,6 +33,7 @@
                 </ul>
             </div>
         @endif
+
         <table class="table">
             <thead>
                 <tr>
@@ -79,6 +98,7 @@
                                             <label for="role" class="form-label">Role</label>
                                             <select name="role" class="form-control" id="role" required>
                                                 <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                                <option value="pro" {{ $user->role == 'pro' ? 'selected' : '' }}>Pro</option>
                                                 <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
                                             </select>
                                         </div>
@@ -127,8 +147,9 @@
                         <div class="mb-3">
                             <label for="role" class="form-label">Role</label>
                             <select name="role" class="form-control" id="role" required>
-                                <option value="admin">Admin</option>
                                 <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                                <option value="admin">Pro</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Create</button>
@@ -138,3 +159,44 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var successAlert = document.querySelector('.alert-success');
+        var errorAlert = document.querySelector('.alert-danger');
+
+        if (successAlert) {
+            var successCountdown = document.getElementById('success-countdown');
+            var successTimeLeft = 5;
+            successCountdown.innerText = successTimeLeft;
+
+            var successInterval = setInterval(function () {
+                successTimeLeft--;
+                successCountdown.innerText = successTimeLeft;
+
+                if (successTimeLeft <= 0) {
+                    clearInterval(successInterval);
+                    successAlert.remove();
+                }
+            }, 1000);
+        }
+
+        if (errorAlert) {
+            var errorCountdown = document.getElementById('error-countdown');
+            var errorTimeLeft = 5;
+            errorCountdown.innerText = errorTimeLeft;
+
+            var errorInterval = setInterval(function () {
+                errorTimeLeft--;
+                errorCountdown.innerText = errorTimeLeft;
+
+                if (errorTimeLeft <= 0) {
+                    clearInterval(errorInterval);
+                    errorAlert.remove();
+                }
+            }, 1000);
+        }
+    });
+</script>
+@endpush

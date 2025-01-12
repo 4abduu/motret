@@ -3,15 +3,39 @@
 @section('title', 'Homepage')
 
 @section('content')
-    <div class="text-center">
-        <h1>Halo, Selamat Datang di Motret</h1>
-        <div class="mt-4">
+    <div class="container">
+        <div class="text-center">
             @if(Auth::check())
-                <a href="{{ route('logout') }}" class="btn btn-danger">Logout</a>
+                <h1>Halo, Selamat Datang di Motret, {{ Auth::user()->username }}</h1>
+                <a href="{{ route('photos.create') }}" class="btn btn-primary mt-3">Upload Foto</a>
             @else
-                <a href="{{ route('login') }}" class="btn btn-primary">Login</a>
-                <a href="{{ route('login') }}" onclick="openRegisterModal(event)" class="btn btn-secondary">Register</a>
+                <h1>Halo, Selamat Datang di Motret</h1>
             @endif
+            <div class="mt-4">
+                @if(Auth::check())
+                    <a href="{{ route('logout') }}" class="btn btn-danger">Logout</a>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-primary">Login</a>
+                    <a href="{{ route('login') }}" onclick="openRegisterModal(event)" class="btn btn-secondary">Register</a>
+                @endif
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            @foreach($photos as $photo)
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <a href="{{ route('photos.show', $photo->id) }}">
+                            <img src="{{ asset('storage/' . $photo->path) }}" class="card-img-top" alt="{{ $photo->title }}">
+                        </a>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ $photo->title }}</h5>
+                            <p class="card-text">{{ $photo->description }}</p>
+                            <p class="card-text"><small class="text-muted">Hashtags: {{ implode(', ', json_decode($photo->hashtags)) }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
         </div>
     </div>
 @endsection

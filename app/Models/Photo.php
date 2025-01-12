@@ -27,6 +27,15 @@ class Photo extends Model
         'user_id',
     ];
 
+    protected $casts = [
+        'hashtags' => 'array',
+    ];
+
+    public function downloads()
+    {
+    return $this->hasMany(Download::class);
+    }
+
     /**
      * Get the user that owns the photo.
      */

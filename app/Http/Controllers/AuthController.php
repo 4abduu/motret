@@ -22,34 +22,62 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $messages = [
-            'email.required' => 'Email harus diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'password.required' => 'Password harus diisi.',
-        ];
+    $messages = [
+        'email.required' => 'Email atau Username harus diisi.',
+        'password.required' => 'Password harus diisi.',
+    ];
 
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ], $messages);
+    $validated = $request->validate([
+        'email' => 'required',
+        'password' => 'required',
+    ], $messages);
 
-        $credentials = $request->only('email', 'password');
-        
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            if ($user->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            } else {
-                return redirect()->route('home');
-            }
+    $loginType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+    $credentials = [$loginType => $request->email, 'password' => $request->password];
+
+    if (Auth::attempt($credentials)) {
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } else {
+            return redirect()->route('home');
         }
-
-        return back()->withErrors(['email' => 'Email atau password salah.']);
     }
+
+    return back()->withErrors(['email' => 'Email/Username atau password salah.']);
+    }
+
+    // public function login(Request $request)
+    // {
+    //     $messages = [
+    //         'email.required' => 'Email harus diisi.',
+    //         'email.email' => 'Format email tidak valid.',
+    //         'password.required' => 'Password harus diisi.',
+    //     ];
+
+    //     $validated = $request->validate([
+    //         'email' => 'required|email',
+    //         'password' => 'required',
+    //     ], $messages);
+
+    //     $credentials = $request->only('email', 'password');
+        
+    //     if (Auth::attempt($credentials)) {
+    //         $user = Auth::user();
+    //         if ($user->role === 'admin') {
+    //             return redirect()->route('admin.dashboard');
+    //         } else {
+    //             return redirect()->route('home');
+    //         }
+    //     }
+
+    //     return back()->withErrors(['email' => 'Email atau password salah.']);
+    // }
 
     public function register(Request $request)
     {
         $messages = [
+            'name.required' => 'Nama harus diisi.',
             'username.required' => 'Username harus diisi.',
             'username.unique' => 'Username sudah digunakan.',
             'username.min' => 'Username minimal harus 4 karakter.',
@@ -60,15 +88,19 @@ class AuthController extends Controller
             'password.required' => 'Password harus diisi.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'password.min' => 'Password minimal harus 8 karakter.',
+            'password.letters' => 'Password harus mengandung huruf.',
+            'password.numbers' => 'Password harus mengandung angka.',
         ];
 
         $validated = $request->validate([
+            'name' => 'required|string|max:255',
             'username' => 'required|unique:users,username|min:4|max:20',
             'email' => 'required|email|unique:users,email',
-            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()->mixedCase()],
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ], $messages);
 
         $user = User::create([
+            'name' => $validated['name'],
             'username' => $validated['username'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
@@ -79,6 +111,12 @@ class AuthController extends Controller
     }
 
     public function logout()
+    {
+        Auth::logout();
+        return redirect()->route('home');
+    }
+    
+    public function guest()
     {
         Auth::logout();
         return redirect()->route('home');

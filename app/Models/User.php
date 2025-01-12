@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'download_reset_at', // Pastikan ini ada
     ];
 
     /**
@@ -43,5 +44,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'subscription_ends_at' => 'datetime',
+        'download_reset_at' => 'datetime', // Pastikan ini ada
     ];
+
+    public function downloads()
+    {
+        return $this->hasMany(Download::class);
+    }
 }
