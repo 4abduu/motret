@@ -4,25 +4,24 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\Photo;
 
-class PhotoSeeder extends Seeder
+class FotoTableSeeder extends Seeder
 {
     public function run()
     {
-        // Ambil data dari tabel 'photos'
-        $photos = DB::table('photos')->get();
-
-        // Isi data ke dalam tabel 'photos' menggunakan model Photo
-        foreach ($photos as $photo) {
-            Photo::create([
-                'user_id' => $photo->user_id,
-                'title' => $photo->title,
-                'description' => $photo->description,
-                'path' => $photo->path,
-                'hashtags' => $photo->hashtags,
-                'status' => $photo->status,
-            ]);
-        }
+        DB::table('foto')->insert([
+            [
+                'id' => 1,
+                'user_id' => 2,
+                'title' => 'Anomaliw',
+                'description' => 'Sebuah alomani yang terdapat di dunia ini.',
+                'path' => 'photos/Tvsh6CsIkiCzehsVBalNDUW9DN5Fvjt09R9fVsyo.jpg',
+                'hashtags' => json_encode(["Alomani", "Windah"]),
+                'likes' => 0,
+                'status' => '1',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 }
