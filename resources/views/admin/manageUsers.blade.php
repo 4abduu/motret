@@ -34,7 +34,7 @@
             </div>
         @endif
 
-        <table class="table">
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -53,13 +53,39 @@
                         <td>{{ $user->role }}</td>
                         <td>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal{{ $user->id }}">Edit</button>
-                            <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display:inline;">
+                            <!-- <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
+                            </form> -->
+                            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#detailUserModal{{ $user->id }}">Detail</button>
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ $user->id }}">Delete</button>
                         </td>
                     </tr>
+
+                    
+                    <!-- Modal Detail User -->
+                    <div class="modal fade" id="detailUserModal{{ $user->id }}" tabindex="-1" aria-labelledby="detailUserModalLabel{{ $user->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="detailUserModalLabel{{ $user->id }}">Detail User</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>Nama:</strong> {{ $user->name }}</p>
+                                    <p><strong>Username:</strong> {{ $user->username }}</p>
+                                    <p><strong>Email:</strong> {{ $user->email }}</p>
+                                    <p><strong>Role:</strong> {{ $user->role }}</p>
+                                    <p><strong>Subscription Berakhir Pada:</strong> {{ $user->subscription_ends_at ?? 'null' }}</p>
+                                    <p><strong>Reset Download Pada:</strong> {{ $user->download_reset_at ?? 'null' }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Modal Edit User -->
                     <div class="modal fade" id="editUserModal{{ $user->id }}" tabindex="-1" aria-labelledby="editUserModalLabel{{ $user->id }}" aria-hidden="true">
@@ -153,6 +179,29 @@
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary">Create</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Delete User -->
+    <div class="modal fade" id="deleteUserModal{{ $user->id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ $user->id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteUserModalLabel{{ $user->id }}">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the user <strong>{{ $user->username }}</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </div>
             </div>

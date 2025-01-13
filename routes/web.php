@@ -8,9 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\HomeController;
 
 // Route untuk homepage
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/foto/{id}', [UserController::class, 'showPhoto'])->name('photos.show');
-Route::post('/foto/{id}/download', [UserController::class, 'downloadPhoto'])->name('photos.download');
+
 
 // Routes untuk login, register, dan logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -19,8 +17,18 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/guest', [AuthController::class, 'guest'])->name('guest');
 
+//Route::middleware(['auth', 'role:'])->prefix('admin')->group(function () {
+    //Route::get('/', [HomeController::class, 'index'])->name('home');
+   // Route::get('/foto/{id}', [UserController::class, 'showPhoto'])->name('photos.show');
+    //Route::post('/foto/{id}/download', [UserController::class, 'downloadPhoto'])->name('photos.download');
+//});
+Route::middleware(['auth', 'redirect.if.admin'])->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+    Route::get('/foto/{id}', [UserController::class, 'showPhoto'])->name('photos.show');
+    Route::post('/foto/{id}/download', [UserController::class, 'downloadPhoto'])->name('photos.download');
+});
 // Grup untuk Admin
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/users', [AdminController::class, 'manageUsers'])->name('admin.users');
     Route::post('/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
@@ -33,6 +41,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
 // Grup untuk User
 Route::middleware(['auth', 'role:user'])->prefix('user')->group(function () {
+    Route::get('/foto/{id}', [UserController::class, 'showPhoto'])->name('photos.show');
+    Route::post('/foto/{id}/download', [UserController::class, 'downloadPhoto'])->name('photos.download');
     Route::get('/profil', [UserController::class, 'profile'])->name('user.profile');
     Route::get('/foto', [UserController::class, 'photos'])->name('user.photos');
     Route::get('/foto/upload', [UserController::class, 'createphotos'])->name('photos.create');

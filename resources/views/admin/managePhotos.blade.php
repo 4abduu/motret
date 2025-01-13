@@ -40,11 +40,12 @@
                         <td>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editPhotoModal{{ $photo->id }}">Edit</button>
                             <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#detailPhotoModal{{ $photo->id }}">Detail</button>
-                            <form action="{{ route('admin.photos.delete', $photo->id) }}" method="POST" style="display:inline;">
+                            <!-- <form action="{{ route('admin.photos.delete', $photo->id) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
+                            </form> -->
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $photo->id }}">Delete</button>
                         </td>
                     </tr>
 
@@ -114,6 +115,29 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Modal Confirm Delete Photo -->
+    <div class="modal fade" id="confirmDeleteModal{{ $photo->id }}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel{{ $photo->id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel{{ $photo->id }}">Confirm Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete this photo?</p>
+                    </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ route('admin.photos.delete', $photo->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+            </div>
+        </div>
+    </div>                    
 @endsection
 
 
