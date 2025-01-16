@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Photo;
+use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -25,6 +26,11 @@ class AdminController extends Controller
     {
         $photos = Photo::all();
         return view('admin.managePhotos', compact('photos'));
+    }
+    public function manageReports()
+    {
+        $reports = Report::with(['user', 'photo.user'])->get();
+        return view('admin.manageReports', compact('reports'));
     }
 
     public function createUser(Request $request)
@@ -130,6 +136,28 @@ class AdminController extends Controller
             return redirect()->route('admin.photos')->with('success', 'Photo deleted successfully.');
         } catch (\Exception $e) {
             return redirect()->route('admin.photos')->with('error', 'Failed to delete photo.');
+        }
+    }
+
+    public function deleteReport($id)
+    {
+        try {
+            Report::findOrFail($id)->delete();
+            return redirect()->route('admin.reports')->with('success', 'Laporan berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.reports')->with('error', 'Gagal menghapus laporan.');
+        }
+    }
+
+    public function banPhoto($id)
+    {
+        try {
+            $photo = Photo::findOrFail($id);
+            $photo->banned = true;
+            $photo->save();
+            return redirect()->route('admin.reports')->with('success', 'Postingan berhasil dibanned.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.reports')->with('error', 'Gagal membanned postingan.');
         }
     }
 }

@@ -22,17 +22,22 @@
         </div>
 
         <div class="row mt-5">
-            @foreach($photos as $photo)
+        @foreach($photos as $photo)
                 <div class="col-md-4 mb-4">
                     <div class="card">
-                        <a href="{{ route('photos.show', $photo->id) }}">
-                            <img src="{{ asset('storage/' . $photo->path) }}" class="card-img-top" alt="{{ $photo->title }}">
-                        </a>
-                        <div class="card-body">
-                            <h5 class="card-title">{{ $photo->title }}</h5>
-                            <p class="card-text">{{ $photo->description }}</p>
-                            <p class="card-text"><small class="text-muted">Hashtags: {{ implode(', ', json_decode($photo->hashtags)) }}</small></p>
-                        </div>
+                        @if($photo->banned)
+                            <div class="card-body">
+                                <p class="card-text">Postingan ini telah dibanned.</p>
+                            </div>
+                        @else
+                            <a href="{{ route('photos.show', $photo->id) }}">
+                                <img src="{{ asset('storage/' . $photo->path) }}" class="card-img-top" alt="{{ $photo->title }}">
+                            </a>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $photo->title }}</h5>
+                                <p class="card-text">{{ $photo->description }}</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endforeach

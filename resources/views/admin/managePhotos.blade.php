@@ -5,29 +5,13 @@
 @section('content')
     <div class="container">
         <h1 class="my-4">Manage Photos</h1>
-
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <span id="success-countdown" class="float-end"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ session('error') }}
-                <span id="error-countdown" class="float-end"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>Photo</th>
                     <th>Title</th>
                     <th>Description</th>
+                    <th>Status</th> <!-- Tambahkan kolom status -->
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -38,13 +22,15 @@
                         <td>{{ $photo->title }}</td>
                         <td>{{ $photo->description }}</td>
                         <td>
+                            @if($photo->banned)
+                                <span class="badge bg-danger">Banned</span>
+                            @else
+                                <span class="badge bg-success">Active</span>
+                            @endif
+                        </td>
+                        <td>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editPhotoModal{{ $photo->id }}">Edit</button>
                             <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#detailPhotoModal{{ $photo->id }}">Detail</button>
-                            <!-- <form action="{{ route('admin.photos.delete', $photo->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form> -->
                             <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $photo->id }}">Delete</button>
                         </td>
                     </tr>
@@ -111,73 +97,31 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Modal Confirm Delete Photo -->
+                    <div class="modal fade" id="confirmDeleteModal{{ $photo->id }}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel{{ $photo->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmDeleteModalLabel{{ $photo->id }}">Confirm Delete</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Are you sure you want to delete this photo?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form action="{{ route('admin.photos.delete', $photo->id) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endforeach
             </tbody>
         </table>
     </div>
-
-    <!-- Modal Confirm Delete Photo -->
-    <div class="modal fade" id="confirmDeleteModal{{ $photo->id }}" tabindex="-1" aria-labelledby="confirmDeleteModalLabel{{ $photo->id }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteModalLabel{{ $photo->id }}">Confirm Delete</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to delete this photo?</p>
-                    </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <form action="{{ route('admin.photos.delete', $photo->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            </form>
-                        </div>
-            </div>
-        </div>
-    </div>                    
 @endsection
-
-
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var successAlert = document.querySelector('.alert-success');
-        var errorAlert = document.querySelector('.alert-danger');
-
-        if (successAlert) {
-            var successCountdown = document.getElementById('success-countdown');
-            var successTimeLeft = 5;
-            successCountdown.innerText = successTimeLeft;
-
-            var successInterval = setInterval(function () {
-                successTimeLeft--;
-                successCountdown.innerText = successTimeLeft;
-
-                if (successTimeLeft <= 0) {
-                    clearInterval(successInterval);
-                    successAlert.remove();
-                }
-            }, 1000);
-        }
-
-        if (errorAlert) {
-            var errorCountdown = document.getElementById('error-countdown');
-            var errorTimeLeft = 5;
-            errorCountdown.innerText = errorTimeLeft;
-
-            var errorInterval = setInterval(function () {
-                errorTimeLeft--;
-                errorCountdown.innerText = errorTimeLeft;
-
-                if (errorTimeLeft <= 0) {
-                    clearInterval(errorInterval);
-                    errorAlert.remove();
-                }
-            }, 1000);
-        }
-    });
-</script>
-@endpush

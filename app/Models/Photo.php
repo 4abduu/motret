@@ -1,19 +1,13 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Photo extends Model
 {
     use HasFactory;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
 
     protected $table = 'foto';
 
@@ -25,6 +19,7 @@ class Photo extends Model
         'likes',
         'status',
         'user_id',
+        'banned',
     ];
 
     protected $casts = [
@@ -33,14 +28,16 @@ class Photo extends Model
 
     public function downloads()
     {
-    return $this->hasMany(Download::class);
+        return $this->hasMany(Download::class);
     }
 
-    /**
-     * Get the user that owns the photo.
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function isBannedMoreThanAWeek()
+    {
+        return $this->banned && $this->updated_at->lt(Carbon::now()->subWeek());
     }
 }

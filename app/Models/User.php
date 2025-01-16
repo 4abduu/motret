@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -22,7 +23,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'download_reset_at', // Pastikan ini ada
+        'download_reset_at',
+        'subscription_ends_at',
+        'profile_photo', // Pastikan ini ada
     ];
 
     /**
@@ -51,4 +54,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Download::class);
     }
+    
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo) {
+            return asset('storage/photo_profile/' . $this->profile_photo);
+        }
+
+        return asset('storage/photo_profile/default_photo_profile.jpg');
+    }
+
 }

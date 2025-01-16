@@ -6,16 +6,34 @@ use Illuminate\Http\Request;
 use App\Models\Photo;
 use App\Models\Download;
 use App\Models\User;
+use App\Models\Report;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->except(['showPhoto', 'downloadPhoto', 'showProfile']);
+    }
+
     public function profile()
     {
-        return view('user.profile');
+        $user = Auth::user();
+        $photos = Photo::where('user_id', $user->id)->get();
+        return view('user.profile', compact('user', 'photos'));
+    }
+
+    public function showProfile($username)
+    {
+        $user = User::where('username', $username)->firstOrFail();
+        $photos = Photo::where('user_id', $user->id)->get();
+        return view('user.profile', compact('user', 'photos'));
     }
 
     public function photos()
@@ -116,5 +134,92 @@ class UserController extends Controller
             return response()->download($lowResPath);
         }
         return response()->download($filePath);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,' . Auth::id(),
+            'email' => 'required|string|email|max:255|unique:users,email,' . Auth::id(),
+            'current_password' => 'nullable|string',
+            'new_password' => 'nullable|string|min:8|confirmed',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $user = Auth::user();
+        $user->name = $validated['name'];
+        $user->username = $validated['username'];
+        $user->email = $validated['email'];
+
+        if ($request->filled('current_password') && $request->filled('new_password')) {
+            if (Hash::check($request->current_password, $user->password)) {
+                $user->password = Hash::make($request->new_password);
+            } else {
+                return back()->withErrors(['current_password' => 'Password lama tidak sesuai.']);
+            }
+        }
+
+        if ($request->hasFile('profile_photo')) {
+            // Hapus foto profil lama jika ada
+            if ($user->profile_photo) {
+                Storage::delete('public/photo_profile/' . $user->profile_photo);
+            }
+
+            // Simpan foto profil baru dengan nama acak
+            $profilePhotoPath = $request->file('profile_photo')->storeAs(
+                'public/photo_profile',
+                Str::random(40) . '.' . $request->file('profile_photo')->getClientOriginalExtension()
+            );
+
+            $user->profile_photo = basename($profilePhotoPath);
+        }
+
+        $user->save();
+
+        return redirect()->route('user.profile')->with('success', 'Profil berhasil diperbarui.');
+    }
+
+    public function deleteProfilePhoto()
+    {
+        $user = Auth::user();
+
+        if ($user->profile_photo) {
+            Storage::delete('public/photo_profile/' . $user->profile_photo);
+            $user->profile_photo = null;
+            $user->save();
+        }
+
+        return redirect()->route('user.profile')->with('success', 'Foto profil berhasil dihapus.');
+    }
+
+    public function reportPhoto(Request $request, $photoId)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:255',
+            'other_reason' => 'nullable|string|max:255',
+        ]);
+
+        $reason = $validated['reason'] === 'Lainnya' ? $validated['other_reason'] : $validated['reason'];
+
+        Report::create([
+            'user_id' => Auth::id(),
+            'photo_id' => $photoId,
+            'reason' => $reason,
+        ]);
+
+        return redirect()->route('photos.show', $photoId)->with('success', 'Foto berhasil dilaporkan.');
+    }
+
+    public function checkUsername(Request $request)
+    {
+        $exists = User::where('username', $request->username)->exists();
+        return response()->json(['exists' => $exists]);
+    }
+
+    public function checkEmail(Request $request)
+    {
+        $exists = User::where('email', $request->email)->exists();
+        return response()->json(['exists' => $exists]);
     }
 }

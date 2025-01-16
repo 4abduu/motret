@@ -22,29 +22,30 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-    $messages = [
-        'email.required' => 'Email atau Username harus diisi.',
-        'password.required' => 'Password harus diisi.',
-    ];
+        $messages = [
+            'email.required' => 'Email atau Username harus diisi.',
+            'password.required' => 'Password harus diisi.',
+        ];
 
-    $validated = $request->validate([
-        'email' => 'required',
-        'password' => 'required',
-    ], $messages);
+        $validated = $request->validate([
+            'email' => 'required',
+            'password' => 'required',
+        ], $messages);
 
-    $loginType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-    $credentials = [$loginType => $request->email, 'password' => $request->password];
+        $loginType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $credentials = [$loginType => $request->email, 'password' => $request->password];
 
-    if (Auth::attempt($credentials)) {
-        $user = Auth::user();
-        if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        } else {
-            return redirect()->route('home');
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            $user = Auth::user();
+            if ($user->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            } else {
+                return redirect()->route('home');
+            }
         }
-    }
 
-    return back()->withErrors(['email' => 'Email/Username atau password salah.']);
+        return back()->withErrors(['email' => 'Email/Username atau password salah.']);
     }
 
     // public function login(Request $request)
@@ -110,10 +111,12 @@ class AuthController extends Controller
         return redirect()->route('home');
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
         Auth::logout();
-        return redirect()->route('home');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/');
     }
     
     public function guest()
