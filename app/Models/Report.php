@@ -15,6 +15,7 @@ class Report extends Model
         'user_id',
         'photo_id',
         'reason',
+        'status',
     ];
 
     public function user()

@@ -4,27 +4,36 @@
 
 @section('content')
     <div class="container">
-        <h1 class="my-4">Laporan</h1>
-        <table class="table table-striped">
+        <h1 class="my-4">Laporan</h1><table class="table table-striped">
             <thead>
                 <tr>
+                    <th>No</th>
                     <th>Foto</th>
                     <th>Diunggah oleh</th>
                     <th>Pelapor</th>
                     <th>Alasan</th>
+                    <th>Status</th> <!-- Tambahkan kolom status -->
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($reports as $report)
+                @foreach($reports as $index => $report)
                     <tr>
+                        <td>{{ $index + 1 }}</td>
                         <td><img src="{{ asset('storage/' . $report->photo->path) }}" alt="{{ $report->photo->title }}" width="100"></td>
                         <td>{{ $report->photo->user->username }}</td>
                         <td>{{ $report->user->username }}</td>
                         <td>{{ $report->reason }}</td>
                         <td>
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#banPhotoModal" data-photo-id="{{ $report->photo->id }}"><i class="fas fa-ban"></i></button>
-                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteReportModal" data-report-id="{{ $report->id }}"><i class="fas fa-times"></i></button>
+                            @if($report->photo->banned)
+                                <span class="badge bg-danger">Banned</span>
+                            @else
+                                <span class="badge bg-warning">Pending</span>
+                            @endif
+                        </td>
+                        <td>
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#banPhotoModal" data-photo-id="{{ $report->photo->id }}"><i class="fas fa-ban"></i></button>
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#deleteReportModal" data-report-id="{{ $report->id }}"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 @endforeach
@@ -96,6 +105,8 @@
                 var photoId = button.getAttribute('data-photo-id');
                 var form = document.getElementById('banPhotoForm');
                 form.action = '/photos/' + photoId + '/ban';
+                var banReason = document.getElementById('ban_reason');
+                banReason.value = '';
             });
         });
     </script>

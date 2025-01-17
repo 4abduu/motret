@@ -6,8 +6,8 @@
         <img src="{{ $user->profile_photo_url }}" alt="Profile Photo" class="img-thumbnail rounded-circle" width="150">
         <p>Nama: {{ $user->name }}</p>
         <p>Username: {{ $user->username }}</p>
-        <p>Email: {{ $user->email }}</p>
         @if(Auth::id() === $user->id)
+        <p>Email: {{ $user->email }}</p>
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profil</button>
         @endif
 
@@ -18,7 +18,10 @@
                     <div class="card">
                         @if($photo->banned)
                             <div class="card-body">
-                                <p class="card-text">Postingan ini telah dibanned.</p>
+                                <h5 class="card-title">Postingan ini telah dibanned.</h5>
+                                @foreach($photo->reports as $report)
+                                    <p class="card-text"><strong>Alasan:</strong> {{ $report->reason }}</p>
+                                @endforeach
                             </div>
                         @else
                             <a href="{{ route('photos.show', $photo->id) }}">
@@ -49,22 +52,6 @@
                             @csrf
                             @method('PUT')
                             <div class="form-group position-relative">
-                                <label for="name">Nama</label>
-                                <input type="text" class="form-control" id="name" name="name" value="{{ $user->name }}" required>
-                            </div>
-                            <div class="form-group position-relative">
-                                <label for="username">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" value="{{ $user->username }}" required>
-                                <small id="usernameHelp" class="form-text text-muted"></small>
-                                <span id="usernameIcon" class="position-absolute" style="right: 10px; top: 35px;"></span>
-                            </div>
-                            <div class="form-group position-relative">
-                                <label for="email">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" required>
-                                <small id="emailHelp" class="form-text text-muted"></small>
-                                <span id="emailIcon" class="position-absolute" style="right: 10px; top: 35px;"></span>
-                            </div>
-                            <div class="form-group position-relative">
                                 <label for="profile_photo">Foto Profil</label>
                                 <div class="input-group">
                                     <input type="file" class="form-control" id="profile_photo" name="profile_photo">
@@ -79,6 +66,22 @@
                                 @if($user->profile_photo)
                                     <small class="form-text text-muted">Foto saat ini: {{ $user->profile_photo }}</small>
                                 @endif
+                            </div>
+                            <div class="form-group position-relative">
+                                <label for="name">Nama</label>
+                                <input type="text" class="form-control" id="name" name="name" value="{{ $user->name }}" required>
+                            </div>
+                            <div class="form-group position-relative">
+                                <label for="username">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" value="{{ $user->username }}" required>
+                                <small id="usernameHelp" class="form-text text-muted"></small>
+                                <span id="usernameIcon" class="position-absolute" style="right: 10px; top: 35px;"></span>
+                            </div>
+                            <div class="form-group position-relative">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ $user->email }}" required>
+                                <small id="emailHelp" class="form-text text-muted"></small>
+                                <span id="emailIcon" class="position-absolute" style="right: 10px; top: 35px;"></span>
                             </div>
                             <div class="form-group">
                                 <label for="current_password">Password Lama</label>

@@ -58,12 +58,20 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ session('warning') }}
+            <span id="warning-countdown" class="float-end"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
         @yield('content')
     </div>
     <script>
-         document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
         var successAlert = document.querySelector('.alert-success');
         var errorAlert = document.querySelector('.alert-danger');
+        var warningAlert = document.querySelector('.alert-warning'); // Tambahkan ini
 
         if (successAlert) {
             var successCountdown = document.getElementById('success-countdown');
@@ -96,8 +104,24 @@
                 }
             }, 1000);
         }
+
+        if (warningAlert) { // Logika untuk notifikasi warning
+            var warningCountdown = document.getElementById('warning-countdown');
+            var warningTimeLeft = 5;
+            warningCountdown.innerText = warningTimeLeft;
+
+            var warningInterval = setInterval(function () {
+                warningTimeLeft--;
+                warningCountdown.innerText = warningTimeLeft;
+
+                if (warningTimeLeft <= 0) {
+                    clearInterval(warningInterval);
+                    warningAlert.remove();
+                }
+            }, 1000);
+        }
     });
-    </script>
+</script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>

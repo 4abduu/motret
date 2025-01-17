@@ -22,12 +22,15 @@
         </div>
 
         <div class="row mt-5">
-        @foreach($photos as $photo)
+            @foreach($photos as $photo)
                 <div class="col-md-4 mb-4">
                     <div class="card">
                         @if($photo->banned)
                             <div class="card-body">
-                                <p class="card-text">Postingan ini telah dibanned.</p>
+                                <h5 class="card-title">Postingan ini telah dibanned.</h5>
+                                @foreach($photo->reports as $report)
+                                    <p class="card-text"><strong>Alasan:</strong> {{ $report->reason }}</p>
+                                @endforeach
                             </div>
                         @else
                             <a href="{{ route('photos.show', $photo->id) }}">

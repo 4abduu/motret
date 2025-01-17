@@ -8,6 +8,8 @@ use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -31,6 +33,11 @@ class AdminController extends Controller
     {
         $reports = Report::with(['user', 'photo.user'])->get();
         return view('admin.manageReports', compact('reports'));
+    }
+    public function editUser($id)
+    {
+        $user = User::findOrFail($id);
+        return view('admin.editUser', compact('user'));
     }
 
     public function createUser(Request $request)
@@ -57,22 +64,27 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
             'role' => 'required|in:admin,pro,user',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ], $messages);
 
-        User::create([
-            'name' => $validated['name'],
-            'username' => $validated['username'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+        $user = new User();
+        $user->name = $validated['name'];
+        $user->username = $validated['username'];
+        $user->email = $validated['email'];
+        $user->password = Hash::make($validated['password']);
+        $user->role = $validated['role'];
+
+        if ($request->hasFile('profile_photo')) {
+            $profilePhotoPath = $request->file('profile_photo')->storeAs(
+                'public/photo_profile',
+                Str::random(40) . '.' . $request->file('profile_photo')->getClientOriginalExtension()
+            );
+            $user->profile_photo = basename($profilePhotoPath);
+        }
+
+        $user->save();
 
         return redirect()->route('admin.users')->with('success', 'User created successfully.');
-    }
-
-    public function editUser($id)
-    {
-        $user = User::findOrFail($id);
-        return view('admin.editUser', compact('user'));
     }
 
     public function updateUser(Request $request, $id)
@@ -83,6 +95,7 @@ class AdminController extends Controller
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => ['nullable', 'confirmed', Password::min(8)->letters()->numbers()],
             'role' => 'required|in:admin,pro,user',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         try {
@@ -94,6 +107,22 @@ class AdminController extends Controller
                 $user->password = Hash::make($validated['password']);
             }
             $user->role = $validated['role'];
+
+            if ($request->hasFile('profile_photo')) {
+                // Hapus foto profil lama jika ada
+                if ($user->profile_photo) {
+                    Storage::delete('public/photo_profile/' . $user->profile_photo);
+                }
+
+                // Simpan foto profil baru dengan nama acak
+                $profilePhotoPath = $request->file('profile_photo')->storeAs(
+                    'public/photo_profile',
+                    Str::random(40) . '.' . $request->file('profile_photo')->getClientOriginalExtension()
+                );
+
+                $user->profile_photo = basename($profilePhotoPath);
+            }
+
             $user->save();
 
             return redirect()->route('admin.users')->with('success', 'User updated successfully.');
@@ -149,15 +178,42 @@ class AdminController extends Controller
         }
     }
 
-    public function banPhoto($id)
+    public function banPhoto(Request $request, $id)
     {
         try {
             $photo = Photo::findOrFail($id);
+
+            if ($photo->banned) {
+                return redirect()->route('admin.reports')->with('warning', 'Postingan ini telah dibanned.');
+            }
+
             $photo->banned = true;
             $photo->save();
+
+            // Update semua laporan terkait dengan status banned
+            Report::where('photo_id', $id)->update(['status' => 1]);
+
             return redirect()->route('admin.reports')->with('success', 'Postingan berhasil dibanned.');
         } catch (\Exception $e) {
             return redirect()->route('admin.reports')->with('error', 'Gagal membanned postingan.');
         }
     }
+
+    public function deleteProfilePhoto($id)
+    {
+        try {
+            $user = User::findOrFail($id); // Cari user berdasarkan ID
+    
+            if ($user->profile_photo) { // Cek apakah user memiliki foto profil
+                Storage::delete('public/photo_profile/' . $user->profile_photo); // Hapus foto profil dari penyimpanan
+                $user->profile_photo = null; // Set kolom profile_photo menjadi null
+                $user->save(); // Simpan perubahan
+            }
+    
+            return redirect()->route('admin.users')->with('success', 'Foto profil berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.users')->with('error', 'Gagal menghapus foto profil.');
+        }
+    }
+    
 }

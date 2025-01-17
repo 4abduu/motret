@@ -41,6 +41,12 @@ class UserController extends Controller
         $photos = Photo::where('user_id', Auth::id())->get();
         return view('user.photos', compact('photos'));
     }
+    public function showPhoto($id)
+    {
+        $photo = Photo::with('user')->findOrFail($id);
+        $randomPhotos = Photo::where('id', '!=', $id)->inRandomOrder()->take(4)->get(); // Ambil 4 foto acak selain foto yang sedang ditampilkan
+        return view('photos.show', compact('photo', 'randomPhotos'));
+    }
 
     public function createphotos()
     {
@@ -68,12 +74,6 @@ class UserController extends Controller
         ]);
 
         return redirect()->route('home')->with('success', 'Foto berhasil diunggah.');
-    }
-
-    public function showPhoto($id)
-    {
-        $photo = Photo::with('user')->findOrFail($id);
-        return view('photos.show', compact('photo'));
     }
 
     public function downloadPhoto(Request $request, $id)
@@ -144,7 +144,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . Auth::id(),
             'current_password' => 'nullable|string',
             'new_password' => 'nullable|string|min:8|confirmed',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
         $user = Auth::user();

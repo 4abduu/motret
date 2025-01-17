@@ -36,6 +36,11 @@ class Photo extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'photo_id');
+    }
+
     public function isBannedMoreThanAWeek()
     {
         return $this->banned && $this->updated_at->lt(Carbon::now()->subWeek());

@@ -32,6 +32,7 @@
         Route::post('/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
         Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
         Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+        Route::delete('/users/{id}/foto', [AdminController::class, 'deleteProfilePhoto'])->name('admin.users.deleteProfilePhoto');
         Route::get('/photos', [AdminController::class, 'managePhotos'])->name('admin.photos');
         Route::put('/photos/{id}', [AdminController::class, 'editPhoto'])->name('admin.photos.edit');
         Route::delete('/photos/{id}', [AdminController::class, 'deletePhoto'])->name('admin.photos.delete');

@@ -8,6 +8,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>No</th>
                     <th>Photo</th>
                     <th>Title</th>
                     <th>Description</th>
@@ -16,8 +17,9 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($photos as $photo)
+                @foreach($photos as $index => $photo)
                     <tr>
+                        <td>{{ $index + 1 }}</td>
                         <td><img src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}" width="100"></td>
                         <td>{{ $photo->title }}</td>
                         <td>{{ $photo->description }}</td>

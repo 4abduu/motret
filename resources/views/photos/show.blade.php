@@ -26,7 +26,7 @@
                 <p>{{ $photo->description }}</p>
                 <h3>Hashtags</h3>
                 <p>{{ implode(', ', json_decode($photo->hashtags)) }}</p>
-                <h3>Diunggah oleh</h3>
+                <h3>Diunggah oleh: <a href="{{ route('user.showProfile', $photo->user->username) }}">{{ $photo->user->username }}</a></h3>
                 <p>{{ $photo->user->username }}</p>
                 <h3>Unduh</h3>
                 <form action="{{ route('photos.download', $photo->id) }}" method="POST">
@@ -43,7 +43,22 @@
         </div>
     </div>
 
-    
+    <div class="my-4">
+            <h3>Jelajahi untuk foto lainnya</h3>
+            <div class="row">
+                @foreach($randomPhotos as $randomPhoto)
+                    <div class="col-md-3 mb-4">
+                        <a href="{{ route('photos.show', $randomPhoto->id) }}">
+                            <img src="{{ asset('storage/' . $randomPhoto->path) }}" class="img-fluid rounded" alt="{{ $randomPhoto->title }}">
+                        </a>
+                        <h5 class="mt-2">{{ $randomPhoto->title }}</h5>
+                        <p>Hashtags</p>
+                        <p>{{ implode(', ', json_decode($randomPhoto->hashtags)) }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Report -->
     <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
