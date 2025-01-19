@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -91,13 +92,24 @@ class AuthController extends Controller
             'password.min' => 'Password minimal harus 8 karakter.',
             'password.letters' => 'Password harus mengandung huruf.',
             'password.numbers' => 'Password harus mengandung angka.',
+            'profile_photo.image' => 'Foto profil harus berupa gambar.',
+            'profile_photo.mimes' => 'Foto profil harus berformat jpeg, png, atau jpg.',
         ];
+
+        $profilePhotoPath = null;
+        if ($request->hasFile('profile_photo')) {
+            $profilePhotoPath = $request->file('profile_photo')->storeAs(
+                'public/photo_profile',
+                Str::random(40) . '.' . $request->file('profile_photo')->getClientOriginalExtension()
+            );
+        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'username' => 'required|unique:users,username|min:4|max:20',
             'email' => 'required|email|unique:users,email',
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg',
         ], $messages);
 
         $user = User::create([
@@ -105,6 +117,7 @@ class AuthController extends Controller
             'username' => $validated['username'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'profile_photo' => $profilePhotoPath ? basename($profilePhotoPath) : null,
         ]);
 
         Auth::login($user);

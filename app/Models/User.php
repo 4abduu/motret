@@ -25,7 +25,7 @@ class User extends Authenticatable
         'role',
         'download_reset_at',
         'subscription_ends_at',
-        'profile_photo', // Pastikan ini ada
+        'profile_photo',
     ];
 
     /**
@@ -47,7 +47,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'subscription_ends_at' => 'datetime',
-        'download_reset_at' => 'datetime', // Pastikan ini ada
+        'download_reset_at' => 'datetime',
     ];
 
     public function downloads()
@@ -64,4 +64,28 @@ class User extends Authenticatable
         return asset('storage/photo_profile/default_photo_profile.jpg');
     }
 
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'pengikut', 'following_id', 'follower_id');
+    }
+
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'pengikut', 'follower_id', 'following_id');
+    }
+
+    public function isFollowing(User $user)
+    {
+        return $this->following()->where('users.id', $user->id)->exists();
+    }
 }

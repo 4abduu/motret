@@ -5,6 +5,10 @@
     use App\Http\Controllers\AdminController;
     use App\Http\Controllers\UserController;
     use App\Http\Controllers\HomeController;
+    use App\Http\Controllers\SearchController;
+    use App\Http\Controllers\LikeController;
+    use App\Http\Controllers\CommentController;
+    use App\Http\Controllers\FollowController;
 
     // Route untuk homepage
     Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -50,7 +54,11 @@
         Route::post('/check-email', [UserController::class, 'checkEmail'])->name('user.checkEmail');
         Route::get('/foto', [UserController::class, 'photos'])->name('user.photos');
         Route::post('/foto/{id}/report', [UserController::class, 'reportPhoto'])->name('photos.report');
+        Route::post('/photos/{photo}/like', [LikeController::class, 'like'])->name('photos.like');
+        Route::post('/photos/{photo}/unlike', [LikeController::class, 'unlike'])->name('photos.unlike');
+        Route::post('/photos/{photo}/comments', [CommentController::class, 'store'])->name('photos.comments.store');
+        Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('users.follow');
+        Route::post('/users/{user}/unfollow', [FollowController::class, 'unfollow'])->name('users.unfollow');
     });
-
-    // Rute untuk profil pengguna berdasarkan username
+    Route::get('/cari', [SearchController::class, 'search'])->name('search');
     Route::get('/{username}', [UserController::class, 'showProfile'])->name('user.showProfile');

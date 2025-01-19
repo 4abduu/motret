@@ -1,64 +1,82 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container mt-5">
-    <!-- @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <span id="success-countdown" class="float-end"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{ asset('storage/' . $photo->path) }}" class="img-fluid" alt="{{ $photo->title }}">
         </div>
-    @endif
-    @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-    {{ session('error') }}
-            <span id="error-countdown" class="float-end"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif -->
-        <h1 class="my-4">{{ $photo->title }}</h1>
-        <div class="row">
-            <div class="col-md-8">
-                <img src="{{ asset('storage/' . $photo->path) }}" class="img-fluid" alt="{{ $photo->title }}">
-            </div>
-            <div class="col-md-4">
-                <h3>Deskripsi</h3>
-                <p>{{ $photo->description }}</p>
-                <h3>Hashtags</h3>
-                <p>{{ implode(', ', json_decode($photo->hashtags)) }}</p>
-                <h3>Diunggah oleh: <a href="{{ route('user.showProfile', $photo->user->username) }}">{{ $photo->user->username }}</a></h3>
-                <p>{{ $photo->user->username }}</p>
-                <h3>Unduh</h3>
-                <form action="{{ route('photos.download', $photo->id) }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-download"></i> Unduh
-                    </button>
-                </form>
-                <h3>Laporkan</h3>
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal">
-                    <i class="fas fa-exclamation-triangle"></i> Laporkan
+        <div class="col-md-6">
+            <h1>{{ $photo->title }}</h1>
+            <p>{{ $photo->description }}</p>
+            <p>Hashtags: {{ implode(', ', json_decode($photo->hashtags)) }}</p>
+            <p>Diunggah oleh: <a href="{{ route('user.showProfile', $photo->user->username) }}">{{ $photo->user->username }}</a></p>
+            <div id="like-section">
+                <button id="like-button" class="btn btn-link" data-liked="{{ $photo->isLikedBy(Auth::user()) ? 'true' : 'false' }}">
+                    <i class="{{ $photo->isLikedBy(Auth::user()) ? 'fas fa-heart' : 'fa-regular fa-heart' }}" 
+                       style="color: {{ $photo->isLikedBy(Auth::user()) ? 'red' : 'black' }};"></i>
                 </button>
+                <span id="likes-count">{{ $photo->likes()->count() }}</span>
+            </div>
+            <form method="POST" action="{{ route('photos.download', $photo->id) }}">
+                @csrf
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Unduh
+                </button>
+            </form>
+            <h3>Laporkan</h3>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal">
+                <i class="fas fa-exclamation-triangle"></i> Laporkan
+            </button>
+            <h3>Komentar</h3>
+            @if(Auth::check())
+                <form method="POST" action="{{ route('photos.comments.store', $photo->id) }}">
+                    @csrf
+                    <div class="mb-3">
+                        <textarea class="form-control" name="comment" rows="3" placeholder="Tambahkan komentar..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Kirim</button>
+                </form>
+            @else
+                <p>Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
+            @endif
+            <div class="mt-4">
+                @foreach($photo->comments as $comment)
+                    <div class="mb-2">
+                        <strong>{{ $comment->user->username }}</strong>
+                        @if($comment->user_id === $photo->user_id)
+                            <span class="text-muted">• Pembuat</span>
+                        @endif
+                        <p>{{ $comment->comment }}</p>
+                        <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>
+</div>
 
     <div class="my-4">
-            <h3>Jelajahi untuk foto lainnya</h3>
-            <div class="row">
+        <h3>Jelajahi untuk foto lainnya</h3>
+        <div class="row">
+            @if($randomPhotos->isEmpty())
+                <div class="col-12 text-center">
+                    <p class="text-muted">Tidak ada foto yang tersedia saat ini.</p>
+                </div>
+            @else
                 @foreach($randomPhotos as $randomPhoto)
                     <div class="col-md-3 mb-4">
                         <a href="{{ route('photos.show', $randomPhoto->id) }}">
                             <img src="{{ asset('storage/' . $randomPhoto->path) }}" class="img-fluid rounded" alt="{{ $randomPhoto->title }}">
                         </a>
                         <h5 class="mt-2">{{ $randomPhoto->title }}</h5>
-                        <p>Hashtags</p>
-                        <p>{{ implode(', ', json_decode($randomPhoto->hashtags)) }}</p>
+                        <p>Hashtags: {{ implode(', ', json_decode($randomPhoto->hashtags)) }}</p>
                     </div>
                 @endforeach
-            </div>
+            @endif
         </div>
     </div>
+    
 
     <!-- Modal Report -->
     <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
@@ -86,23 +104,23 @@
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelecehan" required>
+                                <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
                                 <label class="form-check-label" for="reason3">
-                                    Pelecehan
+                                    Pelanggaran hak cipta
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
                                 <label class="form-check-label" for="reason4">
-                                    Lainnya (silakan jelaskan di bawah)
+                                    Lainnya
                                 </label>
                             </div>
                         </div>
-                        <div class="form-group" id="otherReasonGroup" style="display: none;">
-                            <label for="other_reason">Alasan Lainnya</label>
-                            <input type="text" class="form-control" id="other_reason" name="other_reason">
+                        <div class="form-group">
+                            <label for="description">Deskripsi (Opsional)</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                         </div>
-                        <button type="submit" class="btn btn-danger">Kirim Laporan</button>
+                        <button type="submit" class="btn btn-danger">Laporkan</button>
                     </form>
                 </div>
             </div>
@@ -130,4 +148,41 @@
             });
         });
     </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const likeButton = document.getElementById('like-button');
+        const likesCount = document.getElementById('likes-count');
+        const photoId = {{ $photo->id }};
+        const token = '{{ csrf_token() }}';
+
+        likeButton.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            const liked = likeButton.getAttribute('data-liked') === 'true';
+            const url = liked ? '{{ route('photos.unlike', $photo->id) }}' : '{{ route('photos.like', $photo->id) }}';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                body: JSON.stringify({}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    likeButton.innerHTML = '<i class="fas fa-heart" style="color: red;"></i>';
+                    likeButton.setAttribute('data-liked', 'true');
+                } else {
+                    likeButton.innerHTML = '<i class="fa-regular fa-heart" style="color: black;"></i>';
+                    likeButton.setAttribute('data-liked', 'false');
+                }
+                likesCount.textContent = data.likes_count;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
+
 @endpush

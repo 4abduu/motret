@@ -45,4 +45,22 @@ class Photo extends Model
     {
         return $this->banned && $this->updated_at->lt(Carbon::now()->subWeek());
     }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function isLikedBy(?User $user)
+    {
+        if (!$user) {
+            return false;
+        }
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

@@ -23,9 +23,12 @@
 
         <div class="row mt-5">
             @foreach($photos as $photo)
+                @if($photo->banned && $photo->user_id !== Auth::id())
+                    @continue
+                @endif
                 <div class="col-md-4 mb-4">
                     <div class="card">
-                        @if($photo->banned)
+                        @if($photo->banned && $photo->user_id === Auth::id())
                             <div class="card-body">
                                 <h5 class="card-title">Postingan ini telah dibanned.</h5>
                                 @foreach($photo->reports as $report)

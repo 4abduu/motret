@@ -44,7 +44,11 @@ class UserController extends Controller
     public function showPhoto($id)
     {
         $photo = Photo::with('user')->findOrFail($id);
-        $randomPhotos = Photo::where('id', '!=', $id)->inRandomOrder()->take(4)->get(); // Ambil 4 foto acak selain foto yang sedang ditampilkan
+        $randomPhotos = Photo::where('id', '!=', $id)
+                             ->where('banned', false) // Tambahkan kondisi ini
+                             ->inRandomOrder()
+                             ->take(4)
+                             ->get();
         return view('photos.show', compact('photo', 'randomPhotos'));
     }
 
@@ -57,12 +61,22 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'description' => 'required|string|max:255',
+            'photo' => 'required|image|mimes:jpeg,png,jpg',
             'hashtags' => 'nullable|string',
         ]);
 
         $path = $request->file('photo')->store('photos', 'public');
+
+        // Buat versi buram dari foto
+        $lowResDir = storage_path('app/public/low_res_photos');
+        if (!file_exists($lowResDir)) {
+            mkdir($lowResDir, 0775, true);
+        }
+        $lowResPath = $lowResDir . '/' . basename($path);
+        $image = Image::make(storage_path('app/public/' . $path));
+        $image->blur(50);
+        $image->save($lowResPath);
 
         Photo::create([
             'user_id' => Auth::id(),
@@ -89,14 +103,13 @@ class UserController extends Controller
             } elseif ($user->role === 'user') {
                 // Cek apakah perlu reset download count
                 if ($user->download_reset_at === null || Carbon::now()->greaterThan($user->download_reset_at)) {
-                    Log::info('User instance:', ['user' => $user]);
                     $user->download_reset_at = Carbon::now()->addWeek();
                     $user->save();
                 }
 
                 $downloadCount = Download::where('user_id', $user->id)
-                                          ->where('created_at', '>=', now()->startOfWeek())
-                                          ->count();
+                                        ->where('created_at', '>=', now()->startOfWeek())
+                                        ->count();
 
                 if ($downloadCount < 5) {
                     Download::create(['user_id' => $user->id, 'photo_id' => $photo->id, 'resolution' => 'original']);
@@ -115,25 +128,45 @@ class UserController extends Controller
         }
     }
 
-    // Fungsi untuk proses download
     private function processDownload($photo, $resolution)
     {
         $filePath = storage_path('app/public/' . $photo->path);
         if ($resolution === 'low') {
-            // Simpan versi buram gambar
-            $lowResDir = storage_path('app/public/low_res_photos');
-            if (!file_exists($lowResDir)) {
-                mkdir($lowResDir, 0775, true);
-            }
-            $lowResPath = $lowResDir . '/' . basename($photo->path);
+            // Path untuk versi buram gambar
+            $lowResPath = storage_path('app/public/low_res_photos/' . basename($photo->path));
+            
+            // Memastikan file buram ada
             if (!file_exists($lowResPath)) {
-                $image = Image::make($filePath);
-                $image->blur(50);
-                $image->save($lowResPath);
+                Log::error('File buram tidak ditemukan.', ['filePath' => $lowResPath]);
+                return back()->with('error', 'File tidak ditemukan.');
             }
-            return response()->download($lowResPath);
+
+            // Bersihkan buffer output sebelum mengirim file
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+            return response()->streamDownload(function () use ($lowResPath) {
+                readfile($lowResPath);
+            }, basename($photo->path), [
+                'Content-Type' => mime_content_type($lowResPath)
+            ]);
         }
-        return response()->download($filePath);
+
+        // Memastikan file asli ada
+        if (!file_exists($filePath)) {
+            Log::error('File asli tidak ditemukan.', ['filePath' => $filePath]);
+            return back()->with('error', 'File tidak ditemukan.');
+        }
+
+        // Bersihkan buffer output sebelum mengirim file
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+        return response()->streamDownload(function () use ($filePath) {
+            readfile($filePath);
+        }, basename($photo->path), [
+            'Content-Type' => mime_content_type($filePath)
+        ]);
     }
 
     public function updateProfile(Request $request)

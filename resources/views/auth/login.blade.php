@@ -28,8 +28,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form method="POST" action="{{ route('register.post') }}">
+                    <form method="POST" action="{{ route('register.post') }}" enctype="multipart/form-data">
                         @csrf
+                        <div class="mb-3">
+                            <label for="profile_photo" class="form-label">Profile Photo</label>
+                            <input type="file" name="profile_photo" class="form-control" id="profile_photo">
+                        </div>
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
                             <input type="text" name="name" class="form-control" id="name" required>
@@ -73,3 +77,25 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Menampilkan modal jika URL memiliki parameter 'register=true'
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('register') && urlParams.get('register') === 'true') {
+            const registerModal = new bootstrap.Modal(document.getElementById('registerModal'));
+            registerModal.show();
+        }
+
+        // Reset form saat modal register ditutup
+        const registerModalElement = document.getElementById('registerModal');
+        registerModalElement.addEventListener('hidden.bs.modal', function () {
+            const form = registerModalElement.querySelector('form');
+            if (form) {
+                form.reset(); // Mengosongkan semua input dalam form
+            }
+        });
+    });
+</script>
+@endpush
