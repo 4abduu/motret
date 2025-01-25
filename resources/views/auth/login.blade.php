@@ -1,81 +1,138 @@
-@extends('layouts.app')
+@extends('layouts.login')
+
+@push('styles')
+<style>
+html, body {
+    height: 100%;  /* Mengatur tinggi halaman agar mengisi seluruh layar */
+    margin: 0;     /* Menghilangkan margin default */
+    padding: 0;    /* Menghilangkan padding default */
+}
+
+.container-scroller {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Memastikan container utama mengisi seluruh tinggi layar */
+}
+
+.page-body-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;  /* Membuat halaman konten utama mengisi sisa ruang */
+}
+
+.full-page-wrapper {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-form-light {
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+.form-control {
+    border-radius: 20px;
+}
+
+.btn-success {
+    width: 100%;
+    border-radius: 20px;
+}
+
+.custom-label {
+    color: #32bd40; /* Ubah warna sesuai keinginan */
+    font-family: 'Arial', sans-serif; /* Ubah font sesuai keinginan */
+}
+
+.footer {
+    margin: 0;
+    padding: 20px 0; /* Menambah padding atas dan bawah untuk memperbesar tinggi footer */
+    text-align: left;
+    background-color: #f8f9fa; /* Ganti dengan warna sesuai keinginan */
+    width: 100%;
+    position: relative;
+ /* Menambahkan garis border atas untuk memperjelas footer */
+}
+.brand-logo img {
+    width: 100px;
+    margin-right: 10px;
+}
+</style>
+@endpush
 
 @section('content')
-    <div class="container mt-5">
-        <h1>Login</h1>
-        <form method="POST" action="{{ route('login.post') }}">
-            @csrf
-            <div class="mb-3">
-                <label for="email" class="form-label">Email atau Username</label>
-                <input type="text" name="email" class="form-control" id="email" required>
-            </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" id="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-        <button class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#registerModal">Register</button>
-        <button class="btn btn-info mt-3" data-bs-toggle="modal" data-bs-target="#guestModal">Guest Access</button>
+<div class="form-container">
+    <div class="brand-logo">
+        <img src="{{ asset('images/Motret logo.png') }}" alt="logo">
     </div>
+    <form method="POST" action="{{ route('login.post') }}" class="forms-sample w-100">
+        @csrf
+        <div class="form-group">
+            <label for="exampleInputUsername1" class="custom-label">Username or Email</label>
+            <input type="text" name="email" class="form-control" id="exampleInputUsername1" placeholder="Username or Email" required>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1" class="custom-label">Password</label>
+            <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password" required>
+        </div>
+        <button type="submit" class="btn btn-success me-2">Login</button>
+    </form>
 
-    <!-- Modal Register -->
-    <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="registerModalLabel">Register</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="POST" action="{{ route('register.post') }}" enctype="multipart/form-data">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="profile_photo" class="form-label">Profile Photo</label>
-                            <input type="file" name="profile_photo" class="form-control" id="profile_photo">
-                        </div>
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" name="name" class="form-control" id="name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" name="username" class="form-control" id="username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" name="email" class="form-control" id="email" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control" id="password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password_confirmation" class="form-label">Confirm Password</label>
-                            <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Register</button>
-                    </form>
-                </div>
+    <div class="text-center mt-4 font-weight-light">
+        Don't have an account?
+        <a type="button" data-bs-toggle="modal" data-bs-target="#registerModal" class="text-success">Create</a>
+        or login with
+        <a href="{{ route('home') }}" class="text-success">Guest</a>
+        access?
+    </div>
+</div>
+
+<!-- Registration Modal -->
+<div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="registerModalLabel">Create Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ route('register.post') }}" enctype="multipart/form-data">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="profile_photo" class="form-label">Profile Photo</label>
+                        <input type="file" name="profile_photo" class="form-control" id="profile_photo">
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" name="name" class="form-control" id="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" id="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password_confirmation" class="form-label">Confirm Password</label>
+                        <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Register</button>
+                </form>
             </div>
         </div>
     </div>
-
-    <!-- Modal Guest -->
-    <div class="modal fade" id="guestModal" tabindex="-1" role="dialog" aria-labelledby="guestModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="guestModalLabel">Guest Access</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Anda dapat mengakses sebagai guest untuk melihat foto.</p>
-                    <a href="{{ route('guest') }}" class="btn btn-primary">Lanjutkan sebagai Guest</a>
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
 @endsection
 
 @push('scripts')

@@ -63,4 +63,7 @@ class Photo extends Model
     {
         return $this->hasMany(Comment::class);
     }
+    public static function getPhotoCount(){
+        return self::count();
+    }
 }

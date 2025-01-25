@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -7,13 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Comment extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'komentar';
 
     protected $fillable = [
-        'photo_id',
+        'content',
         'user_id',
-        'comment',
+        'photo_id',
     ];
 
     public function user()
@@ -24,5 +25,11 @@ class Comment extends Model
     public function photo()
     {
         return $this->belongsTo(Photo::class);
+    }
+
+    // Variabel untuk menghitung jumlah komentar
+    public static function getCommentCount()
+    {
+        return self::count();
     }
 }

@@ -3,11 +3,25 @@
 @section('title', 'Manage Photos')
 
 @section('content')
-    <div class="container">
-        <h1 class="my-4">Manage Photos</h1>
-        <table class="table table-striped">
-            <thead>
-                <tr>
+<div class="page-header">
+    <h3 class="page-title">Manage Reports</h3>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Manage Photos</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Manage Photos</h4>
+                <div class="table-responsive">
+                <table id="example" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
                     <th>No</th>
                     <th>Photo</th>
                     <th>Title</th>
@@ -17,23 +31,23 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($photos as $index => $photo)
                     <tr>
+                @foreach($photos as $index => $photo)
                         <td>{{ $index + 1 }}</td>
                         <td><img src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}" width="100"></td>
                         <td>{{ $photo->title }}</td>
                         <td>{{ $photo->description }}</td>
                         <td>
                             @if($photo->banned)
-                                <span class="badge bg-danger">Banned</span>
+                                <div class="badge badge-danger">Banned</div>
                             @else
-                                <span class="badge bg-success">Active</span>
+                                <div class="badge badge-success">Active</div>
                             @endif
                         </td>
                         <td>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editPhotoModal{{ $photo->id }}">Edit</button>
-                            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#detailPhotoModal{{ $photo->id }}">Detail</button>
-                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $photo->id }}">Delete</button>
+                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editPhotoModal{{ $photo->id }}"><i class="ti-pencil-alt" style="color: white;"></i></button>
+                            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#detailPhotoModal{{ $photo->id }}"><i class="ti-info-alt" style="color: white;"></i></button>
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $photo->id }}"><i class="ti-trash" style="color: white;"></i></button>
                         </td>
                     </tr>
 
@@ -60,7 +74,7 @@
                                             <label for="description" class="form-label">Description</label>
                                             <textarea name="description" class="form-control" id="description" required>{{ $photo->description }}</textarea>
                                         </div>
-                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                        <button type="submit" class="btn btn-success">Save changes</button>
                                     </form>
                                 </div>
                             </div>

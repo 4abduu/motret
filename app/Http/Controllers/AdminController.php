@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Photo;
 use App\Models\Report;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -15,7 +16,10 @@ class AdminController extends Controller
 {
     public function index()
     {
-        return view('admin.dashboard');
+        $userCount = User::getUserCount();
+        $photoCount = Photo::getPhotoCount();
+        $commentCount = Comment::getCommentCount();
+        return view('admin.dashboard', compact('userCount', 'photoCount', 'commentCount'));
     }
 
     public function manageUsers()

@@ -88,4 +88,10 @@ class User extends Authenticatable
     {
         return $this->following()->where('users.id', $user->id)->exists();
     }
+
+    // Variabel untuk menghitung jumlah pengguna
+    public static function getUserCount()
+    {
+        return self::count();
+    }
 }

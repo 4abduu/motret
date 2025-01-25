@@ -42,7 +42,9 @@
         Route::delete('/photos/{id}', [AdminController::class, 'deletePhoto'])->name('admin.photos.delete');
         Route::get('/reports', [AdminController::class, 'manageReports'])->name('admin.reports');
         Route::delete('/reports/{id}', [AdminController::class, 'deleteReport'])->name('admin.reports.delete');
-        Route::put('/photos/{id}/ban', [AdminController::class, 'banPhoto'])->name('admin.photos.ban'); // Tambahkan rute ini
+        Route::put('/photos/{id}/ban', [AdminController::class, 'banPhoto'])->name('admin.photos.ban');
+        Route::get('/comments', [AdminController::class, 'managePhotos'])->name('admin.comments');
+        Route::get('/subscriptions', [AdminController::class, 'managePhotos'])->name('admin.subscriptions');        // Tambahkan rute ini
     });
 
     // Grup untuk User

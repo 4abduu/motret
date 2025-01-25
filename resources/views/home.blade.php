@@ -3,7 +3,7 @@
 @section('title', 'Homepage')
 
 @section('content')
-    <div class="container">
+    <div class="container mt-5">
         <div class="text-center">
             @if(Auth::check())
                 <h1>Halo, Selamat Datang di Motret, {{ Auth::user()->username }}</h1>
