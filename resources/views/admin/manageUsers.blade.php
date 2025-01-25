@@ -40,9 +40,9 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>
                                         @if($user->profile_photo)
-                                            <img src="{{ asset('storage/photo_profile/' . $user->profile_photo) }}" alt="{{ $user->username }}" class="rounded-circle" width="100" height="100">
+                                            <img src="{{ asset('storage/photo_profile/' . $user->profile_photo) }}" alt="{{ $user->username }}" class="img-square" style="width: 100px; height: 100px; object-fit: cover; border-radius: 0;">
                                         @else
-                                            <img src="{{ asset('storage/photo_profile/default_photo_profile.jpg') }}" alt="{{ $user->username }}" class="rounded-circle" width="100" height="100">
+                                            <img src="{{ asset('storage/photo_profile/default_photo_profile.jpg') }}" alt="{{ $user->username }}" class="img-square" style="width: 100px; height: 100px; object-fit: cover; border-radius: 0;">
                                         @endif
                                     </td>
                                     <td>{{ $user->name }}</td>
@@ -224,6 +224,10 @@
                     <div class="form-group">
                         <label for="password">Password</label>
                         <input type="password" name="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password_confirmation" class="form-label">Confirm Password</label>
+                        <input type="password" name="password_confirmation" class="form-control" id="password_confirmation">
                     </div>
                     <div class="form-group">
                         <label for="role">Role</label>

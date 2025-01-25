@@ -34,7 +34,7 @@
                     <tr>
                 @foreach($photos as $index => $photo)
                         <td>{{ $index + 1 }}</td>
-                        <td><img src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}" width="100"></td>
+                        <td><img src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}" class="img-square" style="width: 100px; height: 100px; object-fit: cover; border-radius: 0;"></td>
                         <td>{{ $photo->title }}</td>
                         <td>{{ $photo->description }}</td>
                         <td>

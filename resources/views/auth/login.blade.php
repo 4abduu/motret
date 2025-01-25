@@ -50,12 +50,7 @@ html, body {
 }
 
 .footer {
-    margin: 0;
-    padding: 20px 0; /* Menambah padding atas dan bawah untuk memperbesar tinggi footer */
-    text-align: left;
-    background-color: #f8f9fa; /* Ganti dengan warna sesuai keinginan */
     width: 100%;
-    position: relative;
  /* Menambahkan garis border atas untuk memperjelas footer */
 }
 .brand-logo img {
