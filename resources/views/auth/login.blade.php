@@ -111,6 +111,11 @@
                 }
             });
         });
+
+        if (document.querySelector('.alert-danger')) {
+            const newUrl = window.location.href.split('?')[0];
+            window.history.replaceState({}, document.title, newUrl);
+        }
     });
 </script>
 @endpush
