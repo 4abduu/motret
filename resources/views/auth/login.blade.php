@@ -1,65 +1,5 @@
 @extends('layouts.login')
 
-@push('styles')
-<style>
-html, body {
-    height: 100%;  /* Mengatur tinggi halaman agar mengisi seluruh layar */
-    margin: 0;     /* Menghilangkan margin default */
-    padding: 0;    /* Menghilangkan padding default */
-}
-
-.container-scroller {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; /* Memastikan container utama mengisi seluruh tinggi layar */
-}
-
-.page-body-wrapper {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;  /* Membuat halaman konten utama mengisi sisa ruang */
-}
-
-.full-page-wrapper {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.auth-form-light {
-    width: 100%;
-    max-width: 600px;
-    margin: auto;
-    padding: 30px;
-    border-radius: 10px;
-}
-
-.form-control {
-    border-radius: 20px;
-}
-
-.btn-success {
-    width: 100%;
-    border-radius: 20px;
-}
-
-.custom-label {
-    color: #32bd40; /* Ubah warna sesuai keinginan */
-    font-family: 'Arial', sans-serif; /* Ubah font sesuai keinginan */
-}
-
-.footer {
-    width: 100%;
- /* Menambahkan garis border atas untuk memperjelas footer */
-}
-.brand-logo img {
-    width: 100px;
-    margin-right: 10px;
-}
-</style>
-@endpush
-
 @section('content')
 <div class="form-container">
     <div class="brand-logo">
@@ -71,9 +11,11 @@ html, body {
             <label for="exampleInputUsername1" class="custom-label">Username or Email</label>
             <input type="text" name="email" class="form-control" id="exampleInputUsername1" placeholder="Username or Email" required>
         </div>
-        <div class="form-group">
+        <div class="form-group position-relative">
             <label for="exampleInputPassword1" class="custom-label">Password</label>
             <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password" required>
+            <span toggle="#exampleInputPassword1" class="fa fa-eye-slash toggle-password" 
+                style="color: #32bd40; position: absolute; right: 4%; margin-top: -3%; transform: translateY(-50%); font-size: 22px; cursor: pointer;"></span>
         </div>
         <button type="submit" class="btn btn-success me-2">Login</button>
     </form>
@@ -114,13 +56,17 @@ html, body {
                         <label for="email" class="form-label">Email</label>
                         <input type="email" name="email" class="form-control" id="email" required>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3 position-relative">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" name="password" class="form-control" id="password" required>
+                        <span toggle="#password" class="fa fa-eye-slash toggle-password" 
+                        style="color: #32bd40; position: absolute; right: 4%; margin-top: -6%; transform: translateY(-50%); font-size: 22px; cursor: pointer;"></span>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-3 position-relative">
                         <label for="password_confirmation" class="form-label">Confirm Password</label>
                         <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" required>
+                        <span toggle="#password_confirmation" class="fa fa-eye-slash toggle-password" 
+                        style="color: #32bd40; position: absolute; right: 4%; margin-top: -6%; transform: translateY(-50%); font-size: 22px; cursor: pointer;"></span>
                     </div>
                     <button type="submit" class="btn btn-success">Register</button>
                 </form>
@@ -147,6 +93,23 @@ html, body {
             if (form) {
                 form.reset(); // Mengosongkan semua input dalam form
             }
+        });
+
+        // Toggle password visibility
+        const togglePassword = document.querySelectorAll('.toggle-password');
+        togglePassword.forEach(toggle => {
+            toggle.addEventListener('click', function () {
+                const target = document.querySelector(this.getAttribute('toggle'));
+                if (target.type === "password") {
+                    target.type = "text";
+                    this.classList.remove('fa-eye-slash');
+                    this.classList.add('fa-eye');
+                } else {
+                    target.type = "password";
+                    this.classList.remove('fa-eye');
+                    this.classList.add('fa-eye-slash');
+                }
+            });
         });
     });
 </script>

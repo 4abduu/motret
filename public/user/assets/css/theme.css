@@ -1,6 +1,6 @@
 /* line 1, src/assets/scss/theme.scss */
 body {
-  padding-top: 70px; }
+  padding-top: 0px; }
 
 /* line 2, src/assets/scss/theme.scss */
 img {
@@ -47,7 +47,7 @@ footer.footer {
 
 /* line 32, src/assets/scss/theme.scss */
 .navbar {
-  padding: 0.5rem 2rem; }
+  padding: 0; }
 
 /* line 34, src/assets/scss/theme.scss */
 .overlay {

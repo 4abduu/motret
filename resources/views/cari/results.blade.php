@@ -3,7 +3,7 @@
 @section('title', 'Search Results')
 
 @section('content')
-    <div class="container">
+    <div class="container mt-5">
         <h1 class="my-4">Search Results for "{{ $query }}"</h1>
         @if($users->isEmpty() && $photos->isEmpty())
             <p>No results found.</p>
