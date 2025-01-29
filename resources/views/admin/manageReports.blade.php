@@ -1,17 +1,17 @@
+managereports blade:
 @extends('layouts.app')
 
 @section('title', 'Manage Reports')
 
 @section('content')
-<div class="page-header">
-    <h3 class="page-title">Manage Reports</h3>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Manage Reports</li>
-        </ol>
-    </nav>
+<div class="row">
+    <h3>Manage Reports</h3>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a  href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Manage Reports</li>
+      </ol>
 </div>
+
 
 <div class="row">
     <div class="col-lg-12 grid-margin stretch-card">

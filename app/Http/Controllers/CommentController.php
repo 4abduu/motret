@@ -4,22 +4,27 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Comment;
 use App\Models\Photo;
+use App\Models\Notif; // Pastikan model Notif diimport
 use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
-    public function store(Request $request, $photoId)
+    public function store($id, Request $request)
     {
-        $request->validate([
-            'comment' => 'required|string|max:255',
-        ]);
-
+        $photo = Photo::find($id);
         Comment::create([
-            'photo_id' => $photoId,
-            'user_id' => Auth::id(),
             'comment' => $request->comment,
+            'user_id' => auth()->user()->id,
+            'photo_id' => $id
         ]);
 
-        return back()->with('success', 'Komentar berhasil ditambahkan.');
+        Notif::create([
+            'notify_for' => $photo->user_id,
+            'notify_from' => auth()->user()->id,
+            'target_id' => $id,
+            'type' => 'comment',
+        ]);
+
+        return redirect()->back()->with('success', "Anda telah menambah komentar");
     }
 }

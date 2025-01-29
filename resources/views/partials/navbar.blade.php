@@ -1,3 +1,4 @@
+navbar blade:
 @if($userRole === 'admin')
     <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
@@ -33,7 +34,7 @@
                 <img src="{{ asset('images/Motret logo.png') }}" class="me-2" alt="logo" />
             </a>
             <a class="navbar-brand brand-logo-mini" href="{{ url('/') }}">
-                <img src="{{ asset('assets/images/logo-mini.svg') }}" alt="logo" />
+                <img src="{{ asset('assets/images/Motret logo.png') }}" alt="logo" />
             </a>
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
@@ -53,6 +54,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('photos.create') }}">
                         <i class="ti-upload text-primary"></i> Upload
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('notifications.index') }}">
+                        <i class="ti-bell text-primary"></i> Notifications
                     </a>
                 </li>
                 <li class="nav-item nav-profile dropdown">
@@ -96,10 +102,10 @@
             </ul>
             <ul class="navbar-nav navbar-nav-right">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('login') }}">Login</a>
+                    <a class="btn btn-success ml-auto" style="border-radius: 30px; padding: 9px 25px; margin-right: -15px;" href="{{ route('login') }}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('login') }}?register=true">Register</a>
+                    <a class="btn btn-secondary" style="border-radius: 30px; padding: 9px 20px;" href="{{ route('login') }}?register=true">Register</a>
                 </li>
             </ul>
         </div>

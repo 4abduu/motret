@@ -63,7 +63,21 @@ class Photo extends Model
     {
         return $this->hasMany(Comment::class);
     }
-    public static function getPhotoCount(){
+
+    // Relasi ke notifikasi
+    public function notifications()
+    {
+        return $this->hasMany(Notif::class, 'photo_id');
+    }
+
+    public static function getPhotoCount()
+    {
         return self::count();
     }
+
+    public function albums()
+    {
+        return $this->belongsToMany(Album::class, 'album_foto', 'photo_id', 'album_id');
+    }
+
 }

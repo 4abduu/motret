@@ -1,26 +1,28 @@
+manageusers blade:
 @extends('layouts.app')
 
 @section('title', 'Manage Users')
 
 @section('content')
-<div class="page-header">
-    <h3 class="page-title">Manage Users</h3>
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Manage Users</li>
-        </ol>
-    </nav>
+
+<div class="row">
+    <h3>Manage User</h3>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a  href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Manage User</li>
+      </ol>
 </div>
 
 <div class="row">
     <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Data User</h4>
-                <button type="button" class="btn btn-primary btn-icon-text btn-sm" data-bs-toggle="modal" data-bs-target="#createUserModal">
-                    <i class="mdi mdi-plus btn-icon-prepend"></i> Tambah User
-                </button>
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">Data User</h4>
+                    <button type="button" class="btn btn-primary btn-icon-text" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                        <i class="mdi mdi-plus btn-icon-prepend"></i> Tambah User
+                    </button>
+                </div>
                 <div class="table-responsive">
                     <table id="example" class="table table-striped" style="width:100%">
                         <thead>

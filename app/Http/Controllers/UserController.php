@@ -7,6 +7,9 @@ use App\Models\Photo;
 use App\Models\Download;
 use App\Models\User;
 use App\Models\Report;
+use App\Models\Notif;
+use App\Models\Comment;
+use App\Models\Album;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -26,20 +29,23 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $photos = Photo::where('user_id', $user->id)->get();
-        return view('user.profile', compact('user', 'photos'));
+        $albums = Album::where('user_id', $user->id)->with('photos')->get();
+        return view('user.profile', compact('user', 'photos', 'albums'));
     }
 
     public function showProfile($username)
     {
         $user = User::where('username', $username)->firstOrFail();
         $photos = Photo::where('user_id', $user->id)->get();
-        return view('user.profile', compact('user', 'photos'));
+        $albums = Album::where('user_id', $user->id)->with('photos')->get();
+        return view('user.profile', compact('user', 'photos', 'albums'));
     }
 
     public function photos()
     {
         $photos = Photo::where('user_id', Auth::id())->get();
-        return view('user.photos', compact('photos'));
+        $albums = Album::where('user_id', Auth::id())->with('photos')->get();
+        return view('user.photos', compact('photos', 'albums'));
     }
     public function showPhoto($id)
     {
@@ -49,7 +55,8 @@ class UserController extends Controller
                              ->inRandomOrder()
                              ->take(4)
                              ->get();
-        return view('photos.show', compact('photo', 'randomPhotos'));
+        $albums = Auth::check() ? Album::where('user_id', Auth::id())->with('photos')->get() : [];
+        return view('photos.show', compact('photo', 'randomPhotos', 'albums'));
     }
 
     public function createphotos()
@@ -230,17 +237,17 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'reason' => 'required|string|max:255',
-            'other_reason' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:255',
         ]);
-
-        $reason = $validated['reason'] === 'Lainnya' ? $validated['other_reason'] : $validated['reason'];
-
+    
+        $reason = $validated['reason'] === 'Lainnya' ? $validated['description'] : $validated['reason'];
+    
         Report::create([
             'user_id' => Auth::id(),
             'photo_id' => $photoId,
             'reason' => $reason,
         ]);
-
+    
         return redirect()->route('photos.show', $photoId)->with('success', 'Foto berhasil dilaporkan.');
     }
 

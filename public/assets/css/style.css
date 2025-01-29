@@ -20965,7 +20965,7 @@ code {
 
 /* Footer */
 .footer {
-  background: #F5F7FF;
+  background: #f7f8fa;
   color: color(dark);
   padding: 30px 2.45rem;
   transition: all 0.25s ease;
@@ -22265,32 +22265,32 @@ code {
   font-size: 0.75rem;
 }
 .card.card-tale {
-  background: #7DA0FA;
+  background: #6CD45F;
   color: #ffffff;
 }
 .card.card-tale:hover {
-  background: #96b2fb;
+  background: #81E075;
 }
 .card.card-dark-blue {
-  background: #4747A1;
+  background: #53A447;
   color: #ffffff;
 }
 .card.card-dark-blue:hover {
-  background: #5050b2;
+  background: #58B54A;
 }
 .card.card-light-blue {
-  background: #7978E9;
+  background: #53A447;
   color: #ffffff;
 }
 .card.card-light-blue:hover {
-  background: #8f8eed;
+  background: #58B54A;
 }
 .card.card-light-danger {
-  background: #F3797E;
+  background: #6CD45F;
   color: #ffffff;
 }
 .card.card-light-danger:hover {
-  background: #f59095;
+  background: #81E075;
 }
 
 .card-columns .card {
@@ -24004,7 +24004,7 @@ table.dataTable tbody td.select-checkbox:after {
 }
 
 .content-wrapper {
-  background: #F5F7FF;
+  background: #f7f8fa;
   padding: 2.375rem 2.375rem;
   width: 100%;
   -webkit-flex-grow: 1;
@@ -24128,7 +24128,7 @@ table.dataTable tbody td.select-checkbox:after {
   border-radius: 8px;
 }
 .sidebar .nav .nav-item.active > .nav-link {
-  background: #4B49AC;
+  background: #32bd40;
   position: relative;
 }
 .sidebar .nav .nav-item.active > .nav-link i,
@@ -24153,7 +24153,7 @@ table.dataTable tbody td.select-checkbox:after {
   margin-top: 0.2rem;
 }
 .sidebar .nav:not(.sub-menu) > .nav-item:hover > .nav-link, .sidebar .nav:not(.sub-menu) > .nav-item:hover[aria-expanded=true] {
-  background: #4B49AC;
+  background: #32bd40;
   color: #fff;
 }
 .sidebar .nav:not(.sub-menu) > .nav-item > .nav-link {
@@ -24161,18 +24161,18 @@ table.dataTable tbody td.select-checkbox:after {
 }
 .sidebar .nav:not(.sub-menu) > .nav-item > .nav-link[aria-expanded=true] {
   border-radius: 8px 8px 0 0;
-  background: #4B49AC;
+  background: #32bd40;
   color: #fff;
 }
 .sidebar .nav:not(.sub-menu) > .nav-item.active {
-  background: #4B49AC;
+  background: #32bd40;
 }
 .sidebar .nav.sub-menu {
   margin-bottom: 0;
   margin-top: 0;
   list-style: none;
   padding: 0.25rem 0 0 3.07rem;
-  background: #4B49AC;
+  background: #32bd40;
   padding-bottom: 12px;
 }
 .sidebar .nav.sub-menu .nav-item {

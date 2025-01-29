@@ -1,31 +1,37 @@
 @extends('layouts.login')
 
 @section('content')
-<div class="form-container">
-    <div class="brand-logo">
-        <img src="{{ asset('images/Motret logo.png') }}" alt="logo">
-    </div>
-    <form method="POST" action="{{ route('login.post') }}" class="forms-sample w-100">
-        @csrf
-        <div class="form-group">
-            <label for="exampleInputUsername1" class="custom-label">Username or Email</label>
-            <input type="text" name="email" class="form-control" id="exampleInputUsername1" placeholder="Username or Email" required>
+<div class="container d-flex">
+    <div class="row w-100">
+        <div class="col-md-4 d-flex align-items-center justify-content-center">
+            <div class="brand-logo" style=" margin-left: -150px;">
+                <img src="{{ asset('images/Motret logo.png') }}" alt="logo"  style="width: 400px; height: auto;">
+            </div>
         </div>
-        <div class="form-group position-relative">
-            <label for="exampleInputPassword1" class="custom-label">Password</label>
-            <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password" required>
-            <span toggle="#exampleInputPassword1" class="fa fa-eye-slash toggle-password" 
-                style="color: #32bd40; position: absolute; right: 4%; margin-top: -3%; transform: translateY(-50%); font-size: 22px; cursor: pointer;"></span>
-        </div>
-        <button type="submit" class="btn btn-success me-2">Login</button>
-    </form>
+        <div class="col-md-8">
+            <form method="POST" action="{{ route('login.post') }}" class="forms-sample w-100">
+                @csrf
+                <div class="form-group">
+                    <label for="exampleInputUsername1" class="custom-label">Username or Email</label>
+                    <input type="text" name="email" class="form-control" id="exampleInputUsername1" placeholder="Username or Email" required>
+                </div>
+                <div class="form-group position-relative">
+                    <label for="exampleInputPassword1" class="custom-label">Password</label>
+                    <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password" required>
+                    <span toggle="#exampleInputPassword1" class="fa fa-eye-slash toggle-password" 
+                        style="color: #32bd40; position: absolute; right: 4%; margin-top: -3%; transform: translateY(-50%); font-size: 22px; cursor: pointer;"></span>
+                </div>
+                <button type="submit" class="btn btn-success me-2">Login</button>
+            </form>
 
-    <div class="text-center mt-4 font-weight-light">
-        Don't have an account?
-        <a type="button" data-bs-toggle="modal" data-bs-target="#registerModal" class="text-success">Create</a>
-        or login with
-        <a href="{{ route('home') }}" class="text-success">Guest</a>
-        access?
+            <div class="text-center mt-4 font-weight-light">
+                Don't have an account?
+                <a type="button" data-bs-toggle="modal" data-bs-target="#registerModal" class="text-success">Create</a>
+                or login with
+                <a href="{{ route('home') }}" class="text-success">Guest</a>
+                access?
+            </div>
+        </div>
     </div>
 </div>
 

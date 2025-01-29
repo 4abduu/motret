@@ -1,3 +1,4 @@
+app blade:
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -30,13 +31,16 @@
         .page-body-wrapper {
             flex: 1;
             display: flex;
-            flex-direction: row; /* Mengatur sidebar dan main content dalam satu baris */
+            flex-direction: row; /* Menyusun sidebar dan konten utama secara horizontal */
+            overflow: hidden; /* Memastikan elemen ini tidak ter-scroll */
         }
 
         .main-panel {
             flex: 1;
             display: flex;
             flex-direction: column;
+            overflow-y: auto; /* Hanya konten utama yang bisa di-scroll secara vertikal */
+            height: 100vh; /* Pastikan tinggi penuh untuk memungkinkan scroll */
         }
 
         .content-wrapper {

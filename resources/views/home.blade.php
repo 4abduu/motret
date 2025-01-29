@@ -11,6 +11,40 @@
 @section('content')
 <main role="main">
     <section class="mt-4 mb-5">
+        <div class="container mb-4">
+			<div class="row justify-content-center">
+				<nav class="navbar navbar-expand-lg navbar-light bg-white pl-2 pr-2">
+					<button class="navbar-light navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExplore" aria-controls="navbarsDefault" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarsExplore">
+						<ul class="navbar-nav">
+							<li class="nav-item">
+								<a class="nav-link" href="#">Semua Kategori</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#">Fashion</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#">Seni</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#">Wisata</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#">Hewan</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#">Tumbuhan</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link" href="#">Makanan</a>
+							</li>
+						</ul>
+					</div>
+				</nav>
+			</div>
+		</div>
         <div class="container-fluid">
             <div class="row">
                 <div class="card-columns">

@@ -2,47 +2,33 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'username',
         'email',
         'password',
-        'role',
-        'download_reset_at',
-        'subscription_ends_at',
         'profile_photo',
+        'role',
+        'subscription_ends_at',
+        'status',
+        'download_reset_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
@@ -87,6 +73,43 @@ class User extends Authenticatable
     public function isFollowing(User $user)
     {
         return $this->following()->where('users.id', $user->id)->exists();
+    }
+
+    public function follow(User $user)
+    {
+        return $this->following()->attach($user->id);
+    }
+
+    public function unfollow(User $user)
+    {
+        return $this->following()->detach($user->id);
+    }
+
+    public function hasLiked(Photo $photo)
+    {
+        return $this->likes()->where('photo_id', $photo->id)->exists();
+    }
+
+    public function like(Photo $photo)
+    {
+        return $this->likes()->create(['photo_id' => $photo->id]);
+    }
+
+    public function unlike(Photo $photo)
+    {
+        return $this->likes()->where('photo_id', $photo->id)->delete();
+    }
+
+    // Relasi ke notifikasi yang diterima
+    public function notifications()
+    {
+        return $this->hasMany(Notif::class, 'notify_for');
+    }
+
+    // Relasi ke notifikasi yang dikirim
+    public function sentNotifications()
+    {
+        return $this->hasMany(Notif::class, 'notify_from');
     }
 
     // Variabel untuk menghitung jumlah pengguna
