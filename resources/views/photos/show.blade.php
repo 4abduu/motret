@@ -10,7 +10,9 @@
             <h1>{{ $photo->title }}</h1>
             <p>{{ $photo->description }}</p>
             <p>Hashtags: {{ implode(', ', json_decode($photo->hashtags)) }}</p>
-            <p>Diunggah oleh: <a href="{{ route('user.showProfile', $photo->user->username) }}">{{ $photo->user->username }}</a></p>
+            <p>Diunggah oleh: 
+            <a href="{{ route('user.showProfile', $photo->user->username) }}">{{ $photo->user->username }}</a>
+            </p>
             <div id="like-section">
                 <button id="like-button" class="btn btn-link" data-liked="{{ $photo->isLikedBy(Auth::user()) ? 'true' : 'false' }}">
                     <i class="{{ $photo->isLikedBy(Auth::user()) ? 'fas fa-heart' : 'fa-regular fa-heart' }}" 
@@ -74,6 +76,71 @@
                         @endif
                         <p>{{ $comment->comment }}</p>
                         <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
+                        @if(Auth::check())
+                            <div class="dropdown">
+                                <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $comment->id }}">
+                                    @if($comment->user_id === Auth::id())
+                                        <li>
+                                            <form method="POST" action="{{ route('comments.destroy', $comment->id) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item">Hapus Komentar</button>
+                                            </form>
+                                        </li>
+                                    @else
+                                        <li>
+                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-{{ $comment->id }}">
+                                                Lapor Komentar
+                                            </button>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Modal Report Comment -->
+                    <div class="modal fade" id="reportCommentModal-{{ $comment->id }}" tabindex="-1" role="dialog" aria-labelledby="reportCommentModalLabel-{{ $comment->id }}" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="reportCommentModalLabel-{{ $comment->id }}">Laporkan Komentar</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="reportCommentForm-{{ $comment->id }}" method="POST" action="{{ route('comment.report', $comment->id) }}">
+                                        @csrf
+                                        <div class="form-group">
+                                            <label for="reason">Alasan Melaporkan</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="reason" id="reason1" value="Konten tidak pantas" required>
+                                                <label class="form-check-label" for="reason1">Konten tidak pantas</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="reason" id="reason2" value="Spam" required>
+                                                <label class="form-check-label" for="reason2">Spam</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
+                                                <label class="form-check-label" for="reason3">Pelanggaran hak cipta</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
+                                                <label class="form-check-label" for="reason4">Lainnya</label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" id="description-group" style="display: none;">
+                                            <label for="description">Alasan</label>
+                                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-danger">Laporkan</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 @endforeach
             </div>
@@ -131,7 +198,7 @@
     </div>
 </div>
 
-<!-- Modal Report -->
+<!-- Modal Report Photo-->
 <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -140,7 +207,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="reportForm" method="POST" action="{{ route('photos.report', $photo->id) }}">
+                <form id="reportForm" method="POST" action="{{ route('photo.report', $photo->id) }}">
                     @csrf
                     <div class="form-group">
                         <label for="reason">Alasan Melaporkan</label>
@@ -175,7 +242,7 @@
 
 @push('scripts')
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function() {
         const reasonRadios = document.querySelectorAll('input[name="reason"]');
         const descriptionGroup = document.getElementById("description-group");
 
@@ -189,8 +256,23 @@
             });
         });
     });
-</script>
-<script>
+        $(document).ready(function() {
+        $('input[name="reason"]').change(function() {
+            if ($(this).val() === 'Lainnya') {
+                $('#otherReasonGroup').show();
+                $('#other_reason').attr('required', true);
+            } else {
+                $('#otherReasonGroup').hide();
+                $('#other_reason').attr('required', false);
+            }
+        });
+
+        $('#reportModal').on('hidden.bs.modal', function () {
+            $('#reportForm')[0].reset();
+            $('#otherReasonGroup').hide();
+            $('#other_reason').attr('required', false);
+        });
+    });
     $(document).ready(function() {
         $('input[name="reason"]').change(function() {
             if ($(this).val() === 'Lainnya') {

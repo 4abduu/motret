@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Photo;
 use App\Models\Report;
 use App\Models\Comment;
+use App\Models\Reply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -37,6 +38,16 @@ class AdminController extends Controller
     {
         $reports = Report::with(['user', 'photo.user'])->get();
         return view('admin.manageReports', compact('reports'));
+    }
+    public function manageComments()
+    {
+        $comments = Comment::with(['photo.user', 'user', 'replies.user'])->get();
+        return view('admin.manageComments', compact('comments'));
+    }
+    public function manageReplies()
+    {
+        $replies = Reply::with(['comment.photo', 'comment.user', 'user'])->get();
+        return view('admin.manageReplies', compact('replies'));
     }
     public function editUser($id)
     {
@@ -220,4 +231,22 @@ class AdminController extends Controller
         }
     }
     
+    public function deleteComment($id)
+    {
+        try {
+            Comment::findOrFail($id)->delete();
+            return redirect()->route('admin.comments')->with('success', 'Comment deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.comments')->with('error', 'Failed to delete comment.');
+        }
+    }
+    public function deleteReply($id)
+    {
+        try {
+            Reply::findOrFail($id)->delete();
+            return redirect()->route('admin.replies')->with('success', 'Reply deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.replies')->with('error', 'Failed to delete reply.');
+        }
+    }
 }

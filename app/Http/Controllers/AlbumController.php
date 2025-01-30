@@ -21,14 +21,14 @@ class AlbumController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
         ]);
-
+    
         $album = Album::create([
             'user_id' => Auth::id(),
             'name' => $request->name,
             'description' => $request->description,
         ]);
-
-        return response()->json(['success' => true, 'album' => $album]);
+    
+        return redirect()->route('user.profile')->with('success', 'Album berhasil dibuat.');
     }
 
     public function update(Request $request, $id)
@@ -56,7 +56,8 @@ class AlbumController extends Controller
         $album = Album::findOrFail($albumId);
         $album->photos()->detach($photoId);
 
-        return response()->json(['success' => true, 'album_name' => $album->name]);
+        // Mengarahkan kembali dengan informasi sukses
+        return redirect()->route('albums.show', $albumId)->with('success', 'Foto berhasil dihapus dari album.');
     }
 
     public function addPhoto($albumId, $photoId)
@@ -66,18 +67,18 @@ class AlbumController extends Controller
 
         // Pastikan pengguna memiliki album ini
         if ($album->user_id !== Auth::id()) {
-            return response()->json(['error' => 'Anda tidak memiliki album ini.'], 403);
+            return redirect()->route('albums.show', $albumId)->with('error', 'Anda tidak memiliki album ini.');
         }
 
         // Cek apakah foto sudah ada di album
         if ($album->photos()->where('photo_id', $photoId)->exists()) {
-            return response()->json(['warning' => 'Foto sudah ada di album.'], 409);
+            return redirect()->route('albums.show', $albumId)->with('warning', 'Foto sudah ada di album.');
         }
 
         // Tambahkan foto ke album
         $album->photos()->attach($photoId);
 
-        return response()->json(['success' => true, 'album_name' => $album->name]);
+        return redirect()->route('albums.show', $albumId)->with('success', 'Foto berhasil ditambahkan ke album.');
     }
 
     public function updateTitle(Request $request, $id)
@@ -90,7 +91,7 @@ class AlbumController extends Controller
         $album->name = $request->title;
         $album->save();
 
-        return response()->json(['success' => true, 'title' => $album->name]);
+        return redirect()->route('albums.show', $id)->with('success', 'Judul album berhasil diperbarui.');
     }
 
     public function updateDescription(Request $request, $id)
@@ -103,6 +104,6 @@ class AlbumController extends Controller
         $album->description = $request->description;
         $album->save();
 
-        return response()->json(['success' => true, 'description' => $album->description]);
+        return redirect()->route('albums.show', $id)->with('success', 'Deskripsi album berhasil diperbarui.');
     }
 }

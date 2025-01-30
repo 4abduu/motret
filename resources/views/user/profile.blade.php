@@ -3,6 +3,13 @@
 @section('content')
 
 <div class="container mt-5">
+<div class="col-md-12 d-flex justify-content-between align-items-center">
+            @if(Auth::check() && Auth::id() !== $user->id)
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportUserModal">
+                    <i class="fas fa-exclamation-triangle"></i> Laporkan
+                </button>
+            @endif
+        </div>
     <h1>Profil Pengguna</h1>
     <img src="{{ $user->profile_photo_url }}" alt="Profile Photo" class="img-thumbnail rounded-circle" width="150">
     <p>Nama: {{ $user->name }}</p>
@@ -245,9 +252,66 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Report User -->
+<div class="modal fade" id="reportUserModal" tabindex="-1" role="dialog" aria-labelledby="reportUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportUserModalLabel">Laporkan Pengguna</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reportUserForm" method="POST" action="{{ route('user.report', $user->id) }}">
+                    @csrf
+                    <div class="form-group">
+                        <label for="reason">Alasan Melaporkan</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="reason" id="reason1" value="Konten tidak pantas" required>
+                            <label class="form-check-label" for="reason1">Konten tidak pantas</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="reason" id="reason2" value="Spam" required>
+                            <label class="form-check-label" for="reason2">Spam</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
+                            <label class="form-check-label" for="reason3">Pelanggaran hak cipta</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
+                            <label class="form-check-label" for="reason4">Lainnya</label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="description-group" style="display: none;">
+                        <label for="description">Alasan</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Laporkan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const reasonRadios = document.querySelectorAll('input[name="reason"]');
+        const descriptionGroup = document.getElementById("description-group");
+
+        reasonRadios.forEach(radio => {
+            radio.addEventListener("change", function() {
+                if (this.value === "Lainnya") {
+                    descriptionGroup.style.display = "block";
+                } else {
+                    descriptionGroup.style.display = "none";
+                }
+            });
+        });
+    });
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     function updateFollowButton(button, following) {

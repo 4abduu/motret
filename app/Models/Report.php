@@ -13,7 +13,9 @@ class Report extends Model
 
     protected $fillable = [
         'user_id',
+        'reported_user_id',
         'photo_id',
+        'comment_id',
         'reason',
         'status',
     ];
@@ -23,8 +25,18 @@ class Report extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function reportedUser()
+    {
+        return $this->belongsTo(User::class, 'reported_user_id');
+    }
+
     public function photo()
     {
         return $this->belongsTo(Photo::class);
+    }
+
+    public function comment()
+    {
+        return $this->belongsTo(Comment::class);
     }
 }

@@ -32,4 +32,9 @@ class Comment extends Model
     {
         return self::count();
     }
+    
+    public function replies()
+    {
+        return $this->hasMany(Reply::class);
+    }
 }

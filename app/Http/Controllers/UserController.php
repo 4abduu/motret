@@ -50,8 +50,9 @@ class UserController extends Controller
     public function showPhoto($id)
     {
         $photo = Photo::with('user')->findOrFail($id);
+        $photo->increment('views_today');
         $randomPhotos = Photo::where('id', '!=', $id)
-                             ->where('banned', false) // Tambahkan kondisi ini
+                             ->where('banned', false)
                              ->inRandomOrder()
                              ->take(4)
                              ->get();
@@ -102,10 +103,11 @@ class UserController extends Controller
         $photo = Photo::findOrFail($id);
         $user = Auth::user();
         $guestDownloadCount = session('guest_download_count', 0);
-
+    
         // Cek role
         if ($user) {
             if ($user->role === 'pro') {
+                $photo->increment('downloads_today');
                 return $this->processDownload($photo, 'original');
             } elseif ($user->role === 'user') {
                 // Cek apakah perlu reset download count
@@ -113,13 +115,14 @@ class UserController extends Controller
                     $user->download_reset_at = Carbon::now()->addWeek();
                     $user->save();
                 }
-
+    
                 $downloadCount = Download::where('user_id', $user->id)
                                         ->where('created_at', '>=', now()->startOfWeek())
                                         ->count();
-
+    
                 if ($downloadCount < 5) {
                     Download::create(['user_id' => $user->id, 'photo_id' => $photo->id, 'resolution' => 'original']);
+                    $photo->increment('downloads_today');
                     return $this->processDownload($photo, 'original');
                 } else {
                     return back()->with('error', 'Anda telah mencapai batas download minggu ini.');
@@ -128,6 +131,7 @@ class UserController extends Controller
         } else {
             if ($guestDownloadCount < 5) {
                 session(['guest_download_count' => $guestDownloadCount + 1]);
+                $photo->increment('downloads_today');
                 return $this->processDownload($photo, 'low');
             } else {
                 return back()->with('error', 'Anda telah mencapai batas download sebagai tamu.');
@@ -249,6 +253,44 @@ class UserController extends Controller
         ]);
     
         return redirect()->route('photos.show', $photoId)->with('success', 'Foto berhasil dilaporkan.');
+    }
+
+    public function reportComment(Request $request, $commentId)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:255',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $reason = $validated['reason'] === 'Lainnya' ? $validated['description'] : $validated['reason'];
+
+        Report::create([
+            'user_id' => Auth::id(),
+            'comment_id' => $commentId,
+            'reason' => $reason,
+        ]);
+
+        return redirect()->back()->with('success', 'Komentar berhasil dilaporkan.');
+    }
+
+    public function reportUser(Request $request, $userId)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:255',
+            'description' => 'nullable|string|max:255',
+        ]);
+    
+        $reason = $validated['reason'] === 'Lainnya' ? $validated['description'] : $validated['reason'];
+    
+        Report::create([
+            'user_id' => Auth::id(),
+            'reported_user_id' => $userId,
+            'reason' => $reason,
+        ]);
+    
+        $reportedUser = User::findOrFail($userId);
+    
+        return redirect()->route('user.showProfile', ['username' => $reportedUser->username])->with('success', 'Pengguna berhasil dilaporkan.');
     }
 
     public function checkUsername(Request $request)

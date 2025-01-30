@@ -20,6 +20,9 @@ class Photo extends Model
         'status',
         'user_id',
         'banned',
+        'views_today',
+        'likes_today',
+        'downloads_today',
     ];
 
     protected $casts = [

@@ -44,8 +44,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/reports', [AdminController::class, 'manageReports'])->name('admin.reports');
     Route::delete('/reports/{id}', [AdminController::class, 'deleteReport'])->name('admin.reports.delete');
     Route::put('/photos/{id}/ban', [AdminController::class, 'banPhoto'])->name('admin.photos.ban');
-    Route::get('/comments', [AdminController::class, 'managePhotos'])->name('admin.comments');
+    Route::get('/comments', [AdminController::class, 'manageComments'])->name('admin.comments');
     Route::get('/subscriptions', [AdminController::class, 'managePhotos'])->name('admin.subscriptions');
+    Route::get('/comments', [AdminController::class, 'manageComments'])->name('admin.comments');
+    Route::delete('/comments/{id}', [AdminController::class, 'deleteComment'])->name('admin.comments.delete');
+    Route::get('/replies', [AdminController::class, 'manageReplies'])->name('admin.replies');
+    Route::delete('/replies/{id}', [AdminController::class, 'deleteReply'])->name('admin.replies.delete');
 });
 
 // Grup untuk User
@@ -56,9 +60,11 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/check-username', [UserController::class, 'checkUsername'])->name('user.checkUsername');
     Route::post('/check-email', [UserController::class, 'checkEmail'])->name('user.checkEmail');
     Route::get('/foto', [UserController::class, 'photos'])->name('user.photos');
-    Route::post('/foto/{id}/report', [UserController::class, 'reportPhoto'])->name('photos.report');
-    Route::post('/photos/{photo}/like', [LikeController::class, 'like'])->name('photos.like');
+    Route::post('/photo/{id}/report', [UserController::class, 'reportPhoto'])->name('photo.report');
+    Route::post('/comment/{id}/report', [UserController::class, 'reportComment'])->name('comment.report');
+    Route::post('/user/{id}/report', [UserController::class, 'reportUser'])->name('user.report');    Route::post('/photos/{photo}/like', [LikeController::class, 'like'])->name('photos.like');
     Route::post('/photos/{photo}/unlike', [LikeController::class, 'unlike'])->name('photos.unlike');
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/photos/{photo}/comments', [CommentController::class, 'store'])->name('photos.comments.store');
     Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('users.follow');
     Route::post('/users/{user}/unfollow', [FollowController::class, 'unfollow'])->name('users.unfollow');
@@ -75,6 +81,5 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 
 // Rute untuk guest melihat album
 Route::get('/albums/{id}', [AlbumController::class, 'show'])->name('albums.show');
-
 Route::get('/cari', [SearchController::class, 'search'])->name('search');
 Route::get('/{username}', [UserController::class, 'showProfile'])->name('user.showProfile');

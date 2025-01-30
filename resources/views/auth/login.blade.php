@@ -19,7 +19,7 @@
                     <label for="exampleInputPassword1" class="custom-label">Password</label>
                     <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password" required>
                     <span toggle="#exampleInputPassword1" class="fa fa-eye-slash toggle-password" 
-                        style="color: #32bd40; position: absolute; right: 4%; margin-top: -3%; transform: translateY(-50%); font-size: 22px; cursor: pointer;"></span>
+                        style="color: #32bd40; position: absolute; right: 4%; margin-top: -6%; transform: translateY(-50%); font-size: 22px; cursor: pointer;"></span>
                 </div>
                 <button type="submit" class="btn btn-success me-2">Login</button>
             </form>

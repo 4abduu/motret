@@ -5,18 +5,21 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Photo;
 use App\Models\User;
+use App\Models\Search;
 
 class SearchController extends Controller
 {
     public function search(Request $request)
     {
-        $query = $request->input('query');
+        $keyword = $request->input('query');
+        $search = Search::firstOrCreate(['keyword' => $keyword]);
+        $search->increment('count');
 
         // Cari akun berdasarkan username atau nama, dan hanya pengguna dengan peran 'user'
         $users = User::where('role', 'user')
-            ->where(function($q) use ($query) {
-                $q->where('username', 'LIKE', "%{$query}%")
-                  ->orWhere('name', 'LIKE', "%{$query}%");
+            ->where(function($q) use ($keyword) {
+                $q->where('username', 'LIKE', "%{$keyword}%")
+                  ->orWhere('name', 'LIKE', "%{$keyword}%");
             })
             ->get();
 
@@ -25,14 +28,14 @@ class SearchController extends Controller
 
         // Cari foto berdasarkan judul, deskripsi, atau hashtag, atau yang diunggah oleh pengguna yang ditemukan
         $photos = Photo::where('banned', false)
-            ->where(function($q) use ($query, $userIds) {
+            ->where(function($q) use ($keyword, $userIds) {
                 $q->whereIn('user_id', $userIds)
-                  ->orWhere('title', 'LIKE', "%{$query}%")
-                  ->orWhere('description', 'LIKE', "%{$query}%")
-                  ->orWhere('hashtags', 'LIKE', "%{$query}%");
+                  ->orWhere('title', 'LIKE', "%{$keyword}%")
+                  ->orWhere('description', 'LIKE', "%{$keyword}%")
+                  ->orWhere('hashtags', 'LIKE', "%{$keyword}%");
             })
             ->get();
 
-        return view('cari.results', compact('users', 'photos', 'query'));
+        return view('cari.results', compact('users', 'photos', 'keyword'));
     }
 }

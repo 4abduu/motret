@@ -1,5 +1,22 @@
 @extends('layouts.app')
+@push('link')
+    <style>
+        /* CSS to position the dropdown outside the card */
+        .card-columns {
+            position: relative;
+        }
 
+        .dropdown-container {
+            position: absolute;
+            top: 100%; /* Positions the dropdown below the card */
+            right: 60%; /* Moves the dropdown to the left of the card */
+            margin-right: 10px; /* Optional: Add space between the card and dropdown */
+        }
+
+    </style>
+    <link rel="stylesheet" href="{{asset ('user/assets/css/app.css')}}">
+    <link rel="stylesheet" href="{{asset ('user/assets/css/theme.css')}}">
+@endpush
 @section('content')
 <div class="container mt-5">
     <div class="row">
@@ -15,19 +32,65 @@
         </div>
     </div>
     <div class="row">
-        @foreach($album->photos as $photo)
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                        <a href="{{ route('photos.show', $photo->id) }}">
-                    <img src="{{ asset('storage/' . $photo->path) }}" class="card-img-top" alt="{{ $photo->title }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $photo->title }}</h5>
-                        <p class="card-text">{{ $photo->description }}</p>
-                    </div>
-                        </a>
+        @if($album->photos->isEmpty())
+            <div class="col-md-12 text-center">
+                <p>Album ini belum memiliki foto.</p>
+                <a href="{{ route('home') }}" class="btn btn-primary">Tambahkan foto ke album Anda</a>
+            </div>
+        @else
+            @foreach($album->photos as $photo)
+            <div class="card-columns">
+                <div class="card card-pin">
+                    <a href="{{ route('photos.show', $photo->id) }}">
+                        <img class="card-img" src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
+                        <div class="overlay">
+                            <h2 class="card-title title">{{ $photo->title }}</h2>
+                            <div class="more">
+                                <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
+                            </div>
+                        </div>                                        
+                    </a>
+                </div>
+                <!-- Dropdown outside the card -->
+                <div class="dropdown dropdown-container">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <li>
+                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deletePhotoModal-{{ $photo->id }}">
+                                <i class="fas fa-trash"></i> Hapus Foto
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-        @endforeach
+
+
+                                <!-- Modal Konfirmasi Hapus Foto -->
+                                <div class="modal fade" id="deletePhotoModal-{{ $photo->id }}" tabindex="-1" role="dialog" aria-labelledby="deletePhotoModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deletePhotoModalLabel">Konfirmasi Hapus Foto</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Apakah Anda yakin ingin menghapus foto ini dari album?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                <form action="{{ route('albums.removePhoto', ['albumId' => $album->id, 'photoId' => $photo->id]) }}" method="POST">
+                                    @csrf
+                                    @method('POST')
+                                    <button type="submit" class="btn btn-danger">Hapus</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        @endif
     </div>
 </div>
 

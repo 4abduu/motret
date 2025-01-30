@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Photo;
 use App\Models\Like;
-use App\Models\Notif; // Pastikan model Notif diimport
+use App\Models\Notif;
 use Illuminate\Support\Facades\Auth;
 
 class LikeController extends Controller
@@ -19,6 +20,8 @@ class LikeController extends Controller
                 'user_id' => $user->id,
                 'photo_id' => $photo->id,
             ]);
+
+            $photo->increment('likes_today');
 
             // Tambahkan notifikasi
             Notif::create([
@@ -44,6 +47,7 @@ class LikeController extends Controller
         $like = Like::where('user_id', $user->id)->where('photo_id', $photo->id)->first();
         if ($like) {
             $like->delete();
+            $photo->decrement('likes_today');
 
             // Hapus notifikasi
             Notif::where('notify_from', $user->id)
