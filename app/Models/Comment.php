@@ -37,4 +37,9 @@ class Comment extends Model
     {
         return $this->hasMany(Reply::class);
     }
+
+    public function reports() 
+    {
+        return $this->hasMany(Report::class, 'comment_id');
+    }
 }

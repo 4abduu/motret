@@ -69,81 +69,149 @@
             @endif
             <div class="mt-4">
                 @foreach($photo->comments as $comment)
-                    <div class="mb-2">
-                        <strong>{{ $comment->user->username }}</strong>
-                        @if($comment->user_id === $photo->user_id)
-                            <span class="text-muted">• Pembuat</span>
-                        @endif
-                        <p>{{ $comment->comment }}</p>
-                        <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
-                        @if(Auth::check())
-                            <div class="dropdown">
-                                <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $comment->id }}">
-                                    @if($comment->user_id === Auth::id())
-                                        <li>
-                                            <form method="POST" action="{{ route('comments.destroy', $comment->id) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item">Hapus Komentar</button>
-                                            </form>
-                                        </li>
-                                    @else
-                                        <li>
-                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-{{ $comment->id }}">
-                                                Lapor Komentar
+                    @php
+                        $isOwner = Auth::check() && Auth::id() === $comment->user_id;
+                        $hideComment = !$isOwner && $comment->banned;
+                        $report = $comment->reports->first();
+                    @endphp
+                    
+                    @if(!$hideComment)
+                        <div class="mb-2">
+                            <strong>{{ $comment->user->username }}</strong>
+                            @if($comment->user_id === $photo->user_id)
+                                <span class="text-muted">• Pembuat</span>
+                            @endif
+                            @if($comment->banned)
+                                @if($isOwner)
+                                    <p><em class="text-muted">Komentar anda telah dibanned: {{ $report->reason }}</em></p>
+                                @endif
+                            @else
+                                <p>{{ $comment->comment }}</p>
+                                <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
+                                
+                                @if(Auth::check())
+                                    <div class="d-flex align-items-center">
+                                        <button class="btn btn-link reply-button" data-comment-id="{{ $comment->id }}">Balas</button>
+                                        <div class="dropdown ms-2">
+                                            <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
                                             </button>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Modal Report Comment -->
-                    <div class="modal fade" id="reportCommentModal-{{ $comment->id }}" tabindex="-1" role="dialog" aria-labelledby="reportCommentModalLabel-{{ $comment->id }}" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="reportCommentModalLabel-{{ $comment->id }}">Laporkan Komentar</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <form id="reportCommentForm-{{ $comment->id }}" method="POST" action="{{ route('comment.report', $comment->id) }}">
-                                        @csrf
-                                        <div class="form-group">
-                                            <label for="reason">Alasan Melaporkan</label>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason1" value="Konten tidak pantas" required>
-                                                <label class="form-check-label" for="reason1">Konten tidak pantas</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason2" value="Spam" required>
-                                                <label class="form-check-label" for="reason2">Spam</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
-                                                <label class="form-check-label" for="reason3">Pelanggaran hak cipta</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
-                                                <label class="form-check-label" for="reason4">Lainnya</label>
-                                            </div>
+                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $comment->id }}">
+                                                @if($isOwner)
+                                                    <li>
+                                                        <form method="POST" action="{{ route('comments.destroy', $comment->id) }}">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="dropdown-item">Hapus Komentar</button>
+                                                        </form>
+                                                    </li>
+                                                @else
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-{{ $comment->id }}">
+                                                            Lapor Komentar
+                                                        </button>
+                                                    </li>
+                                                @endif
+                                            </ul>
                                         </div>
-                                        <div class="form-group" id="description-group" style="display: none;">
-                                            <label for="description">Alasan</label>
-                                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-danger">Laporkan</button>
-                                    </form>
+                                    </div>
+            
+                                    <div class="reply-form" id="reply-form-{{ $comment->id }}" style="display: none;">
+                                        <form method="POST" action="{{ route('comments.reply', $comment->id) }}">
+                                            @csrf
+                                            <div class="input-group mb-3">
+                                                <input type="text" class="form-control" name="reply" placeholder="Tambahkan balasan..." required>
+                                                <button class="btn btn-outline-secondary" type="submit">
+                                                    <i class="fas fa-paper-plane"></i>
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                @endif
+                            @endif
+            
+                            @foreach($comment->replies as $reply)
+                                @php
+                                    $hideReply = $comment->banned || (!$isOwner && $reply->banned);
+                                @endphp
+                                
+                                @if(!$hideReply)
+                                    <div class="ms-4 mt-2">
+                                        <strong>{{ $reply->user->username }}</strong>
+                                        <p>{{ $reply->reply }}</p>
+                                        <small class="text-muted">{{ $reply->created_at->diffForHumans() }}</small>
+                                        @if(Auth::check())
+                                            <div class="dropdown">
+                                                <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $reply->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $reply->id }}">
+                                                    @if($reply->user_id === Auth::id())
+                                                        <li>
+                                                            <form method="POST" action="{{ route('comments.destroy', $reply->id) }}">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="dropdown-item">Hapus Komentar</button>
+                                                            </form>
+                                                        </li>
+                                                    @else
+                                                        <li>
+                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-{{ $reply->id }}">
+                                                                Lapor Komentar
+                                                            </button>
+                                                        </li>
+                                                    @endif
+                                                </ul>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+            
+                        <!-- Modal Report Comment -->
+                        <div class="modal fade" id="reportCommentModal-{{ $comment->id }}" tabindex="-1" role="dialog" aria-labelledby="reportCommentModalLabel-{{ $comment->id }}" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="reportCommentModalLabel-{{ $comment->id }}">Laporkan Komentar</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="reportCommentForm-{{ $comment->id }}" method="POST" action="{{ route('comment.report', $comment->id) }}">
+                                            @csrf
+                                            <div class="form-group">
+                                                <label for="reason">Alasan Melaporkan</label>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="reason" id="reason1" value="Konten tidak pantas" required>
+                                                    <label class="form-check-label" for="reason1">Konten tidak pantas</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="reason" id="reason2" value="Spam" required>
+                                                    <label class="form-check-label" for="reason2">Spam</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
+                                                    <label class="form-check-label" for="reason3">Pelanggaran hak cipta</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
+                                                    <label class="form-check-label" for="reason4">Lainnya</label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group" id="description-group" style="display: none;">
+                                                <label for="description">Alasan</label>
+                                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-danger">Laporkan</button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 @endforeach
-            </div>
+            </div>                  
         </div>
     </div>
 </div>
@@ -394,6 +462,53 @@
                 }
             })
             .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Event listener untuk tombol "Balas"
+        document.querySelectorAll('.reply-button').forEach(button => {
+            button.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-comment-id');
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+                replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+
+        // Event listener untuk form reply
+        document.querySelectorAll('.reply-form form').forEach(form => {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                const formData = new FormData(this);
+                const commentId = this.closest('.reply-form').getAttribute('id').split('-')[2];
+                const url = this.getAttribute('action');
+                const token = '{{ csrf_token() }}';
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                    },
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const replyHtml = `
+                            <div class="ms-4 mt-2">
+                                <strong>${data.reply.user.username}</strong>
+                                <p>${data.reply.reply}</p>
+                                <small class="text-muted">${data.reply.created_at}</small>
+                            </div>
+                        `;
+                        document.querySelector(`#reply-form-${commentId}`).insertAdjacentHTML('beforebegin', replyHtml);
+                        this.reset();
+                        this.closest('.reply-form').style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
         });
     });
 </script>

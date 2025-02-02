@@ -8,9 +8,9 @@ class AddMostViewLikeSearchDownloadFields extends Migration
     public function up()
     {
         Schema::table('foto', function (Blueprint $table) {
-            $table->unsignedBigInteger('views_today')->default(0)->after('description');
-            $table->unsignedBigInteger('likes_today')->default(0)->after('views_today');
-            $table->unsignedBigInteger('downloads_today')->default(0)->after('likes_today');
+            $table->unsignedBigInteger('views')->default(0)->after('description');
+            $table->unsignedBigInteger('likes')->default(0)->after('views');
+            $table->unsignedBigInteger('downloads')->default(0)->after('likes');
         });
 
         Schema::create('cari', function (Blueprint $table) {
@@ -24,9 +24,9 @@ class AddMostViewLikeSearchDownloadFields extends Migration
     public function down()
     {
         Schema::table('photos', function (Blueprint $table) {
-            $table->dropColumn('views_today');
-            $table->dropColumn('likes_today');
-            $table->dropColumn('downloads_today');
+            $table->dropColumn('views');
+            $table->dropColumn('likes');
+            $table->dropColumn('downloads');
         });
 
         Schema::dropIfExists('searches');

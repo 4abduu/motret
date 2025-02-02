@@ -18,10 +18,9 @@ class HomeController extends Controller
                   });
         })->get();
 
-
-        $mostViewedPhotos = Photo::where('banned', false)->orderBy('views_today', 'desc')->take(10)->get();
-        $mostLikedPhotos = Photo::where('banned', false)->orderBy('likes_today', 'desc')->take(10)->get();
-        $mostDownloadedPhotos = Photo::where('banned', false)->orderBy('downloads_today', 'desc')->take(10)->get();
+        $mostViewedPhotos = Photo::where('banned', false)->orderBy('views', 'desc')->take(10)->get();
+        $mostLikedPhotos = Photo::withCount('likes')->where('banned', false)->orderBy('likes_count', 'desc')->take(10)->get();
+        $mostDownloadedPhotos = Photo::withCount('downloads')->where('banned', false)->orderBy('downloads_count', 'desc')->take(10)->get();
         $mostSearchedKeywords = Search::orderBy('count', 'desc')->take(10)->get();
 
         return view('home', compact('photos', 'mostViewedPhotos', 'mostLikedPhotos', 'mostDownloadedPhotos', 'mostSearchedKeywords'));

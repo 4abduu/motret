@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Comment;
+use App\Models\Reply;
 use App\Models\Photo;
 use App\Models\Notif; // Pastikan model Notif diimport
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +39,35 @@ class CommentController extends Controller
 
         $comment->delete();
 
-        return redirect()->back()->with('success', 'Komentar berhasil dihapus.');
+        return redirect()->route('admin.comments')->with('success', 'Comment deleted successfully.');
+    }
+
+    public function storeReply($commentId, Request $request)
+    {
+        $comment = Comment::findOrFail($commentId);
+
+        $reply = Reply::create([
+            'reply' => $request->reply,
+            'user_id' => Auth::id(),
+            'comment_id' => $commentId,
+        ]);
+
+        Notif::create([
+            'notify_for' => $comment->user_id,
+            'notify_from' => Auth::id(),
+            'target_id' => $comment->photo_id,
+            'type' => 'reply',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'reply' => [
+                'user' => [
+                    'username' => Auth::user()->username,
+                ],
+                'reply' => $reply->reply,
+                'created_at' => $reply->created_at->diffForHumans(),
+            ],
+        ]);
     }
 }

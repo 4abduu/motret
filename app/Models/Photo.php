@@ -20,9 +20,7 @@ class Photo extends Model
         'status',
         'user_id',
         'banned',
-        'views_today',
-        'likes_today',
-        'downloads_today',
+        'views',
     ];
 
     protected $casts = [
@@ -31,7 +29,7 @@ class Photo extends Model
 
     public function downloads()
     {
-        return $this->hasMany(Download::class);
+        return $this->hasMany(Download::class, 'photo_id');
     }
 
     public function user()
@@ -51,7 +49,7 @@ class Photo extends Model
 
     public function likes()
     {
-        return $this->hasMany(Like::class);
+        return $this->hasMany(Like::class, 'photo_id');
     }
 
     public function isLikedBy(?User $user)
@@ -81,6 +79,18 @@ class Photo extends Model
     public function albums()
     {
         return $this->belongsToMany(Album::class, 'album_foto', 'photo_id', 'album_id');
+    }
+
+    // Accessor untuk menghitung jumlah likes
+    public function getLikesCountAttribute(): int
+    {
+        return $this->suka()->count();
+    }
+
+    // Accessor untuk menghitung jumlah downloads
+    public function getDownloadsCountAttribute(): int
+    {
+        return $this->downloads()->count();
     }
 
 }

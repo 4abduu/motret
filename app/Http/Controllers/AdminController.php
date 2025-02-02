@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -36,18 +37,46 @@ class AdminController extends Controller
     }
     public function manageReports()
     {
-        $reports = Report::with(['user', 'photo.user'])->get();
-        return view('admin.manageReports', compact('reports'));
+        $reportUserCount = Report::whereNotNull('reported_user_id')->count();
+        $reportCommentCount = Report::whereNotNull('comment_id')->count();
+        $reportPhotoCount = Report::whereNotNull('photo_id')->count();
+        return view('admin.manageReports', compact('reportUserCount', 'reportCommentCount', 'reportPhotoCount'));
     }
+    public function reportUsers()
+    {
+        $reportUsers = Report::whereNotNull('reported_user_id')->get();
+        return view('admin.reportUsers', compact('reportUsers'));
+    }
+
+    public function reportComments()
+    {
+        $reportComments = Report::whereNotNull('comment_id')->get();
+        return view('admin.reportComments', compact('reportComments'));
+    }
+
+    public function reportPhotos()
+    {
+        $reportPhotos = Report::whereNotNull('photo_id')->get();
+        return view('admin.reportPhotos', compact('reportPhotos'));
+    }
+
     public function manageComments()
     {
-        $comments = Comment::with(['photo.user', 'user', 'replies.user'])->get();
-        return view('admin.manageComments', compact('comments'));
+        $commentCount = Comment::count();
+        $replyCount = Comment::count();
+        return view('admin.manageComments', compact('commentCount', 'replyCount'));
     }
-    public function manageReplies()
+
+    public function comments()
     {
-        $replies = Reply::with(['comment.photo', 'comment.user', 'user'])->get();
-        return view('admin.manageReplies', compact('replies'));
+        $comments = Comment::all();
+        return view('admin.comments', compact('comments'));
+    }
+
+    public function replies()
+    {
+        $replies = Reply::all();
+        return view('admin.replies', compact('replies'));
     }
     public function editUser($id)
     {
@@ -185,12 +214,10 @@ class AdminController extends Controller
 
     public function deleteReport($id)
     {
-        try {
-            Report::findOrFail($id)->delete();
-            return redirect()->route('admin.reports')->with('success', 'Laporan berhasil dihapus.');
-        } catch (\Exception $e) {
-            return redirect()->route('admin.reports')->with('error', 'Gagal menghapus laporan.');
-        }
+        $report = Report::findOrFail($id);
+        $report->delete();
+
+        return redirect()->back()->with('success', 'Laporan berhasil dihapus.');
     }
 
     public function banPhoto(Request $request, $id)
@@ -199,18 +226,53 @@ class AdminController extends Controller
             $photo = Photo::findOrFail($id);
 
             if ($photo->banned) {
-                return redirect()->route('admin.reports')->with('warning', 'Postingan ini telah dibanned.');
+                return redirect()->route('admin.reports.photos')->with('warning', 'Postingan ini telah dibanned.');
+            }
+
+            // Ambil alasan ban dari laporan terkait
+            $report = Report::where('photo_id', $id)->first();
+            if (!$report) {
+                return redirect()->route('admin.reports.photos')->with('error', 'Laporan tidak ditemukan.');
             }
 
             $photo->banned = true;
+            $photo->ban_expires_at = Carbon::now()->addDays(7);
             $photo->save();
 
             // Update semua laporan terkait dengan status banned
-            Report::where('photo_id', $id)->update(['status' => 1]);
+            Report::where('photo_id', $id)->update(['status' => true]);
 
-            return redirect()->route('admin.reports')->with('success', 'Postingan berhasil dibanned.');
+            return redirect()->route('admin.reports.photos')->with('success', 'Foto berhasil dibanned.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.reports')->with('error', 'Gagal membanned postingan.');
+            return redirect()->route('admin.reports.photos')->with('error', 'Foto gagal dibanned: ' . $e->getMessage());
+        }
+    }
+
+    public function banComment(Request $request, $id)
+    {
+        try {
+            $comment = Comment::findOrFail($id);
+
+            if ($comment->banned) {
+                return redirect()->route('admin.reports.comments')->with('warning', 'Komentar ini telah dibanned.');
+            }
+
+            // Ambil alasan ban dari laporan terkait
+            $report = Report::where('comment_id', $id)->first();
+            if (!$report) {
+                return redirect()->route('admin.reports.comments')->with('error', 'Laporan tidak ditemukan.');
+            }
+
+            $comment->banned = true;
+            $comment->ban_expires_at = Carbon::now()->addDays(7);
+            $comment->save();
+
+            // Update semua laporan terkait dengan status banned
+            Report::where('comment_id', $id)->update(['status' => true]);
+
+            return redirect()->route('admin.reports.comments')->with('success', 'Komentar berhasil dibanned.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.reports.comments')->with('error', 'Komentar gagal dibanned: ' . $e->getMessage());
         }
     }
 

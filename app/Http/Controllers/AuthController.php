@@ -49,33 +49,6 @@ class AuthController extends Controller
         return back()->withErrors(['email' => 'Email/Username atau password salah.']);
     }
 
-    // public function login(Request $request)
-    // {
-    //     $messages = [
-    //         'email.required' => 'Email harus diisi.',
-    //         'email.email' => 'Format email tidak valid.',
-    //         'password.required' => 'Password harus diisi.',
-    //     ];
-
-    //     $validated = $request->validate([
-    //         'email' => 'required|email',
-    //         'password' => 'required',
-    //     ], $messages);
-
-    //     $credentials = $request->only('email', 'password');
-        
-    //     if (Auth::attempt($credentials)) {
-    //         $user = Auth::user();
-    //         if ($user->role === 'admin') {
-    //             return redirect()->route('admin.dashboard');
-    //         } else {
-    //             return redirect()->route('home');
-    //         }
-    //     }
-
-    //     return back()->withErrors(['email' => 'Email atau password salah.']);
-    // }
-
     public function register(Request $request)
     {
         $messages = [

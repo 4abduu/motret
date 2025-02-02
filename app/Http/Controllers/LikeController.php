@@ -21,7 +21,9 @@ class LikeController extends Controller
                 'photo_id' => $photo->id,
             ]);
 
-            $photo->increment('likes_today');
+            // Perbarui jumlah likes di tabel foto
+            $photo->likes = $photo->likes()->count();
+            $photo->save();
 
             // Tambahkan notifikasi
             Notif::create([
@@ -47,7 +49,10 @@ class LikeController extends Controller
         $like = Like::where('user_id', $user->id)->where('photo_id', $photo->id)->first();
         if ($like) {
             $like->delete();
-            $photo->decrement('likes_today');
+
+            // Perbarui jumlah likes di tabel foto
+            $photo->likes = $photo->likes()->count();
+            $photo->save();
 
             // Hapus notifikasi
             Notif::where('notify_from', $user->id)

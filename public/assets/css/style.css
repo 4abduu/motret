@@ -22292,6 +22292,18 @@ code {
 .card.card-light-danger:hover {
   background: #81E075;
 }
+.card.card-light-light-blue {
+  background: #7DA0FA;
+  color: #ffffff;
+}
+.card.card-light-yellow {
+  background: #FFCD29;
+  color: #ffffff;
+}
+.card.card-light-green {
+  background: #40AB5D;
+  color: #ffffff;
+}
 
 .card-columns .card {
   margin-bottom: 0.75rem;

@@ -10,9 +10,9 @@
                         <li class="breadcrumb-item active">Dashboard</li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.users') }}">Manage User</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.photos') }}">Manage Foto</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.comments') }}">Manage Comment</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.manageComments') }}">Manage Comment</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions') }}">Manage Berlangganan</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.reports') }}">Manage Report</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.manageReports') }}">Manage Report</a></li>
                     </ol>
                   </div>
                 </div>

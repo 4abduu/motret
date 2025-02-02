@@ -24,7 +24,7 @@ Route::get('/foto/{id}', [UserController::class, 'showPhoto'])->name('photos.sho
 Route::post('/foto/{id}/download', [UserController::class, 'downloadPhoto'])->name('photos.download');
 
 // Routes untuk login, register, dan logout
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->middleware('logout_if_authenticated');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -33,6 +33,13 @@ Route::get('/guest', [AuthController::class, 'guest'])->name('guest');
 // Grup untuk Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/comments', [AdminController::class, 'manageComments'])->name('admin.manageComments');
+    Route::get('/admin/comments/comments', [AdminController::class, 'comments'])->name('admin.comments');
+    Route::get('/admin/comments/replies', [AdminController::class, 'replies'])->name('admin.replies');
+    Route::get('/admin/reports', [AdminController::class, 'manageReports'])->name('admin.manageReports');
+    Route::get('/admin/reports/users', [AdminController::class, 'reportUsers'])->name('admin.reports.users');
+    Route::get('/admin/reports/comments', [AdminController::class, 'reportComments'])->name('admin.reports.comments');
+    Route::get('/admin/reports/photos', [AdminController::class, 'reportPhotos'])->name('admin.reports.photos');
     Route::get('/users', [AdminController::class, 'manageUsers'])->name('admin.users');
     Route::post('/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
     Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
@@ -41,14 +48,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/photos', [AdminController::class, 'managePhotos'])->name('admin.photos');
     Route::put('/photos/{id}', [AdminController::class, 'editPhoto'])->name('admin.photos.edit');
     Route::delete('/photos/{id}', [AdminController::class, 'deletePhoto'])->name('admin.photos.delete');
-    Route::get('/reports', [AdminController::class, 'manageReports'])->name('admin.reports');
     Route::delete('/reports/{id}', [AdminController::class, 'deleteReport'])->name('admin.reports.delete');
-    Route::put('/photos/{id}/ban', [AdminController::class, 'banPhoto'])->name('admin.photos.ban');
-    Route::get('/comments', [AdminController::class, 'manageComments'])->name('admin.comments');
+    Route::put('/admin/reports/comments/{id}/ban', [AdminController::class, 'banComment'])->name('admin.comments.ban');
+    Route::put('/admin/reports/photos/{id}/ban', [AdminController::class, 'banPhoto'])->name('admin.photos.ban');
+    Route::put('/admin/reports/users/{id}/ban', [AdminController::class, 'banPhoto'])->name('admin.users.ban');
     Route::get('/subscriptions', [AdminController::class, 'managePhotos'])->name('admin.subscriptions');
-    Route::get('/comments', [AdminController::class, 'manageComments'])->name('admin.comments');
-    Route::delete('/comments/{id}', [AdminController::class, 'deleteComment'])->name('admin.comments.delete');
-    Route::get('/replies', [AdminController::class, 'manageReplies'])->name('admin.replies');
+    Route::delete('admin/comments/{id}', [AdminController::class, 'deleteComment'])->name('admin.comments.delete');
     Route::delete('/replies/{id}', [AdminController::class, 'deleteReply'])->name('admin.replies.delete');
 });
 
@@ -65,6 +70,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/user/{id}/report', [UserController::class, 'reportUser'])->name('user.report');    Route::post('/photos/{photo}/like', [LikeController::class, 'like'])->name('photos.like');
     Route::post('/photos/{photo}/unlike', [LikeController::class, 'unlike'])->name('photos.unlike');
     Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::post('/comments/{comment}/reply', [CommentController::class, 'storeReply'])->name('comments.reply'); 
     Route::post('/photos/{photo}/comments', [CommentController::class, 'store'])->name('photos.comments.store');
     Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('users.follow');
     Route::post('/users/{user}/unfollow', [FollowController::class, 'unfollow'])->name('users.unfollow');

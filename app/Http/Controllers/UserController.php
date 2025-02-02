@@ -50,7 +50,7 @@ class UserController extends Controller
     public function showPhoto($id)
     {
         $photo = Photo::with('user')->findOrFail($id);
-        $photo->increment('views_today');
+        $photo->increment('views');
         $randomPhotos = Photo::where('id', '!=', $id)
                              ->where('banned', false)
                              ->inRandomOrder()
@@ -71,7 +71,7 @@ class UserController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'photo' => 'required|image|mimes:jpeg,png,jpg',
-            'hashtags' => 'nullable|string',
+            'hashtags' => 'required|string',
         ]);
 
         $path = $request->file('photo')->store('photos', 'public');
@@ -107,7 +107,7 @@ class UserController extends Controller
         // Cek role
         if ($user) {
             if ($user->role === 'pro') {
-                $photo->increment('downloads_today');
+                Download::create(['user_id' => $user->id, 'photo_id' => $photo->id, 'resolution' => 'original']);
                 return $this->processDownload($photo, 'original');
             } elseif ($user->role === 'user') {
                 // Cek apakah perlu reset download count
@@ -122,7 +122,6 @@ class UserController extends Controller
     
                 if ($downloadCount < 5) {
                     Download::create(['user_id' => $user->id, 'photo_id' => $photo->id, 'resolution' => 'original']);
-                    $photo->increment('downloads_today');
                     return $this->processDownload($photo, 'original');
                 } else {
                     return back()->with('error', 'Anda telah mencapai batas download minggu ini.');
@@ -131,7 +130,7 @@ class UserController extends Controller
         } else {
             if ($guestDownloadCount < 5) {
                 session(['guest_download_count' => $guestDownloadCount + 1]);
-                $photo->increment('downloads_today');
+                Download::create(['user_id' => null, 'photo_id' => $photo->id, 'resolution' => 'low']);
                 return $this->processDownload($photo, 'low');
             } else {
                 return back()->with('error', 'Anda telah mencapai batas download sebagai tamu.');

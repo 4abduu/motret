@@ -19,48 +19,47 @@
                     <span class="menu-title">Manage Foto</span>
                 </a>
             </li>
+
+            {{-- Dropdown Comment --}}
+            @php 
+                $isCommentActive = request()->routeIs('admin.comments') || request()->routeIs('admin.replies'); 
+            @endphp
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('admin.comments') }}">
+                <a class="nav-link" data-bs-toggle="collapse" href="#comment" aria-expanded="{{ $isCommentActive ? 'true' : 'false' }}" aria-controls="comment">
                     <i class="mdi mdi-comment-text-outline menu-icon"></i>
-                    <span class="menu-title">Manage Comment</span>
+                    <span class="menu-title" onclick="window.location='{{ route('admin.manageComments') }}'">Comment</span>
+                    <i class="menu-arrow" onclick="toggleDropdown(event, '#comment')"></i>
                 </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ route('admin.subscriptions') }}">
-                    <i class="mdi mdi-crown menu-icon"></i>
-                    <span class="menu-title">Manage Berlangganan</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#auth"  aria-expanded="false" aria-controls="auth">
-                  <i class="mdi mdi-comment-text-outline menu-icon"></i>
-                  <span class="menu-title">Comment</span>
-                  <i class="menu-arrow"></i>
-                </a>
-                <div class="collapse" id="auth">
-                  <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" href="{{ route('admin.comments.comments') }}"> Manage Comment </a></li>
-                    <li class="nav-item"> <a class="nav-link" href="{{ route('admin.comments.replies') }}"> Manage Replies </a></li>
-                  </ul>
+                <div class="collapse {{ $isCommentActive ? 'show' : '' }}" id="comment">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.comments') }}"> Manage Comment </a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.replies') }}"> Manage Replies </a></li>
+                    </ul>
                 </div>
             </li>
+
+            {{-- Dropdown Report --}}
+            @php 
+                $isReportActive = request()->routeIs('admin.reports.*'); 
+            @endphp
             <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="collapse" href="#report"  aria-expanded="false" aria-controls="report">
-                  <i class="icon-ban menu-icon"></i>
-                  <span class="menu-title">Report</span>
-                  <i class="menu-arrow"></i>
+                <a class="nav-link" data-bs-toggle="collapse" href="#report" aria-expanded="{{ $isReportActive ? 'true' : 'false' }}" aria-controls="report">
+                    <i class="icon-ban menu-icon"></i>
+                    <span class="menu-title" onclick="window.location='{{ route('admin.manageReports') }}'">Report</span>
+                    <i class="menu-arrow" onclick="toggleDropdown(event, '#report')"></i>
                 </a>
-                <div class="collapse" id="report">
-                  <ul class="nav flex-column sub-menu">
-                    <li class="nav-item"> <a class="nav-link" href="{{ route('admin.reports.users') }}"> Report User </a></li>
-                    <li class="nav-item"> <a class="nav-link" href="{{ route('admin.reports.comments') }}"> Report Comment </a></li>
-                    <li class="nav-item"> <a class="nav-link"href="{{ route('admin.reports.photos') }}"> Report Photo </a></li>
-                  </ul>
+                <div class="collapse {{ $isReportActive ? 'show' : '' }}" id="report">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.reports.users') }}"> Report User </a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.reports.comments') }}"> Report Comment </a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.reports.photos') }}"> Report Photo </a></li>
+                    </ul>
                 </div>
             </li>
         </ul>
     </nav>
 @endif
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
       document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function (toggle) {
@@ -79,4 +78,4 @@
         });
       });
     });
-  </script>
+</script>
