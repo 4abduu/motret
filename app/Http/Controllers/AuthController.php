@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite;
+use Exception;
 
 class AuthController extends Controller
 {
@@ -19,6 +22,11 @@ class AuthController extends Controller
     public function showLoginForm()
     {
         return view('auth.login');
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
     }
 
     public function login(Request $request)
@@ -110,4 +118,46 @@ class AuthController extends Controller
         Auth::logout();
         return redirect()->route('home');
     }
+
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+            $user = User::where('email', $googleUser->getEmail())->first();
+    
+            if ($user) {
+                // Jika user sudah ada, login
+                Auth::login($user);
+            } else {
+                // Buat username dari nama depan email (sebelum @)
+                $username = explode('@', $googleUser->getEmail())[0];
+    
+                // Jika username sudah ada, tambah angka increment
+                $originalUsername = $username;
+                $counter = 1;
+                while (User::where('username', $username)->exists()) {
+                    $username = $originalUsername . $counter;
+                    $counter++;
+                }
+    
+                // Buat user baru
+                $user = User::create([
+                    'username' => $username, 
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'google_id' => $googleUser->getId(),
+                    'password' => bcrypt('password123'), 
+                    'role' => 'user', 
+                ]);
+    
+                // Login user baru
+                Auth::login($user);
+            }
+    
+            return redirect()->route('home');
+        } catch (Exception $e) {
+            return redirect()->route('login')->with('error', 'Something went wrong, please try again.');
+        }
+    }
+    
 }

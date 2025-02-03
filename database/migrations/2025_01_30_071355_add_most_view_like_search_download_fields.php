@@ -23,12 +23,12 @@ class AddMostViewLikeSearchDownloadFields extends Migration
 
     public function down()
     {
-        Schema::table('photos', function (Blueprint $table) {
+        Schema::table('foto', function (Blueprint $table) {
             $table->dropColumn('views');
             $table->dropColumn('likes');
             $table->dropColumn('downloads');
         });
 
-        Schema::dropIfExists('searches');
+        Schema::dropIfExists('cari');
     }
 }

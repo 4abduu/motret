@@ -31,6 +31,12 @@
                 <a href="{{ route('home') }}" class="text-success">Guest</a>
                 access?
             </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ route('auth.google') }}" class="btn btn-danger">
+                    <i class="fa fa-google"></i> Login with Google
+                </a>
+            </div>
         </div>
     </div>
 </div>

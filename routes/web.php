@@ -29,7 +29,8 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/guest', [AuthController::class, 'guest'])->name('guest');
-
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('oauth/google/callback', [AuthController::class, 'handleGoogleCallback']);
 // Grup untuk Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');

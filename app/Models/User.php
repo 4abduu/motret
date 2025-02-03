@@ -22,6 +22,7 @@ class User extends Authenticatable
         'subscription_ends_at',
         'status',
         'download_reset_at',
+        'google_id', // Tambahkan kolom ini
     ];
 
     protected $hidden = [
