@@ -31,6 +31,10 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/guest', [AuthController::class, 'guest'])->name('guest');
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('oauth/google/callback', [AuthController::class, 'handleGoogleCallback']);
+Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 // Grup untuk Admin
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
@@ -83,7 +87,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/albums/{albumId}/photos/{photoId}/add', [AlbumController::class, 'addPhoto'])->name('albums.addPhoto');
     Route::post('/albums/{albumId}/photos/{photoId}/remove', [AlbumController::class, 'removePhoto'])->name('albums.removePhoto');
     Route::put('/albums/{id}/updateTitle', [AlbumController::class, 'updateTitle'])->name('albums.updateTitle');
-    Route::put('/albums/{id}/updateDescription', [AlbumController::class, 'updateDescription'])->name('albums.updateDescription');
+    Route::put('/albums/{id}/updateDescription', [AlbumController::class, 'updateDescription'])->name('albums.updateDescription'); 
 });
 
 // Rute untuk guest melihat album

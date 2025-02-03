@@ -7,10 +7,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rules\Password as PasswordRule;  // Mengganti nama alias
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\DB;
 use Exception;
+use Carbon\Carbon;
+use App\Mail\PasswordResetMail;
+use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
@@ -89,7 +94,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|unique:users,username|min:4|max:20',
             'email' => 'required|email|unique:users,email',
-            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],  // Menggunakan alias PasswordRule
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg',
         ], $messages);
 
@@ -158,6 +163,75 @@ class AuthController extends Controller
         } catch (Exception $e) {
             return redirect()->route('login')->with('error', 'Something went wrong, please try again.');
         }
+    }
+
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+    
+    public function sendResetLink(Request $request)
+    {
+        $request->validate([
+            'email_or_username' => 'required',
+        ]);
+    
+        $user = User::where('email', $request->email_or_username)
+                    ->orWhere('username', $request->email_or_username)
+                    ->first();
+    
+        if (!$user) {
+            return back()->withErrors(['email_or_username' => 'Email atau username tidak ditemukan.']);
+        }
+    
+        // Generate 8 digit token angka
+        $token = str_pad(mt_rand(0, 99999999), 8, '0', STR_PAD_LEFT);
+    
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $user->email], // Cek apakah email sudah ada di tabel
+            [
+                'token' => $token,
+                'created_at' => Carbon::now('UTC'),
+            ]
+        );
+    
+        Mail::to($user->email)->send(new PasswordResetMail($token));
+    
+        return redirect()->route('password.reset')->with('status', 'Kode verifikasi telah dikirim ke email Anda.');
+    }
+    
+    public function showResetPasswordForm(Request $request)
+    {
+        return view('auth.reset-password', ['request' => $request]);
+    }
+    
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|digits:8',
+            'password' => 'required|confirmed|min:8',
+        ]);
+    
+        $passwordReset = DB::table('password_reset_tokens')
+                            ->where('token', $request->token)
+                            ->first();
+    
+        if (!$passwordReset || Carbon::parse($passwordReset->created_at)->lt(Carbon::now('UTC')->subMinutes(30))) {
+            return back()->withErrors(['token' => 'Token tidak valid atau telah kadaluarsa.']);
+        }
+    
+        $user = User::where('email', $passwordReset->email)->first();
+    
+        if (!$user) {
+            return back()->withErrors(['email' => 'Email tidak ditemukan.']);
+        }
+    
+        $user->password = Hash::make($request->password);
+        $user->save();
+    
+        DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+    
+        return redirect()->route('login')->with('status', 'Password berhasil diubah.');
     }
     
 }

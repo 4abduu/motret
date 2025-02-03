@@ -37,6 +37,10 @@
                     <i class="fa fa-google"></i> Login with Google
                 </a>
             </div>
+            <div class="text-center mt-4 font-weight-light">
+                Forgot password? Reset your password 
+                <a href="{{ route('password.request') }}" class="text-success">here</a>
+            </div>
         </div>
     </div>
 </div>
