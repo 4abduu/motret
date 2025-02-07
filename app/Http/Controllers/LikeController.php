@@ -29,9 +29,9 @@ class LikeController extends Controller
             Notif::create([
                 'notify_for' => $photo->user_id,
                 'notify_from' => $user->id,
-                'target_id' => $photo->id,
+                'target_id' => $photo->id, // Menggunakan ID postingan sebagai target_id
                 'type' => 'like',
-                'message' => $user->username . ' liked your photo.',
+                'message' => json_encode(['text' => 'menyukai foto Anda.'])  // Menyimpan pesan dalam format JSON
             ]);
         }
 

@@ -13,14 +13,31 @@
                         </a>
                         @break
                     @case('like')
-                        <a href="{{ route('photos.show', $notification->target_id) }}">
+                        @if($notification->target_id && $notification->photo)
+                            <a href="{{ route('photos.show', $notification->target_id) }}">
+                                {{ $notification->sender->username }} menyukai foto Anda.
+                            </a>
+                        @else
                             {{ $notification->sender->username }} menyukai foto Anda.
-                        </a>
+                        @endif
                         @break
                     @case('comment')
-                        <a href="{{ route('photos.show', $notification->target_id) }}">
+                        @if($notification->target_id && $notification->photo)
+                            <a href="{{ route('photos.show', $notification->target_id) }}">
+                                {{ $notification->sender->username }} mengomentari foto Anda.
+                            </a>
+                        @else
                             {{ $notification->sender->username }} mengomentari foto Anda.
-                        </a>
+                        @endif
+                        @break
+                    @case('reply')
+                        @if($notification->target_id && $notification->photo)
+                            <a href="{{ route('photos.show', $notification->target_id) }}">
+                                {{ $notification->sender->username }} membalas komentar Anda.
+                            </a>
+                        @else
+                            {{ $notification->sender->username }} membalas komentar Anda.
+                        @endif
                         @break
                     @default
                         {{ $notification->message }}

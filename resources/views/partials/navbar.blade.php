@@ -60,16 +60,24 @@
                         <i class="ti-bell text-primary"></i> Notifications
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('subscription') }}">
+                        <img src="{{ asset('images/crown.png') }}" alt="Crown" style="width: 24px; height: 24px;">
+                    </a>
+                </li>
                 <li class="nav-item nav-profile dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
                         <img src="{{ asset('images/foto profil.jpg') }}" alt="profile" />
                     </a>
                     <div class="dropdown-menu dropdown-menu-end navbar-dropdown" aria-labelledby="profileDropdown">
                         <a class="dropdown-item" href="{{ route('user.profile') }}">
-                            <i class="ti-user text-primary"></i> Profile
+                            <i class="ti-user text-primary"></i> Profil
+                        </a>                        
+                        <a class="dropdown-item" href="{{ route('user.settings') }}">
+                            <i class="ti-settings text-primary"></i> Pengaturan
                         </a>
                         <a class="dropdown-item" href="{{ route('logout') }}">
-                            <i class="ti-power-off text-primary"></i> Logout
+                            <i class="ti-power-off text-primary"></i> Keluar
                         </a>
                     </div>
                 </li>

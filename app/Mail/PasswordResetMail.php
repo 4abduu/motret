@@ -29,7 +29,7 @@ class PasswordResetMail extends Mailable
      */
     public function build()
     {
-        return $this->view('auth.password-reset') // View yang akan digunakan untuk email
+        return $this->view('template.password-reset') // View yang akan digunakan untuk email
                     ->subject('Password Reset Request') // Subjek email
                     ->with([
                         'token' => $this->token, // Mengirim token ke view

@@ -19,6 +19,7 @@
             height: 100%;
             margin: 0;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
         .container-scroller {

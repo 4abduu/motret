@@ -1,0 +1,211 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container mt-5">
+    <h2>Pengaturan</h2>
+    <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="username-tab" data-bs-toggle="tab" href="#username" role="tab" aria-controls="username" aria-selected="true">Ubah Username</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="password-tab" data-bs-toggle="tab" href="#password" role="tab" aria-controls="password" aria-selected="false">Ubah Password</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="email-tab" data-bs-toggle="tab" href="#email" role="tab" aria-controls="email" aria-selected="false">Ubah Email</a>
+        </li>
+        @if(!Auth::user()->is_verified)
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="verification-tab" data-bs-toggle="tab" href="#verification" role="tab" aria-controls="verification" aria-selected="false">Request Verified</a>
+        </li>
+        @endif
+    </ul>
+    <div class="tab-content" id="settingsTabsContent">
+        <div class="tab-pane fade show active" id="username" role="tabpanel" aria-labelledby="username-tab">
+            <form method="POST" action="{{ route('user.updateUsername') }}">
+                @csrf
+                @method('PUT')
+                <div class="form-group mt-3">
+                    <label for="username">Username Baru</label>
+                    <input type="text" name="username" class="form-control" id="username" required oninput="checkUsername()">
+                    <div id="username-availability" class="mt-2"></div>
+                </div>
+                <button type="submit" class="btn btn-success mt-3">Ubah Username</button>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
+            <form method="POST" action="{{ route('user.updatePassword') }}">
+                @csrf
+                @method('PUT')
+                <div class="form-group mt-3">
+                    <label for="current_password">Password Lama</label>
+                    <input type="password" name="current_password" class="form-control" id="current_password" required>
+                </div>
+                <div class="form-group mt-3">
+                    <label for="new_password">Password Baru</label>
+                    <input type="password" name="new_password" class="form-control" id="new_password" required>
+                </div>
+                <div class="form-group mt-3">
+                    <label for="new_password_confirmation">Konfirmasi Password Baru</label>
+                    <input type="password" name="new_password_confirmation" class="form-control" id="new_password_confirmation" required>
+                </div>
+                <button type="submit" class="btn btn-success mt-3">Ubah Password</button>
+                <button type="button" class="btn btn-danger mt-3" onclick="resetPassword()">Reset Password</button>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="email" role="tabpanel" aria-labelledby="email-tab">
+            <form method="POST" action="{{ route('user.updateEmail') }}">
+                @csrf
+                @method('PUT')
+                <div class="form-group mt-3">
+                    <label for="current_email">Email Lama</label>
+                    <div class="input-group">
+                        <input type="email" name="current_email" class="form-control" id="current_email" required>
+                        <button type="button" class="btn btn-primary" onclick="sendVerificationCode()">Send Code</button>
+                    </div>
+                    <div id="email-verification-status" class="mt-2"></div>
+                </div>
+                <div class="form-group mt-3">
+                    <label for="verification_code">Kode Verifikasi</label>
+                    <input type="text" name="verification_code" class="form-control" id="verification_code" required>
+                </div>
+                <div class="form-group mt-3">
+                    <label for="new_email">Email Baru</label>
+                    <input type="email" name="new_email" class="form-control" id="new_email" required oninput="checkEmail()">
+                    <div id="email-availability" class="mt-2"></div>
+                </div>
+                <button type="submit" class="btn btn-success mt-3">Ubah Email</button>
+            </form>
+        </div>
+        @if(!Auth::user()->is_verified)
+        <div class="tab-pane fade" id="verification" role="tabpanel" aria-labelledby="verification-tab">
+            <form action="{{ route('user.submitVerification') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <h2>Request Verified User</h2>
+                
+                <!-- Nama Lengkap -->
+                <div class="form-group mt-3">
+                    <label for="full_name">Nama Lengkap:</label>
+                    <input type="text" id="full_name" name="full_name" class="form-control" required>
+                </div>
+                
+                <!-- Username -->
+                <div class="form-group mt-3">
+                    <label for="username">Username di Motret:</label>
+                    <input type="text" id="username" name="username" class="form-control" required>
+                </div>
+                
+                <!-- Upload KTP -->
+                <div class="form-group mt-3">
+                    <label for="ktp">Upload KTP:</label>
+                    <input type="file" id="ktp" name="ktp" class="form-control" accept="image/*,.pdf" required>
+                </div>
+                
+                <!-- Upload Selfie dengan KTP -->
+                <div class="form-group mt-3">
+                    <label for="selfie">Upload Selfie dengan KTP:</label>
+                    <input type="file" id="selfie" name="selfie" class="form-control" accept="image/*" required>
+                </div>
+                
+                <!-- Upload Portofolio (Opsional) -->
+                <div class="form-group mt-3">
+                    <label for="portfolio">Upload Portofolio (Opsional):</label>
+                    <input type="file" id="portfolio" name="portfolio" class="form-control" accept="image/*,.pdf">
+                </div>
+                
+                <!-- Upload Sertifikat (Opsional) -->
+                <div class="form-group mt-3">
+                    <label for="certificate">Upload Sertifikat (Opsional):</label>
+                    <input type="file" id="certificate" name="certificate" class="form-control" accept="image/*,.pdf">
+                </div>
+                
+                <!-- Alasan Verifikasi -->
+                <div class="form-group mt-3">
+                    <label for="reason">Alasan ingin menjadi verified user:</label>
+                    <textarea id="reason" name="reason" class="form-control" rows="4" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success mt-3">Kirim Pengajuan</button>
+            </form>
+        </div>
+        @endif
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    let usernameTimeout, emailTimeout;
+    
+    document.getElementById('username').addEventListener('input', function() {
+        clearTimeout(usernameTimeout);
+        usernameTimeout = setTimeout(checkUsername, 500);
+    });
+
+    document.getElementById('new_email').addEventListener('input', function() {
+        clearTimeout(emailTimeout);
+        emailTimeout = setTimeout(checkEmail, 500);
+    });
+
+    function checkUsername() {
+        clearTimeout(usernameTimeout);
+        document.getElementById('username-availability').innerHTML = '';
+        usernameTimeout = setTimeout(() => {
+            const username = document.getElementById('username').value;
+            fetch('{{ route('user.checkUsername') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const availability = document.getElementById('username-availability');
+                availability.innerHTML = data.exists ? '<span class="text-danger">Username sudah digunakan.</span>' : '<span class="text-success">Username tersedia.</span>';
+            });
+        }, 500);
+    }
+
+    function checkEmail() {
+        clearTimeout(emailTimeout);
+        document.getElementById('email-availability').innerHTML = '';
+        emailTimeout = setTimeout(() => {
+            const email = document.getElementById('new_email').value;
+            fetch('{{ route('user.checkEmail') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const availability = document.getElementById('email-availability');
+                availability.innerHTML = data.exists ? '<span class="text-danger">Email sudah digunakan.</span>' : '<span class="text-success">Email tersedia.</span>';
+            });
+        }, 500);
+    }
+
+    function sendVerificationCode() {
+        const email = document.getElementById('current_email').value;
+        fetch('{{ route('user.sendEmailVerificationCode') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ old_email: email })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('email-verification-status').innerHTML = data.success ? '<span class="text-success">Kode verifikasi telah dikirim.</span>' : '<span class="text-danger">Email tidak sesuai.</span>';
+        });
+    }
+
+    function resetPassword() {
+        alert("Instruksi reset password telah dikirim ke email Anda.");
+    }
+</script>
+@endpush
+@endsection

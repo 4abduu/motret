@@ -5,29 +5,44 @@ use Illuminate\Http\Request;
 use App\Models\Comment;
 use App\Models\Reply;
 use App\Models\Photo;
-use App\Models\Notif; // Pastikan model Notif diimport
+use App\Models\Notif;
 use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
     public function store($id, Request $request)
     {
+        // Ambil username pengguna yang sedang login
+        $user = Auth::user()->username;
+    
+        // Temukan foto berdasarkan ID
         $photo = Photo::find($id);
-        Comment::create([
+    
+        // Pastikan foto ditemukan sebelum melanjutkan
+        if (!$photo) {
+            return redirect()->back()->with('error', 'Foto tidak ditemukan.');
+        }
+    
+        // Menambahkan komentar ke database
+        $comment = Comment::create([
             'comment' => $request->comment,
             'user_id' => auth()->user()->id,
             'photo_id' => $id
         ]);
-
+    
+        // Menambahkan notifikasi
         Notif::create([
-            'notify_for' => $photo->user_id,
-            'notify_from' => auth()->user()->id,
-            'target_id' => $id,
-            'type' => 'comment',
+            'notify_for' => $photo->user_id, // Pengguna yang mendapatkan notifikasi
+            'notify_from' => auth()->user()->id, // Pengguna yang mengirim notifikasi
+            'target_id' => $photo->id, // ID dari foto yang dikomentari, pastikan ini sesuai dengan apa yang diinginkan
+            'type' => 'comment', // Tipe notifikasi
+            'message' => 'mengomentari foto Anda.', // Pesan notifikasi
         ]);
-
-        return redirect()->back()->with('success', "Anda telah menambah komentar");
+    
+        // Kembali ke halaman sebelumnya dengan pesan sukses
+        return redirect()->back()->with('success', "Anda telah menambah komentar.");
     }
+    
 
     public function destroy($id)
     {
@@ -45,7 +60,7 @@ class CommentController extends Controller
     public function storeReply($commentId, Request $request)
     {
         $comment = Comment::findOrFail($commentId);
-
+        $user = Auth::user()->username;
         $reply = Reply::create([
             'reply' => $request->reply,
             'user_id' => Auth::id(),
@@ -54,9 +69,10 @@ class CommentController extends Controller
 
         Notif::create([
             'notify_for' => $comment->user_id,
-            'notify_from' => Auth::id(),
-            'target_id' => $comment->photo_id,
+            'notify_from' => $user->id,
+            'target_id' => $comment->photo_id, // Menggunakan ID postingan sebagai target_id
             'type' => 'reply',
+            'message' => 'membalas komentar Anda.',
         ]);
 
         return response()->json([

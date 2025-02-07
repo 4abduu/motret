@@ -17,6 +17,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::middleware(['auth'])->group(function () {
     Route::get('/foto/upload', [UserController::class, 'createphotos'])->name('photos.create');
     Route::post('/foto/upload', [UserController::class, 'storePhoto'])->name('photos.store');
+    Route::post('/settings/email/send-code', [AuthController::class, 'sendEmailVerificationCode'])->name('user.sendEmailVerificationCode');
 });
 
 // Rute untuk guest melihat dan mendownload foto
@@ -60,12 +61,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/subscriptions', [AdminController::class, 'managePhotos'])->name('admin.subscriptions');
     Route::delete('admin/comments/{id}', [AdminController::class, 'deleteComment'])->name('admin.comments.delete');
     Route::delete('/replies/{id}', [AdminController::class, 'deleteReply'])->name('admin.replies.delete');
+    Route::get('/admin/verification-requests', [AdminController::class, 'manageVerification'])->name('admin.verificationRequests');
+    Route::put('/admin/verification-requests/{id}/approve', [AdminController::class, 'approveVerificationRequest'])->name('admin.verificationRequests.approve');
+    Route::put('/admin/verification-requests/{id}/reject', [AdminController::class, 'rejectVerificationRequest'])->name('admin.verificationRequests.reject');
+    Route::get('/admin/verification-requests/{id}/documents', [AdminController::class, 'showVerificationDocuments'])->name('admin.verificationDocuments');
 });
 
 // Grup untuk User
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/profil', [UserController::class, 'profile'])->name('user.profile');
     Route::put('/profil', [UserController::class, 'updateProfile'])->name('user.updateProfile');
+    Route::get('/subscription', [UserController::class, 'subscription'])->name('subscription');
     Route::delete('/profil/foto', [UserController::class, 'deleteProfilePhoto'])->name('user.deleteProfilePhoto');
     Route::post('/check-username', [UserController::class, 'checkUsername'])->name('user.checkUsername');
     Route::post('/check-email', [UserController::class, 'checkEmail'])->name('user.checkEmail');
@@ -88,6 +94,12 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/albums/{albumId}/photos/{photoId}/remove', [AlbumController::class, 'removePhoto'])->name('albums.removePhoto');
     Route::put('/albums/{id}/updateTitle', [AlbumController::class, 'updateTitle'])->name('albums.updateTitle');
     Route::put('/albums/{id}/updateDescription', [AlbumController::class, 'updateDescription'])->name('albums.updateDescription'); 
+    Route::get('/settings', [UserController::class, 'settings'])->name('user.settings');
+    Route::put('/settings/username', [UserController::class, 'updateUsername'])->name('user.updateUsername');
+    Route::put('/settings/password', [UserController::class, 'updatePassword'])->name('user.updatePassword');
+    Route::put('/settings/email', [UserController::class, 'updateEmail'])->name('user.updateEmail');
+    Route::post('/settings/email/send-code', [AuthController::class, 'sendEmailVerificationCode'])->name('user.sendEmailVerificationCode');
+    Route::post('/submit-verification', [UserController::class, 'submitVerification'])->name('user.submitVerification');
 });
 
 // Rute untuk guest melihat album

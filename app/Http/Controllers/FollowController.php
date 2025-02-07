@@ -26,7 +26,7 @@ class FollowController extends Controller
                 'notify_from' => $authUser->id,
                 'target_id' => $user->id,
                 'type' => 'follow',
-                'message' => $authUser->username . ' started following you.',
+                'message' => 'started following you.',
             ]);
         }
 

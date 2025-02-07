@@ -17,6 +17,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password as PasswordRule;  // Mengganti nama alias
+use Illuminate\Support\Facades\DB;
+use App\Models\VerificationRequest;
+use App\Models\VerificationDocument;
 
 class UserController extends Controller
 {
@@ -46,6 +50,10 @@ class UserController extends Controller
         $photos = Photo::where('user_id', Auth::id())->get();
         $albums = Album::where('user_id', Auth::id())->with('photos')->get();
         return view('user.photos', compact('photos', 'albums'));
+    }    
+    public function settings()
+    {
+        return view('user.settings');
     }
     public function showPhoto($id)
     {
@@ -58,6 +66,13 @@ class UserController extends Controller
                              ->get();
         $albums = Auth::check() ? Album::where('user_id', Auth::id())->with('photos')->get() : [];
         return view('photos.show', compact('photo', 'randomPhotos', 'albums'));
+    }
+
+
+    public function subscription()
+    {
+        $user = Auth::user();
+        return view ('user.subscriptionIndex');
     }
 
     public function createphotos()
@@ -183,7 +198,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username,' . Auth::id(),
+            'username' => 'required|string|max:20|unique:users,username,' . Auth::id(),
             'email' => 'required|string|email|max:255|unique:users,email,' . Auth::id(),
             'current_password' => 'nullable|string',
             'new_password' => 'nullable|string|min:8|confirmed',
@@ -302,5 +317,115 @@ class UserController extends Controller
     {
         $exists = User::where('email', $request->email)->exists();
         return response()->json(['exists' => $exists]);
+    }
+
+    public function updateUsername(Request $request)
+    {
+        $validated = $request->validate([
+            'username' => 'required|string|max:20|unique:users,username,' . Auth::id(),
+        ]);
+
+        $user = Auth::user();
+        $user->username = $validated['username'];
+        $user->save();
+
+        return redirect()->route('user.settings')->with('success', 'Username berhasil diperbarui.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],  // Menggunakan alias PasswordRule
+        ]);
+
+        $user = Auth::user();
+        if (Hash::check($request->current_password, $user->password)) {
+            $user->password = Hash::make($validated['new_password']);
+            $user->save();
+            return redirect()->route('user.settings')->with('success', 'Password berhasil diperbarui.');
+        } else {
+            return back()->withErrors(['current_password' => 'Password lama tidak sesuai.']);
+        }
+    }
+
+    public function updateEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'old_email' => 'required|string|email|max:255',
+            'new_email' => 'required|string|email|max:255|unique:users,email',
+            'verification_code' => 'required|string|size:8',
+        ]);
+
+        $user = Auth::user();
+        if ($user->email !== $validated['old_email']) {
+            return back()->withErrors(['old_email' => 'Email lama tidak sesuai.']);
+        }
+
+        $passwordReset = DB::table('password_reset_tokens')
+            ->where('email', $validated['old_email'])
+            ->where('token', $validated['verification_code'])
+            ->where('type', 'email')
+            ->first();
+
+        if (!$passwordReset || Carbon::parse($passwordReset->created_at)->lt(Carbon::now()->subMinutes(30))) {
+            return back()->withErrors(['verification_code' => 'Kode verifikasi tidak valid atau telah kadaluarsa.']);
+        }
+
+        $user->email = $validated['new_email'];
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $validated['old_email'])->delete();
+
+        return redirect()->route('user.settings')->with('success', 'Email berhasil diperbarui.');
+    }
+
+    public function submitVerification(Request $request)
+    {
+        $validated = $request->validate([
+            'full_name' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
+            'ktp' => 'required|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'selfie' => 'required|file|mimes:jpeg,png,jpg|max:2048',
+            'portfolio' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'certificate' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
+            'reason' => 'required|string|max:1000',
+        ]);
+
+        $verificationRequest = VerificationRequest::create([
+            'user_id' => Auth::id(),
+            'full_name' => $validated['full_name'],
+            'username' => $validated['username'],
+            'reason' => $validated['reason'],
+            'status' => 'pending',
+        ]);
+
+        $documents = [
+            'ktp' => $request->file('ktp'),
+            'selfie' => $request->file('selfie'),
+            'portfolio' => $request->file('portfolio'),
+            'certificate' => $request->file('certificate'),
+        ];
+
+        foreach ($documents as $type => $file) {
+            if ($file) {
+                $path = $file->store('verifications/' . $type, 'public');
+                VerificationDocument::create([
+                    'verification_request_id' => $verificationRequest->id,
+                    'file_path' => $path,
+                    'file_type' => $type,
+                ]);
+            }
+        }
+
+        Notif::create([
+            'notify_for' => Auth::id(),
+            'notify_from' => null,
+            'target_id' => Auth::id(),
+            'type' => 'system',
+            'message' => 'Pengajuan verifikasi Anda telah diterima dan sedang diproses.',
+        ]);
+
+        return redirect()->route('user.settings')->with('success', 'Pengajuan verifikasi telah dikirim.');
     }
 }

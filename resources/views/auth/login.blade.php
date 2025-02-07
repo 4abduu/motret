@@ -33,8 +33,9 @@
             </div>
 
             <div class="text-center mt-4">
-                <a href="{{ route('auth.google') }}" class="btn btn-danger">
-                    <i class="fa fa-google"></i> Login with Google
+                <a href="{{ route('auth.google') }}" class="btn btn-outline-dark btn-icon-text">
+                    <img src="images/google.png" alt="Google Logo" style="width: 20px; height: 20px; margin-right: 8px;">
+                    Login with Google
                 </a>
             </div>
             <div class="text-center mt-4 font-weight-light">

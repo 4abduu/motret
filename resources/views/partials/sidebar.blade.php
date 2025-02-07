@@ -19,7 +19,13 @@
                     <span class="menu-title">Manage Foto</span>
                 </a>
             </li>
-
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('admin.verificationRequests') }}">
+                    <i class="ti-id-badge menu-icon"></i>
+                    <span class="menu-title">Manage Verification</span>
+                </a>
+            </li>
+            
             {{-- Dropdown Comment --}}
             @php 
                 $isCommentActive = request()->routeIs('admin.comments') || request()->routeIs('admin.replies'); 

@@ -233,5 +233,31 @@ class AuthController extends Controller
     
         return redirect()->route('login')->with('status', 'Password berhasil diubah.');
     }
-    
+
+    public function sendEmailVerificationCode(Request $request)
+    {
+        $validated = $request->validate([
+            'old_email' => 'required|string|email|max:255',
+        ]);
+
+        $user = Auth::user();
+        if ($user->email !== $validated['old_email']) {
+            return response()->json(['success' => false, 'message' => 'Email tidak sesuai.']);
+        }
+
+        // Generate 8 digit token angka
+        $token = str_pad(mt_rand(0, 99999999), 8, '0', STR_PAD_LEFT);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $validated['old_email'], 'type' => 'email'], // Cek apakah email sudah ada di tabel
+            [
+                'token' => $token,
+                'created_at' => Carbon::now('UTC'),
+            ]
+        );
+
+        Mail::to($validated['old_email'])->send(new EmailVerificationMail($token));
+
+        return response()->json(['success' => true, 'message' => 'Kode verifikasi telah dikirim ke email Anda.']);
+    }
 }

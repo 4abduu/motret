@@ -14,8 +14,7 @@ class Notif extends Model
     protected $fillable = [
         'notify_for',
         'notify_from',
-        'photo_id',
-        'comment_id',
+        'target_id',
         'type',
         'message',
         'status',

@@ -7,12 +7,16 @@ use App\Models\Photo;
 use App\Models\Report;
 use App\Models\Comment;
 use App\Models\Reply;
+use App\Models\VerificationRequest;
+use App\Models\VerificationDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Models\Notif;
 
 class AdminController extends Controller
 {
@@ -82,6 +86,17 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
         return view('admin.editUser', compact('user'));
+    }
+
+    public function manageVerification()
+    {
+        $verificationRequests = VerificationRequest::with('user', 'documents')->get();
+        return view('admin.verificationRequests', compact('verificationRequests'));
+    }
+    public function showVerificationDocuments($id)
+    {
+        $verificationRequest = VerificationRequest::with('documents')->findOrFail($id);
+        return view('admin.verificationDocuments', compact('verificationRequest'));
     }
 
     public function createUser(Request $request)
@@ -311,4 +326,49 @@ class AdminController extends Controller
             return redirect()->route('admin.replies')->with('error', 'Failed to delete reply.');
         }
     }
+    public function rejectVerificationRequest(Request $request, $id)
+    {
+        $request->validate([
+            'message' => 'required|string|max:255',
+        ]);
+
+        $verificationRequest = VerificationRequest::findOrFail($id);
+        $user = $verificationRequest->user;
+
+        $verificationRequest->status = 'rejected';
+        $verificationRequest->save();
+
+        Notif::create([
+            'notify_for' => $user->id,
+            'notify_from' => Auth::id(),
+            'target_id' => $user->id,
+            'type' => 'system',
+            'message' => 'Permintaan verifikasi Anda telah ditolak. Pesan: ' . $request->message,
+        ]);
+
+        return redirect()->route('admin.verificationRequests')->with('success', 'Permintaan verifikasi telah ditolak.');
+    }
+
+    
+    public function approveVerificationRequest($id)
+    {
+        $verificationRequest = VerificationRequest::findOrFail($id);
+        $user = $verificationRequest->user;
+        $user->is_verified = true;
+        $user->save();
+
+        $verificationRequest->status = 'approved';
+        $verificationRequest->save();
+
+        Notif::create([
+            'notify_for' => $user->id,
+            'notify_from' => Auth::id(),
+            'target_id' => $user->id,
+            'type' => 'system',
+            'message' => 'Permintaan verifikasi Anda telah disetujui.',
+        ]);
+
+        return redirect()->route('admin.verificationRequests')->with('success', 'Permintaan verifikasi telah disetujui.');
+    }
+
 }

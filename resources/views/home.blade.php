@@ -9,6 +9,7 @@
     gap: 10px;
     overflow-x: auto;
     padding-bottom: 10px;
+    white-space: nowrap;
 }
 .card-pin {
     flex: 0 0 auto;
@@ -22,8 +23,6 @@
 @endpush
 
 @section('content')
-<main role="main">
-    <section class="mt-4 mb-5">
         <div class="container mb-4">
             <div class="row justify-content-center">
                 <nav class="navbar navbar-expand-lg navbar-light bg-white pl-2 pr-2">
@@ -76,7 +75,6 @@
                         <a href="{{ route('photos.show', $photo->id) }}">
                             <img class="card-img" src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
                             <div class="overlay">
-                                <h2 class="card-title title">{{ $photo->title }}</h2>
                                 <div class="more">
                                     <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
                                 </div>
@@ -95,7 +93,6 @@
                         <a href="{{ route('photos.show', $photo->id) }}">
                             <img class="card-img" src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
                             <div class="overlay">
-                                <h2 class="card-title title">{{ $photo->title }}</h2>
                                 <div class="more">
                                     <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
                                 </div>
@@ -114,7 +111,6 @@
                         <a href="{{ route('photos.show', $photo->id) }}">
                             <img class="card-img" src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
                             <div class="overlay">
-                                <h2 class="card-title title">{{ $photo->title }}</h2>
                                 <div class="more">
                                     <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
                                 </div>
@@ -158,8 +154,6 @@
                 </div>
             </div>
         </div>
-    </section>
-</main>
 
 @endsection
 
