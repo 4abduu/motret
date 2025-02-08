@@ -340,7 +340,7 @@ class AdminController extends Controller
 
         Notif::create([
             'notify_for' => $user->id,
-            'notify_from' => Auth::id(),
+            'notify_from' => null,
             'target_id' => $user->id,
             'type' => 'system',
             'message' => 'Permintaan verifikasi Anda telah ditolak. Pesan: ' . $request->message,
@@ -354,7 +354,7 @@ class AdminController extends Controller
     {
         $verificationRequest = VerificationRequest::findOrFail($id);
         $user = $verificationRequest->user;
-        $user->is_verified = true;
+        $user->verified = true;
         $user->save();
 
         $verificationRequest->status = 'approved';
@@ -362,7 +362,7 @@ class AdminController extends Controller
 
         Notif::create([
             'notify_for' => $user->id,
-            'notify_from' => Auth::id(),
+            'notify_from' => null,
             'target_id' => $user->id,
             'type' => 'system',
             'message' => 'Permintaan verifikasi Anda telah disetujui.',

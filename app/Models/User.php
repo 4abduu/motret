@@ -22,7 +22,8 @@ class User extends Authenticatable
         'subscription_ends_at',
         'status',
         'download_reset_at',
-        'google_id', // Tambahkan kolom ini
+        'google_id',
+        'verified', // Tambahkan kolom ini
     ];
 
     protected $hidden = [
@@ -118,4 +119,16 @@ class User extends Authenticatable
     {
         return self::count();
     }
+    // User yang berlangganan ke user lain
+    public function subscriptions()
+    {
+        return $this->hasMany(SubscriptionUser::class);
+    }
+
+    // User verif yang memiliki pelanggan
+    public function subscribers()
+    {
+        return $this->hasMany(SubscriptionUser::class, 'verified_user_id');
+    }
+
 }

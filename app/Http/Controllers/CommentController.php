@@ -60,30 +60,46 @@ class CommentController extends Controller
     public function storeReply($commentId, Request $request)
     {
         $comment = Comment::findOrFail($commentId);
-        $user = Auth::user()->username;
+        $user = Auth::user(); // Ambil objek user yang sedang login
+    
         $reply = Reply::create([
             'reply' => $request->reply,
-            'user_id' => Auth::id(),
+            'user_id' => $user->id, // Gunakan ID user yang login
             'comment_id' => $commentId,
         ]);
-
+    
         Notif::create([
             'notify_for' => $comment->user_id,
-            'notify_from' => $user->id,
+            'notify_from' => $user->id, // Pastikan mengambil user_id yang benar
             'target_id' => $comment->photo_id, // Menggunakan ID postingan sebagai target_id
             'type' => 'reply',
             'message' => 'membalas komentar Anda.',
         ]);
-
+    
         return response()->json([
             'success' => true,
             'reply' => [
                 'user' => [
-                    'username' => Auth::user()->username,
+                    'username' => $user->username, // Pastikan username dikembalikan dengan benar
                 ],
                 'reply' => $reply->reply,
                 'created_at' => $reply->created_at->diffForHumans(),
             ],
         ]);
     }
+
+    public function destroyReply($id)
+{
+    $reply = Reply::findOrFail($id);
+
+    if ($reply->user_id !== Auth::id()) {
+        return response()->json(['success' => false, 'message' => 'Tidak diizinkan'], 403);
+    }
+    
+    $reply->delete();
+
+    return response()->json(['success' => true]);
+}
+
+    
 }

@@ -72,7 +72,7 @@ class UserController extends Controller
     public function subscription()
     {
         $user = Auth::user();
-        return view ('user.subscriptionIndex');
+        return view ('user.subscription');
     }
 
     public function createphotos()

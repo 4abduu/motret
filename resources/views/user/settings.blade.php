@@ -13,7 +13,7 @@
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="email-tab" data-bs-toggle="tab" href="#email" role="tab" aria-controls="email" aria-selected="false">Ubah Email</a>
         </li>
-        @if(!Auth::user()->is_verified)
+        @if(!Auth::user()->verified)
         <li class="nav-item" role="presentation">
             <a class="nav-link" id="verification-tab" data-bs-toggle="tab" href="#verification" role="tab" aria-controls="verification" aria-selected="false">Request Verified</a>
         </li>
@@ -76,7 +76,7 @@
                 <button type="submit" class="btn btn-success mt-3">Ubah Email</button>
             </form>
         </div>
-        @if(!Auth::user()->is_verified)
+        @if(!Auth::user()->verified)
         <div class="tab-pane fade" id="verification" role="tabpanel" aria-labelledby="verification-tab">
             <form action="{{ route('user.submitVerification') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -84,25 +84,25 @@
                 
                 <!-- Nama Lengkap -->
                 <div class="form-group mt-3">
-                    <label for="full_name">Nama Lengkap:</label>
+                    <label for="full_name">Nama Lengkap: <span class="text-danger">*</span></label>
                     <input type="text" id="full_name" name="full_name" class="form-control" required>
                 </div>
                 
                 <!-- Username -->
                 <div class="form-group mt-3">
-                    <label for="username">Username di Motret:</label>
+                    <label for="username">Username di Motret: <span class="text-danger">*</span></label>
                     <input type="text" id="username" name="username" class="form-control" required>
                 </div>
                 
                 <!-- Upload KTP -->
                 <div class="form-group mt-3">
-                    <label for="ktp">Upload KTP:</label>
+                    <label for="ktp">Upload KTP: <span class="text-danger">*</span></label>
                     <input type="file" id="ktp" name="ktp" class="form-control" accept="image/*,.pdf" required>
                 </div>
                 
                 <!-- Upload Selfie dengan KTP -->
                 <div class="form-group mt-3">
-                    <label for="selfie">Upload Selfie dengan KTP:</label>
+                    <label for="selfie">Upload Selfie dengan KTP: <span class="text-danger">*</span></label>
                     <input type="file" id="selfie" name="selfie" class="form-control" accept="image/*" required>
                 </div>
                 
@@ -120,13 +120,13 @@
                 
                 <!-- Alasan Verifikasi -->
                 <div class="form-group mt-3">
-                    <label for="reason">Alasan ingin menjadi verified user:</label>
+                    <label for="reason">Alasan ingin menjadi verified user: <span class="text-danger">*</span></label>
                     <textarea id="reason" name="reason" class="form-control" rows="4" required></textarea>
                 </div>
                 
                 <button type="submit" class="btn btn-success mt-3">Kirim Pengajuan</button>
             </form>
-        </div>
+        </div>        
         @endif
     </div>
 </div>

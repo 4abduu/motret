@@ -78,10 +78,12 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/foto', [UserController::class, 'photos'])->name('user.photos');
     Route::post('/photo/{id}/report', [UserController::class, 'reportPhoto'])->name('photo.report');
     Route::post('/comment/{id}/report', [UserController::class, 'reportComment'])->name('comment.report');
-    Route::post('/user/{id}/report', [UserController::class, 'reportUser'])->name('user.report');    Route::post('/photos/{photo}/like', [LikeController::class, 'like'])->name('photos.like');
+    Route::post('/user/{id}/report', [UserController::class, 'reportUser'])->name('user.report');    
+    Route::post('/photos/{photo}/like', [LikeController::class, 'like'])->name('photos.like');
     Route::post('/photos/{photo}/unlike', [LikeController::class, 'unlike'])->name('photos.unlike');
     Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/comments/{comment}/reply', [CommentController::class, 'storeReply'])->name('comments.reply'); 
+    Route::delete('/replies/{id}', [CommentController::class, 'destroyReply'])->name('reply.destroy');
     Route::post('/photos/{photo}/comments', [CommentController::class, 'store'])->name('photos.comments.store');
     Route::post('/users/{user}/follow', [FollowController::class, 'follow'])->name('users.follow');
     Route::post('/users/{user}/unfollow', [FollowController::class, 'unfollow'])->name('users.unfollow');

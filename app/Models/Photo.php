@@ -16,7 +16,6 @@ class Photo extends Model
         'description',
         'path',
         'hashtags',
-        'likes',
         'status',
         'user_id',
         'banned',
@@ -84,7 +83,7 @@ class Photo extends Model
     // Accessor untuk menghitung jumlah likes
     public function getLikesCountAttribute(): int
     {
-        return $this->suka()->count();
+        return $this->likes()->count();
     }
 
     // Accessor untuk menghitung jumlah downloads
@@ -92,5 +91,4 @@ class Photo extends Model
     {
         return $this->downloads()->count();
     }
-
 }
