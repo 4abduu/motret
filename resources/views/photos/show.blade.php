@@ -14,11 +14,21 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         text-align: center;
     }
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.5); /* Overlay transparan */
+        z-index: 1;
+    }
 </style>
 <div class="container mt-5">
     <div class="row">
-        <div class="col-md-6">
-            <img src="{{ asset('storage/' . $photo->path) }}" class="img-fluid" alt="{{ $photo->title }}">
+        <div class="col-md-6 position-relative">
+            <canvas id="photoCanvas" class="img-fluid" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+            <div class="overlay"></div>
             <div class="d-flex align-items-center mt-3">
                 <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="me-3">
                     @csrf
@@ -531,7 +541,57 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
+    // Blokir klik kanan
+    document.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+    });
 
+    // Blokir inspect element
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+            e.preventDefault();
+        }
+    });
+
+    // Render gambar ke canvas dan tambahkan watermark
+    const canvas = document.getElementById('photoCanvas');
+    const imgSrc = canvas.getAttribute('data-src');
+    const img = new Image();
+    img.src = imgSrc;
+    img.crossOrigin = "anonymous"; // Untuk mencegah CORS error jika dihosting
+    img.onload = function () {
+        // Set canvas size ke ukuran gambar
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Tambahkan watermark berulang diagonal
+        const watermarkText = "MOTRET"; // Kata yang diulang
+        const fontSize = 25; // Ukuran font watermark
+        ctx.font = `${fontSize}px Arial`;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.3)"; // Warna semi-transparan
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        // Atur jarak antar teks watermark
+        const stepX = 150; // Jarak horizontal antar watermark
+        const stepY = 100; // Jarak vertikal antar watermark
+        const angle = -30 * (Math.PI / 180); // Rotasi 30 derajat
+
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(angle);
+        
+        for (let x = -canvas.width; x < canvas.width; x += stepX) {
+            for (let y = -canvas.height; y < canvas.height; y += stepY) {
+                ctx.fillText(watermarkText, x, y);
+            }
+        }
+
+        ctx.restore();
+    };
 });
 </script>
 @endpush

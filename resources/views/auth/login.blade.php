@@ -9,6 +9,11 @@
             </div>
         </div>
         <div class="col-md-8">
+            @if (session('status'))
+                <div class="alert alert-danger" role="alert">
+                    {{ session('status') }}
+                </div>
+            @endif
             <form method="POST" action="{{ route('login.post') }}" class="forms-sample w-100">
                 @csrf
                 <div class="form-group">

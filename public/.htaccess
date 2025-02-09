@@ -18,4 +18,13 @@
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
+
+    # RewriteCond %{HTTP_REFERER} !^$
+    # RewriteCond %{HTTP_REFERER} !^https://(www\.)?yourdomain\.com [NC]
+    # RewriteRule \.(jpg|jpeg|png|gif)$ - [F,NC,L]
+
+    RewriteCond %{HTTP_REFERER} !^$
+    RewriteCond %{HTTP_REFERER} !^https://(www\.)?127\.0\.0\.1:8000 [NC]
+    RewriteRule \.(jpg|jpeg|png|gif)$ - [F,NC,L]
+
 </IfModule>

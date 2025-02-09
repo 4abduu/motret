@@ -13,8 +13,12 @@ use App\Http\Controllers\NotifController;
 use App\Http\Controllers\AlbumController; // Pastikan AlbumController diimport
 
 // Route untuk homepage
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::middleware(['auth'])->group(function () {
+
+Route::middleware(['logout_if_authenticated'])->group(function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+});
+
+Route::middleware(['auth', 'logout_if_authenticated'])->group(function () {
     Route::get('/foto/upload', [UserController::class, 'createphotos'])->name('photos.create');
     Route::post('/foto/upload', [UserController::class, 'storePhoto'])->name('photos.store');
     Route::post('/settings/email/send-code', [AuthController::class, 'sendEmailVerificationCode'])->name('user.sendEmailVerificationCode');
@@ -37,7 +41,7 @@ Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name(
 Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 // Grup untuk Admin
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/comments', [AdminController::class, 'manageComments'])->name('admin.manageComments');
     Route::get('/admin/comments/comments', [AdminController::class, 'comments'])->name('admin.comments');
@@ -46,21 +50,21 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/reports/users', [AdminController::class, 'reportUsers'])->name('admin.reports.users');
     Route::get('/admin/reports/comments', [AdminController::class, 'reportComments'])->name('admin.reports.comments');
     Route::get('/admin/reports/photos', [AdminController::class, 'reportPhotos'])->name('admin.reports.photos');
-    Route::get('/users', [AdminController::class, 'manageUsers'])->name('admin.users');
-    Route::post('/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
-    Route::put('/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
-    Route::delete('/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
-    Route::delete('/users/{id}/foto', [AdminController::class, 'deleteProfilePhoto'])->name('admin.users.deleteProfilePhoto');
-    Route::get('/photos', [AdminController::class, 'managePhotos'])->name('admin.photos');
-    Route::put('/photos/{id}', [AdminController::class, 'editPhoto'])->name('admin.photos.edit');
-    Route::delete('/photos/{id}', [AdminController::class, 'deletePhoto'])->name('admin.photos.delete');
-    Route::delete('/reports/{id}', [AdminController::class, 'deleteReport'])->name('admin.reports.delete');
+    Route::get('/admin/users', [AdminController::class, 'manageUsers'])->name('admin.users');
+    Route::post('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
+    Route::put('/admin/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
+    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::delete('/admin/users/{id}/foto', [AdminController::class, 'deleteProfilePhoto'])->name('admin.users.deleteProfilePhoto');
+    Route::get('/admin/photos', [AdminController::class, 'managePhotos'])->name('admin.photos');
+    Route::put('/admin/photos/{id}', [AdminController::class, 'editPhoto'])->name('admin.photos.edit');
+    Route::delete('/admin/photos/{id}', [AdminController::class, 'deletePhoto'])->name('admin.photos.delete');
+    Route::delete('/admin/reports/{id}', [AdminController::class, 'deleteReport'])->name('admin.reports.delete');
     Route::put('/admin/reports/comments/{id}/ban', [AdminController::class, 'banComment'])->name('admin.comments.ban');
     Route::put('/admin/reports/photos/{id}/ban', [AdminController::class, 'banPhoto'])->name('admin.photos.ban');
-    Route::put('/admin/reports/users/{id}/ban', [AdminController::class, 'banPhoto'])->name('admin.users.ban');
-    Route::get('/subscriptions', [AdminController::class, 'managePhotos'])->name('admin.subscriptions');
+    Route::put('/admin/reports/users/{id}/ban', [AdminController::class, 'banUser'])->name('admin.users.ban');
+    Route::get('/admin/subscriptions', [AdminController::class, 'managePhotos'])->name('admin.subscriptions');
     Route::delete('admin/comments/{id}', [AdminController::class, 'deleteComment'])->name('admin.comments.delete');
-    Route::delete('/replies/{id}', [AdminController::class, 'deleteReply'])->name('admin.replies.delete');
+    Route::delete('/admin/replies/{id}', [AdminController::class, 'deleteReply'])->name('admin.replies.delete');
     Route::get('/admin/verification-requests', [AdminController::class, 'manageVerification'])->name('admin.verificationRequests');
     Route::put('/admin/verification-requests/{id}/approve', [AdminController::class, 'approveVerificationRequest'])->name('admin.verificationRequests.approve');
     Route::put('/admin/verification-requests/{id}/reject', [AdminController::class, 'rejectVerificationRequest'])->name('admin.verificationRequests.reject');
@@ -68,7 +72,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // Grup untuk User
-Route::middleware(['auth', 'role:user'])->group(function () {
+Route::middleware(['auth', 'role:user', 'logout_if_authenticated'])->group(function () {
     Route::get('/profil', [UserController::class, 'profile'])->name('user.profile');
     Route::put('/profil', [UserController::class, 'updateProfile'])->name('user.updateProfile');
     Route::get('/subscription', [UserController::class, 'subscription'])->name('subscription');

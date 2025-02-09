@@ -5,17 +5,27 @@
 @push('link')
 <style>
     .scrolling-wrapper {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    white-space: nowrap;
-}
-.card-pin {
-    flex: 0 0 auto;
-    width: 250px; /* Atur ukuran kartu agar konsisten */
-}
-
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        white-space: nowrap;
+    }
+    .card-pin {
+        flex: 0 0 auto;
+        width: 250px; /* Atur ukuran kartu agar konsisten */
+        height: 250px; /* Atur tinggi kartu agar konsisten */
+        position: relative;
+    }
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.5); /* Overlay transparan */
+        z-index: 1;
+    }
 </style>
     <script type="text/javascript"> (function() { var css = document.createElement('link'); css.href = 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'; css.rel = 'stylesheet'; css.type = 'text/css'; document.getElementsByTagName('head')[0].appendChild(css); })(); </script>
     <link rel="stylesheet" href="{{asset ('user/assets/css/app.css')}}">
@@ -73,7 +83,7 @@
                 @foreach($mostViewedPhotos as $photo)
                     <div class="card card-pin">
                         <a href="{{ route('photos.show', $photo->id) }}">
-                            <img class="card-img" src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
+                            <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
                             <div class="overlay">
                                 <div class="more">
                                     <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
@@ -91,7 +101,7 @@
                 @foreach($mostLikedPhotos as $photo)
                     <div class="card card-pin">
                         <a href="{{ route('photos.show', $photo->id) }}">
-                            <img class="card-img" src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
+                            <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
                             <div class="overlay">
                                 <div class="more">
                                     <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
@@ -109,7 +119,7 @@
                 @foreach($mostDownloadedPhotos as $photo)
                     <div class="card card-pin">
                         <a href="{{ route('photos.show', $photo->id) }}">
-                            <img class="card-img" src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
+                            <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
                             <div class="overlay">
                                 <div class="more">
                                     <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
@@ -140,7 +150,7 @@
                                 </div>
                             @else
                             <a href="{{ route('photos.show', $photo->id) }}">
-                                <img class="card-img" src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
+                                <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
                                 <div class="overlay">
                                     <h2 class="card-title title">{{ $photo->title }}</h2>
                                     <div class="more">
@@ -166,5 +176,59 @@
         event.preventDefault();
         window.location.href = "{{ route('login') }}?register=true";
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('canvas.card-img').forEach(function (canvas) {
+        var imgSrc = canvas.getAttribute('data-src');
+        var img = new Image();
+        img.src = imgSrc;
+        img.onload = function () {
+            var ctx = canvas.getContext('2d');
+            var width = canvas.width;
+            var height = canvas.height;
+            var aspectRatio = img.width / img.height;
+
+            if (width / height > aspectRatio) {
+                width = height * aspectRatio;
+            } else {
+                height = width / aspectRatio;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Tambahkan watermark berulang secara diagonal
+            ctx.font = '10px Arial'; // Ukuran font lebih kecil
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'; // Warna lebih transparan
+            var text = 'MOTRET ';
+            var stepX = 50; // Jarak antar teks secara horizontal
+            var stepY = 25;  // Jarak antar teks secara vertikal
+
+            for (var y = -canvas.height; y < canvas.height * 2; y += stepY) {
+                for (var x = -canvas.width; x < canvas.width * 2; x += stepX) {
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(-Math.PI / 6); // Rotasi teks miring
+                    ctx.fillText(text, 0, 0);
+                    ctx.restore();
+                }
+            }
+        };
+    });
+
+    // Blokir klik kanan
+    document.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+    });
+
+    // Blokir inspect element
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+            e.preventDefault();
+        }
+    });
+});
+
 </script>
 @endpush

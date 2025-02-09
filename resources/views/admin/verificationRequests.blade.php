@@ -27,6 +27,7 @@
                                 <th>Username</th>
                                 <th>Alasan</th>
                                 <th>Dokumen</th>
+                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -38,6 +39,15 @@
                                     <td>{{ $request->reason }}</td>
                                     <td>
                                         <a href="{{ route('admin.verificationDocuments', $request->id) }}" class="btn btn-info btn-sm">Lihat Dokumen</a>
+                                    </td>
+                                    <td>
+                                        @if($request->status === 'pending')
+                                            <span class="badge badge-warning">Pending</span>
+                                        @elseif($request->status === 'approved')
+                                            <span class="badge badge-success">Disetujui</span>
+                                        @else
+                                            <span class="badge badge-danger">Ditolak</span>
+                                        @endif
                                     </td>
                                     <td>
                                         @if($request->status === 'pending')

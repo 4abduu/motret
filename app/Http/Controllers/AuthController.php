@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Exception;
 use Carbon\Carbon;
 use App\Mail\PasswordResetMail;
+use App\Mail\EmailVerificationMail;
 use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller

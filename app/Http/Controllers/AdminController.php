@@ -371,4 +371,15 @@ class AdminController extends Controller
         return redirect()->route('admin.verificationRequests')->with('success', 'Permintaan verifikasi telah disetujui.');
     }
 
+    public function banUser(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $user->banned_type = $request->banned_type;
+        $user->banned_until = $request->banned_type === 'temporary' ? $request->banned_until : null;
+        $user->banned_reason = $request->banned_reason;
+        $user->banned = true;
+        $user->save();
+
+        return redirect()->route('admin.reports.users')->with('success', 'User has been banned successfully.');
+    }
 }

@@ -1,4 +1,3 @@
-<!-- filepath: /c:/xampp/htdocs/motret/resources/views/admin/reportUsers.blade.php -->
 @extends('layouts.app')
 
 @section('title', 'Manage User Reports')
@@ -26,6 +25,8 @@
                                 <th>Reporter</th>
                                 <th>Reason</th>
                                 <th>Status</th>
+                                <th>Banned Type</th>
+                                <th>Banned Until</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -43,6 +44,8 @@
                                             <div class="badge badge-warning">Pending</div>
                                         @endif
                                     </td>
+                                    <td>{{ $report->reportedUser->banned_type }}</td>
+                                    <td>{{ $report->reportedUser->banned_until }}</td>
                                     <td>
                                         <!-- Button "ban" -->
                                         <button type="button" class="btn btn-warning btn-icon" data-bs-toggle="modal" data-bs-target="#banUserModal{{ $report->id }}">
@@ -66,11 +69,24 @@
                                             <div class="modal-body">
                                                 <p><strong>Reported By:</strong> {{ $report->user->username }}</p>
                                                 <p><strong>Reason:</strong> {{ $report->reason }}</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <form method="POST" action="{{ route('admin.users.ban', $report->reportedUser->id) }}">
+                                                <form method="POST" action="{{ route('admin.users.ban', $report->reportedUser->id) }}" id="banUserForm{{ $report->id }}">
                                                     @csrf
                                                     @method('PUT')
+                                                    <div class="form-group">
+                                                        <label for="banned_type{{ $report->id }}">Tipe Ban</label>
+                                                        <select name="banned_type" id="banned_type{{ $report->id }}" class="form-control" required>
+                                                            <option value="temporary">Sementara</option>
+                                                            <option value="permanent">Permanen</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group" id="banned_until_group{{ $report->id }}">
+                                                        <label for="banned_until{{ $report->id }}">Tanggal Berakhir Ban</label>
+                                                        <input type="date" name="banned_until" id="banned_until{{ $report->id }}" class="form-control">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="banned_reason{{ $report->id }}">Alasan Ban</label>
+                                                        <textarea name="banned_reason" id="banned_reason{{ $report->id }}" class="form-control" required>{{ $report->reason }}</textarea>
+                                                    </div>
                                                     <button type="submit" class="btn btn-danger">Ban</button>
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                                                 </form>
@@ -122,12 +138,31 @@
             form.action = '/reports/' + reportId;
         });
 
-        var banUserModal = document.getElementById('banUserModal');
-        banUserModal.addEventListener('show.bs.modal', function (event) {
-            var button = event.relatedTarget;
-            var userId = button.getAttribute('data-user-id');
-            var form = document.getElementById('banUserForm');
-            form.action = '/users/' + userId + '/ban';
+        document.querySelectorAll('[id^="banUserModal"]').forEach(function (modal) {
+            modal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var userId = button.getAttribute('data-user-id');
+                var form = modal.querySelector('form');
+                form.action = '/users/' + userId + '/ban';
+            });
+        });
+
+            document.querySelectorAll('[id^="banned_type"]').forEach(function (element) {
+            element.addEventListener('change', function () {
+                let reportId = this.id.replace('banned_type', '');
+                let bannedUntilGroup = document.getElementById(`banned_until_group${reportId}`);
+
+                if (bannedUntilGroup) {
+                    if (this.value === 'permanent') {
+                        bannedUntilGroup.style.display = 'none';
+                    } else {
+                        bannedUntilGroup.style.display = 'block';
+                    }
+                }
+            });
+
+            // Jalankan sekali untuk memastikan tampilan awal sesuai dengan pilihan default
+            element.dispatchEvent(new Event('change'));
         });
     });
 </script>

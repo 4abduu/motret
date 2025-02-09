@@ -23,7 +23,10 @@ class User extends Authenticatable
         'status',
         'download_reset_at',
         'google_id',
-        'verified', // Tambahkan kolom ini
+        'verified',
+        'banned_type',
+        'banned_until',
+        'banned_reason',
     ];
 
     protected $hidden = [
@@ -36,6 +39,8 @@ class User extends Authenticatable
         'password' => 'hashed',
         'subscription_ends_at' => 'datetime',
         'download_reset_at' => 'datetime',
+        'verified' => 'boolean',
+        'banned_until' => 'datetime',
     ];
 
     public function downloads()
