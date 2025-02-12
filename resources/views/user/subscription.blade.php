@@ -1,9 +1,6 @@
-subscriptionIndex.blade.php
-
 @extends('layouts.app')
 
 @section('content')
-</head>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 <style>
     body {
@@ -56,28 +53,87 @@ subscriptionIndex.blade.php
     
     <div class="container mt-5 pt-10">
         <div class="row justify-content-center equal-height">
-            <div class="col-md-4 d-flex">
-                <div class="card flex-fill">
-                    <h4 class="fw-bold">Unlimited Subscription</h4>
-                    <p><i class="bi bi-check-circle"></i> Unggah foto tanpa batas</p>
-                    <p><i class="bi bi-check-circle"></i> Download foto tanpa batas</p>
-                    <p><i class="bi bi-x-circle" style="color: #ff2929;"></i> Jadi kreator kami</p>
-                    <h3 class="fw-bold">Rp. 25.000 <small>/bln</small></h3>
-                    <button class="btn btn-green">Beli Paket</button>
+            @foreach($prices as $price)
+                <div class="col-md-4 d-flex">
+                    <div class="card flex-fill">
+                        <h4 class="fw-bold">Unlimited Subscription</h4>
+                        <p><i class="bi bi-check-circle"></i> Unggah foto tanpa batas</p>
+                        <p><i class="bi bi-check-circle"></i> Download foto tanpa batas</p>
+                        <p><i class="bi bi-x-circle" style="color: #ff2929;"></i> Jadi kreator kami</p>
+                        <h3 class="fw-bold">Rp. {{ number_format($price->price, 0, ',', '.') }} <small>/{{ str_replace('_', ' ', $price->duration) }}</small></h3>
+                        <button class="btn btn-green" onclick="buySubscription({{ $price->id }})">Beli Paket</button>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="col-md-4 d-flex">
-                <div class="card flex-fill">
-                    <h4 class="fw-bold">Verified User</h4>
-                    <p><i class="bi bi-check-circle"></i> Jadi kreator kami</p>
-                    <p><i class="bi bi-check-circle"></i> Buatlah karya yang menarik</p>
-                    <p><i class="bi bi-check-circle"></i> Gabung tanpa biaya</p>
-                    <h3 class="fw-bold">Rp. 50.000 <small>/bln</small></h3>
-                    <button class="btn btn-green">Beli Paket</button>
-                </div>
-            </div>
+            @endforeach
         </div>
     </div>
+
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+    <script>
+        function buySubscription(subscriptionPriceId) {
+            fetch('{{ route('transaction.create') }}', {
+                  method: 'POST',
+                  headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                  },
+                  body: JSON.stringify({ subscription_price_id: subscriptionPriceId })
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                  console.log(data);
+                  if (data.snap_token) {
+                        snap.pay(data.snap_token, {
+                              onSuccess: function(result) {
+                              alert('Pembayaran berhasil!');
+                              checkTransactionStatus(result.order_id);
+                              },
+                              onPending: function(result) {
+                              alert('Menunggu pembayaran...');
+                              checkTransactionStatus(result.order_id);
+                              },
+                              onError: function(result) {
+                              alert('Pembayaran gagal!');
+                              },
+                              onClose: function() {
+                              alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+                              }
+                        });
+                  } else {
+                        alert('Terjadi kesalahan, coba lagi!');
+                  }
+                  })
+                  .catch(error => {
+                  console.error('Error:', error);
+                  alert('Terjadi kesalahan dalam permintaan pembayaran.');
+                  });
+
+        }
+
+        function checkTransactionStatus(orderId) {
+            fetch('{{ route('transaction.checkStatus') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ order_id: orderId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.status === 'success') {
+                    alert('Status transaksi berhasil diperbarui.');
+                    location.reload();
+                } else {
+                    alert('Gagal memperbarui status transaksi.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan dalam memeriksa status transaksi.');
+            });
+        }
+    </script>
 </body>
 @endsection

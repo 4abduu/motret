@@ -6,30 +6,73 @@ use Illuminate\Http\Request;
 use App\Models\Album;
 use App\Models\Photo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AlbumController extends Controller
 {
     public function show($id)
     {
-        $album = Album::with('photos')->findOrFail($id);
+        $album = Album::with(['photos' => function($query) {
+            $query->where('banned', false);
+        }])->findOrFail($id);
         return view('albums.show', compact('album'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        // Validasi input
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
         ]);
     
-        $album = Album::create([
-            'user_id' => Auth::id(),
-            'name' => $request->name,
-            'description' => $request->description,
-        ]);
+        // Jika validasi gagal, kembalikan error dalam format JSON untuk AJAX, atau redirect untuk non-AJAX
+        if ($validator->fails()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
     
-        return redirect()->route('user.profile')->with('success', 'Album berhasil dibuat.');
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+    
+        try {
+            // Simpan album ke database
+            $album = Album::create([
+                'user_id' => Auth::id(),
+                'name' => $request->name,
+                'description' => $request->description,
+            ]);
+    
+            // Jika request berasal dari AJAX, kembalikan JSON
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Album berhasil dibuat!',
+                    'album' => $album
+                ]);
+            }
+    
+            // Jika bukan AJAX, redirect ke halaman album
+            return redirect()->route('user.profile')->with('success', 'Album berhasil dibuat.');
+    
+        } catch (\Exception $e) {
+            // Tangani error
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat membuat album.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+    
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat membuat album.');
+        }
     }
+    
+    
 
     public function update(Request $request, $id)
     {

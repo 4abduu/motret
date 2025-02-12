@@ -83,7 +83,11 @@
                 @foreach($mostViewedPhotos as $photo)
                     <div class="card card-pin">
                         <a href="{{ route('photos.show', $photo->id) }}">
-                            <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+                            @if(Auth::check() && (Auth::user()->role === 'user' || Auth::user()->role === 'pro'))
+                                <img src="{{ asset('storage/' . $photo->path) }}" class="card-img" alt="{{ $photo->title }}">
+                            @else
+                                <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+                            @endif
                             <div class="overlay">
                                 <div class="more">
                                     <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
@@ -101,7 +105,11 @@
                 @foreach($mostLikedPhotos as $photo)
                     <div class="card card-pin">
                         <a href="{{ route('photos.show', $photo->id) }}">
-                            <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+                            @if(Auth::check() && (Auth::user()->role === 'user' || Auth::user()->role === 'pro'))
+                                <img src="{{ asset('storage/' . $photo->path) }}" class="card-img" alt="{{ $photo->title }}">
+                            @else
+                                <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+                            @endif
                             <div class="overlay">
                                 <div class="more">
                                     <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
@@ -119,7 +127,11 @@
                 @foreach($mostDownloadedPhotos as $photo)
                     <div class="card card-pin">
                         <a href="{{ route('photos.show', $photo->id) }}">
-                            <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+                            @if(Auth::check() && (Auth::user()->role === 'user' || Auth::user()->role === 'pro'))
+                                <img src="{{ asset('storage/' . $photo->path) }}" class="card-img" alt="{{ $photo->title }}">
+                            @else
+                                <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+                            @endif
                             <div class="overlay">
                                 <div class="more">
                                     <i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> More
@@ -139,18 +151,12 @@
                             @continue
                         @endif
                         <div class="card card-pin">
-                            @if($photo->banned && $photo->user_id === Auth::id())
-                                <div class="overlay">
-                                    <h2 class="card-title title">Postingan Dilarang</h2>
-                                    <p class="text-warning">Alasan: 
-                                        @foreach($photo->reports as $report)
-                                            {{ $report->reason }}
-                                        @endforeach
-                                    </p>
-                                </div>
-                            @else
                             <a href="{{ route('photos.show', $photo->id) }}">
-                                <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+                                @if(Auth::check() && (Auth::user()->role === 'user' || Auth::user()->role === 'pro'))
+                                    <img src="{{ asset('storage/' . $photo->path) }}" class="card-img" alt="{{ $photo->title }}">
+                                @else
+                                    <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+                                @endif
                                 <div class="overlay">
                                     <h2 class="card-title title">{{ $photo->title }}</h2>
                                     <div class="more">
@@ -158,7 +164,6 @@
                                     </div>
                                 </div>                                        
                             </a>
-                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -178,57 +183,58 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('canvas.card-img').forEach(function (canvas) {
-        var imgSrc = canvas.getAttribute('data-src');
-        var img = new Image();
-        img.src = imgSrc;
-        img.onload = function () {
-            var ctx = canvas.getContext('2d');
-            var width = canvas.width;
-            var height = canvas.height;
-            var aspectRatio = img.width / img.height;
+        @if(!Auth::check() || (Auth::check() && (Auth::user()->role !== 'user' && Auth::user()->role !== 'pro')))
+            document.querySelectorAll('canvas.card-img').forEach(function (canvas) {
+                var imgSrc = canvas.getAttribute('data-src');
+                var img = new Image();
+                img.src = imgSrc;
+                img.onload = function () {
+                    var ctx = canvas.getContext('2d');
+                    var width = canvas.width;
+                    var height = canvas.height;
+                    var aspectRatio = img.width / img.height;
 
-            if (width / height > aspectRatio) {
-                width = height * aspectRatio;
-            } else {
-                height = width / aspectRatio;
-            }
+                    if (width / height > aspectRatio) {
+                        width = height * aspectRatio;
+                    } else {
+                        height = width / aspectRatio;
+                    }
 
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
 
-            // Tambahkan watermark berulang secara diagonal
-            ctx.font = '10px Arial'; // Ukuran font lebih kecil
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'; // Warna lebih transparan
-            var text = 'MOTRET ';
-            var stepX = 50; // Jarak antar teks secara horizontal
-            var stepY = 25;  // Jarak antar teks secara vertikal
+                    // // Tambahkan watermark berulang secara diagonal
+                    // ctx.font = '10px Arial'; // Ukuran font lebih kecil
+                    // ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'; // Warna lebih transparan
+                    // var text = 'MOTRET ';
+                    // var stepX = 50; // Jarak antar teks secara horizontal
+                    // var stepY = 25;  // Jarak antar teks secara vertikal
 
-            for (var y = -canvas.height; y < canvas.height * 2; y += stepY) {
-                for (var x = -canvas.width; x < canvas.width * 2; x += stepX) {
-                    ctx.save();
-                    ctx.translate(x, y);
-                    ctx.rotate(-Math.PI / 6); // Rotasi teks miring
-                    ctx.fillText(text, 0, 0);
-                    ctx.restore();
-                }
-            }
-        };
-    });
+                    // for (var y = -canvas.height; y < canvas.height * 2; y += stepY) {
+                    //     for (var x = -canvas.width; x < canvas.width * 2; x += stepX) {
+                    //         ctx.save();
+                    //         ctx.translate(x, y);
+                    //         ctx.rotate(-Math.PI / 6); // Rotasi teks miring
+                    //         ctx.fillText(text, 0, 0);
+                    //         ctx.restore();
+                    //     }
+                    // }
+                };
+            });
+        @endif
 
-    // Blokir klik kanan
-    document.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-    });
-
-    // Blokir inspect element
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+        // Blokir klik kanan
+        document.addEventListener('contextmenu', function (e) {
             e.preventDefault();
-        }
-    });
-});
+        });
 
+        // Blokir inspect element
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
+            }
+        });
+    });
 </script>
 @endpush

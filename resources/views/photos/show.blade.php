@@ -23,6 +23,10 @@
         background: rgba(255, 255, 255, 0.5); /* Overlay transparan */
         z-index: 1;
     }
+    .btn, .dropdown, #like-section, .download-button {
+        position: relative;
+        z-index: 2; /* Pastikan tombol berada di atas overlay */
+    }
 </style>
 <div class="container mt-5">
     <div class="row">
@@ -30,7 +34,7 @@
             <canvas id="photoCanvas" class="img-fluid" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
             <div class="overlay"></div>
             <div class="d-flex align-items-center mt-3">
-                <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="me-3">
+                <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="me-3 download-button">
                     @csrf
                     <button type="submit" class="btn btn-link p-0">
                         <i class="bi bi-download"></i>
@@ -192,13 +196,13 @@
                                                 @if($reply->user_id === Auth::id())
                                                     <li>
                                                         <button type="button" class="dropdown-item delete-reply" data-reply-id="{{ $reply->id }}">
-                                                            Hapus Komentar
+                                                            Hapus Balasan
                                                         </button>
                                                     </li>
                                                 @else
                                                     <li>
                                                         <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-{{ $reply->id }}">
-                                                            Lapor Komentar
+                                                            Lapor Balasan
                                                         </button>
                                                     </li>
                                                 @endif
@@ -426,27 +430,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Membuat album baru
     const createAlbumForm = document.getElementById('createAlbumForm');
-    if (createAlbumForm) {
-        createAlbumForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            fetch('{{ route('albums.store') }}', {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': token },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const newAlbum = document.createElement('li');
-                    newAlbum.innerHTML = `<a class="dropdown-item add-to-album" href="#" data-album-id="${data.album.id}">${data.album.name}</a>`;
-                    document.querySelector('.dropdown-menu').insertBefore(newAlbum, document.querySelector('.dropdown-divider'));
-                    $('#createAlbumModal').modal('hide');
-                }
-            })
-            .catch(console.error);
+
+    createAlbumForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(createAlbumForm);
+        const submitButton = createAlbumForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true; // Disable submit button to prevent multiple submissions
+
+        fetch('{{ route('albums.store') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json' // Paksa Laravel untuk mengembalikan JSON
+            },
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status); // Log response status
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data); // Log response data
+            if (data.success) {
+                alert('Album berhasil dibuat!');
+                location.reload(); // Reload the page to see the new album
+            } else {
+                alert('Gagal membuat album. Silakan coba lagi.');
+            }
+        })
+        .catch(async (error) => {
+        console.error('Fetch error:', error);
+        
+        // Coba baca response sebagai teks
+        const responseText = await error.response.text();
+        console.log('Response text:', responseText);
+        
+        alert('Terjadi kesalahan: ' + responseText);
+    })
+        .finally(() => {
+            submitButton.disabled = false; // Re-enable submit button
         });
-    }
+    });
 
     // Event delegation untuk tombol "Balas"
     document.addEventListener('click', function (event) {
@@ -515,10 +540,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const button = event.target.closest(".delete-reply");
             const replyId = button.getAttribute("data-reply-id");
             const url = `/replies/${replyId}`;
-
-            if (!confirm("Apakah kamu yakin ingin menghapus komentar ini?")) {
-                return;
-            }
 
             try {
                 const response = await fetch(url, {

@@ -54,7 +54,7 @@ class CommentController extends Controller
 
         $comment->delete();
 
-        return redirect()->route('admin.comments')->with('success', 'Comment deleted successfully.');
+        return redirect()->back()->with('success', "Anda telah menghapus komentar.");
     }
 
     public function storeReply($commentId, Request $request)

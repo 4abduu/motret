@@ -12,6 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('users:download_reset_at')->hourly();
+        $schedule->command('subscriptions:check-expired')->hourly();
         $schedule->command('users:unban')->hourly(); // Unbanned tiap jam
         $schedule->command('banned:delete')->dailyAt('00:00'); // Jalan setiap tengah malam UTC
     }

@@ -87,6 +87,7 @@ class UserController extends Controller
             'description' => 'required|string|max:255',
             'photo' => 'required|image|mimes:jpeg,png,jpg',
             'hashtags' => 'required|string',
+            'premium' => 'required|boolean',
         ]);
 
         $path = $request->file('photo')->store('photos', 'public');
@@ -107,6 +108,7 @@ class UserController extends Controller
             'description' => $validated['description'],
             'path' => $path,
             'hashtags' => json_encode(explode(',', $validated['hashtags'])),
+            'premium' => $request->premium,
             'status' => '1',
         ]);
 
@@ -118,7 +120,7 @@ class UserController extends Controller
         $photo = Photo::findOrFail($id);
         $user = Auth::user();
         $guestDownloadCount = session('guest_download_count', 0);
-    
+
         // Cek role
         if ($user) {
             if ($user->role === 'pro') {
@@ -129,12 +131,14 @@ class UserController extends Controller
                 if ($user->download_reset_at === null || Carbon::now()->greaterThan($user->download_reset_at)) {
                     $user->download_reset_at = Carbon::now()->addWeek();
                     $user->save();
+
+                    Download::where('user_id', $user->id)->delete();
                 }
-    
+
                 $downloadCount = Download::where('user_id', $user->id)
                                         ->where('created_at', '>=', now()->startOfWeek())
                                         ->count();
-    
+
                 if ($downloadCount < 5) {
                     Download::create(['user_id' => $user->id, 'photo_id' => $photo->id, 'resolution' => 'original']);
                     return $this->processDownload($photo, 'original');
@@ -194,31 +198,60 @@ class UserController extends Controller
         ]);
     }
 
+    public function editPhoto($id)
+    {
+        $photo = Photo::findOrFail($id);
+        if (Auth::id() !== $photo->user_id) {
+            return redirect()->route('user.profile')->with('error', 'Anda tidak memiliki izin untuk mengedit foto ini.');
+        }
+        return view('photos.edit', compact('photo'));
+    }
+
+    public function updatePhoto(Request $request, $id)
+    {
+        $photo = Photo::findOrFail($id);
+        if (Auth::id() !== $photo->user_id) {
+            return redirect()->route('user.profile')->with('error', 'Anda tidak memiliki izin untuk mengedit foto ini.');
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'hashtags' => 'required|string',
+        ]);
+
+        $photo->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'hashtags' => json_encode(explode(',', $validated['hashtags'])),
+        ]);
+
+        return redirect()->route('user.profile')->with('success', 'Foto berhasil diperbarui.');
+    }
+
+    public function destroyPhoto($id)
+    {
+        $photo = Photo::findOrFail($id);
+        if (Auth::id() !== $photo->user_id) {
+            return redirect()->route('user.profile')->with('error', 'Anda tidak memiliki izin untuk menghapus foto ini.');
+        }
+
+        $photo->delete();
+        return redirect()->route('user.profile')->with('success', 'Foto berhasil dihapus.');
+    }
+
     public function updateProfile(Request $request)
     {
+        $user = Auth::user();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:20|unique:users,username,' . Auth::id(),
-            'email' => 'required|string|email|max:255|unique:users,email,' . Auth::id(),
-            'current_password' => 'nullable|string',
-            'new_password' => 'nullable|string|min:8|confirmed',
+            'bio' => 'nullable|string|max:255',
+            'website' => 'nullable|string|max:255',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
-        $user = Auth::user();
-        $user->name = $validated['name'];
-        $user->username = $validated['username'];
-        $user->email = $validated['email'];
-
-        if ($request->filled('current_password') && $request->filled('new_password')) {
-            if (Hash::check($request->current_password, $user->password)) {
-                $user->password = Hash::make($request->new_password);
-            } else {
-                return back()->withErrors(['current_password' => 'Password lama tidak sesuai.']);
-            }
-        }
-
-        if ($request->hasFile('profile_photo')) {
+            if ($request->hasFile('profile_photo')) {
             // Hapus foto profil lama jika ada
             if ($user->profile_photo) {
                 Storage::delete('public/photo_profile/' . $user->profile_photo);
@@ -233,10 +266,56 @@ class UserController extends Controller
             $user->profile_photo = basename($profilePhotoPath);
         }
 
+        $user->name = $validated['name'];
+        $user->bio = $validated['bio'];
+        $user->website = $validated['website'];
         $user->save();
 
-        return redirect()->route('user.profile')->with('success', 'Profil berhasil diperbarui.');
+        return redirect()->route('user.showProfile', $user->username)->with('success', 'Profil berhasil diperbarui.');
     }
+    // public function updateProfile(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'name' => 'required|string|max:255',
+    //         'username' => 'required|string|max:20|unique:users,username,' . Auth::id(),
+    //         'email' => 'required|string|email|max:255|unique:users,email,' . Auth::id(),
+    //         'current_password' => 'nullable|string',
+    //         'new_password' => 'nullable|string|min:8|confirmed',
+    //         'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+    //     ]);
+
+    //     $user = Auth::user();
+    //     $user->name = $validated['name'];
+    //     $user->username = $validated['username'];
+    //     $user->email = $validated['email'];
+
+    //     if ($request->filled('current_password') && $request->filled('new_password')) {
+    //         if (Hash::check($request->current_password, $user->password)) {
+    //             $user->password = Hash::make($request->new_password);
+    //         } else {
+    //             return back()->withErrors(['current_password' => 'Password lama tidak sesuai.']);
+    //         }
+    //     }
+
+    //     if ($request->hasFile('profile_photo')) {
+    //         // Hapus foto profil lama jika ada
+    //         if ($user->profile_photo) {
+    //             Storage::delete('public/photo_profile/' . $user->profile_photo);
+    //         }
+
+    //         // Simpan foto profil baru dengan nama acak
+    //         $profilePhotoPath = $request->file('profile_photo')->storeAs(
+    //             'public/photo_profile',
+    //             Str::random(40) . '.' . $request->file('profile_photo')->getClientOriginalExtension()
+    //         );
+
+    //         $user->profile_photo = basename($profilePhotoPath);
+    //     }
+
+    //     $user->save();
+
+    //     return redirect()->route('user.profile')->with('success', 'Profil berhasil diperbarui.');
+    // }
 
     public function deleteProfilePhoto()
     {

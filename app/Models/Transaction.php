@@ -19,6 +19,7 @@ class Transaction extends Model
         'gross_amount',
         'transaction_id',
         'fraud_status',
+        'type',
     ];
 
     public function user()

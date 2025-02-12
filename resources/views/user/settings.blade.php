@@ -49,13 +49,12 @@
                     <input type="password" name="new_password_confirmation" class="form-control" id="new_password_confirmation" required>
                 </div>
                 <button type="submit" class="btn btn-success mt-3">Ubah Password</button>
-                <button type="button" class="btn btn-danger mt-3" onclick="resetPassword()">Reset Password</button>
+                <a href="{{ route('password.request') }}" class="btn btn-danger mt-3">Reset Password</a>
             </form>
         </div>
         <div class="tab-pane fade" id="email" role="tabpanel" aria-labelledby="email-tab">
-            <form method="POST" action="{{ route('user.updateEmail') }}">
+            <form method="POST" action="{{ route('user.verifyEmailCode') }}">
                 @csrf
-                @method('PUT')
                 <div class="form-group mt-3">
                     <label for="current_email">Email Lama</label>
                     <div class="input-group">
@@ -189,7 +188,11 @@
 
     function sendVerificationCode() {
         const email = document.getElementById('current_email').value;
-        fetch('{{ route('user.sendEmailVerificationCode') }}', {
+        if (!email || !validateEmail(email)) {
+            document.getElementById('email-verification-status').innerHTML = '<span class="text-danger">Masukkan email yang valid.</span>';
+            return;
+        }
+        fetch('{{ route('user.sendEmailVerification') }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -199,12 +202,13 @@
         })
         .then(response => response.json())
         .then(data => {
-            document.getElementById('email-verification-status').innerHTML = data.success ? '<span class="text-success">Kode verifikasi telah dikirim.</span>' : '<span class="text-danger">Email tidak sesuai.</span>';
+            document.getElementById('email-verification-status').innerHTML = data.success ? '<span class="text-success">Kode verifikasi telah dikirim.</span>' : '<span class="text-danger">' + data.message + '</span>';
         });
     }
 
-    function resetPassword() {
-        alert("Instruksi reset password telah dikirim ke email Anda.");
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
     }
 </script>
 @endpush

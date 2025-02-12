@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use App\Mail\PasswordResetMail;
 use App\Mail\EmailVerificationMail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -37,29 +38,36 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        Log::info('Login attempt', ['request' => $request->only('email')]);
+    
         $messages = [
             'email.required' => 'Email atau Username harus diisi.',
             'password.required' => 'Password harus diisi.',
         ];
-
+    
         $validated = $request->validate([
             'email' => 'required',
             'password' => 'required',
         ], $messages);
-
+    
         $loginType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        Log::info('Login type detected', ['type' => $loginType]);
+    
         $credentials = [$loginType => $request->email, 'password' => $request->password];
-
+    
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             $user = Auth::user();
+            Log::info('Login successful', ['user_id' => $user->id, 'role' => $user->role]);
+    
             if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
             } else {
                 return redirect()->route('home');
             }
         }
-
+    
+        Log::warning('Login failed', ['email/username' => $request->email]);
         return back()->withErrors(['email' => 'Email/Username atau password salah.']);
     }
 
@@ -192,6 +200,7 @@ class AuthController extends Controller
             ['email' => $user->email], // Cek apakah email sudah ada di tabel
             [
                 'token' => $token,
+                'type' => 'password',
                 'created_at' => Carbon::now('UTC'),
             ]
         );
@@ -235,30 +244,55 @@ class AuthController extends Controller
         return redirect()->route('login')->with('status', 'Password berhasil diubah.');
     }
 
-    public function sendEmailVerificationCode(Request $request)
+    public function sendEmailVerification(Request $request)
     {
         $validated = $request->validate([
             'old_email' => 'required|string|email|max:255',
         ]);
-
+    
         $user = Auth::user();
         if ($user->email !== $validated['old_email']) {
             return response()->json(['success' => false, 'message' => 'Email tidak sesuai.']);
         }
-
+    
         // Generate 8 digit token angka
         $token = str_pad(mt_rand(0, 99999999), 8, '0', STR_PAD_LEFT);
-
+    
         DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $validated['old_email'], 'type' => 'email'], // Cek apakah email sudah ada di tabel
+            ['email' => $validated['old_email']], // Cek apakah email sudah ada di tabel
             [
                 'token' => $token,
+                'type' => 'email',
                 'created_at' => Carbon::now('UTC'),
             ]
         );
-
+    
         Mail::to($validated['old_email'])->send(new EmailVerificationMail($token));
-
+    
         return response()->json(['success' => true, 'message' => 'Kode verifikasi telah dikirim ke email Anda.']);
+    }
+    public function verifyEmailCode(Request $request)
+    {
+        $validated = $request->validate([
+            'verification_code' => 'required|digits:8',
+            'new_email' => 'required|string|email|max:255|unique:users,email',
+        ]);
+
+        $user = Auth::user();
+        $emailVerification = DB::table('password_reset_tokens')
+                                ->where('email', $user->email)
+                                ->where('token', $request->verification_code)
+                                ->first();
+
+        if (!$emailVerification || Carbon::parse($emailVerification->created_at)->lt(Carbon::now('UTC')->subMinutes(30))) {
+            return back()->withErrors(['verification_code' => 'Kode verifikasi tidak valid atau telah kadaluarsa.']);
+        }
+
+        $user->email = $validated['new_email'];
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+
+        return redirect()->route('user.settings')->with('success', 'Email berhasil diubah.');
     }
 }

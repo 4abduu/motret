@@ -32,6 +32,13 @@
                 <label for="hashtags" class="form-label">Hashtags (tanpa #)</label>
                 <input type="text" name="hashtags" class="form-control" id="hashtags">
             </div>
+            <div class="mb-3">
+                <label for="premium" class="form-label">Premium</label>
+                <select class="form-control" id="premium" name="premium" required>
+                    <option value="0">Biasa</option>
+                    <option value="1">Premium</option>
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary">Upload</button>
         </form>
     </div>

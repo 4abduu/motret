@@ -17,6 +17,7 @@ class Photo extends Model
         'path',
         'hashtags',
         'status',
+        'premium',
         'user_id',
         'banned',
         'views',

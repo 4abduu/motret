@@ -2,7 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\CommentController as AdminCommentController;
+use App\Http\Controllers\Admin\PhotoController as AdminPhotoController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
+use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
+use App\Http\Controllers\User\SubscriptionController as UserSubscriptionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
@@ -40,42 +47,61 @@ Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm']
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
 Route::get('/reset-password', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
 // Grup untuk Admin
 Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/comments', [AdminController::class, 'manageComments'])->name('admin.manageComments');
-    Route::get('/admin/comments/comments', [AdminController::class, 'comments'])->name('admin.comments');
-    Route::get('/admin/comments/replies', [AdminController::class, 'replies'])->name('admin.replies');
-    Route::get('/admin/reports', [AdminController::class, 'manageReports'])->name('admin.manageReports');
-    Route::get('/admin/reports/users', [AdminController::class, 'reportUsers'])->name('admin.reports.users');
-    Route::get('/admin/reports/comments', [AdminController::class, 'reportComments'])->name('admin.reports.comments');
-    Route::get('/admin/reports/photos', [AdminController::class, 'reportPhotos'])->name('admin.reports.photos');
-    Route::get('/admin/users', [AdminController::class, 'manageUsers'])->name('admin.users');
-    Route::post('/admin/users/create', [AdminController::class, 'createUser'])->name('admin.users.create');
-    Route::put('/admin/users/{id}', [AdminController::class, 'updateUser'])->name('admin.users.update');
-    Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
-    Route::delete('/admin/users/{id}/foto', [AdminController::class, 'deleteProfilePhoto'])->name('admin.users.deleteProfilePhoto');
-    Route::get('/admin/photos', [AdminController::class, 'managePhotos'])->name('admin.photos');
-    Route::put('/admin/photos/{id}', [AdminController::class, 'editPhoto'])->name('admin.photos.edit');
-    Route::delete('/admin/photos/{id}', [AdminController::class, 'deletePhoto'])->name('admin.photos.delete');
-    Route::delete('/admin/reports/{id}', [AdminController::class, 'deleteReport'])->name('admin.reports.delete');
-    Route::put('/admin/reports/comments/{id}/ban', [AdminController::class, 'banComment'])->name('admin.comments.ban');
-    Route::put('/admin/reports/photos/{id}/ban', [AdminController::class, 'banPhoto'])->name('admin.photos.ban');
-    Route::put('/admin/reports/users/{id}/ban', [AdminController::class, 'banUser'])->name('admin.users.ban');
-    Route::get('/admin/subscriptions', [AdminController::class, 'managePhotos'])->name('admin.subscriptions');
-    Route::delete('admin/comments/{id}', [AdminController::class, 'deleteComment'])->name('admin.comments.delete');
-    Route::delete('/admin/replies/{id}', [AdminController::class, 'deleteReply'])->name('admin.replies.delete');
-    Route::get('/admin/verification-requests', [AdminController::class, 'manageVerification'])->name('admin.verificationRequests');
-    Route::put('/admin/verification-requests/{id}/approve', [AdminController::class, 'approveVerificationRequest'])->name('admin.verificationRequests.approve');
-    Route::put('/admin/verification-requests/{id}/reject', [AdminController::class, 'rejectVerificationRequest'])->name('admin.verificationRequests.reject');
-    Route::get('/admin/verification-requests/{id}/documents', [AdminController::class, 'showVerificationDocuments'])->name('admin.verificationDocuments');
+    
+    // Manage Users
+    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users');
+    Route::post('/admin/users/create', [AdminUserController::class, 'createUser'])->name('admin.users.create');
+    Route::put('/admin/users/{id}', [AdminUserController::class, 'updateUser'])->name('admin.users.update');
+    Route::delete('/admin/users/{id}', [AdminUserController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::delete('/admin/users/{id}/foto', [AdminUserController::class, 'deleteProfilePhoto'])->name('admin.users.deleteProfilePhoto');
+    Route::put('/admin/users/{id}/ban', [AdminUserController::class, 'banUser'])->name('admin.users.ban');
+    
+    // Manage Photos
+    Route::get('/admin/photos', [AdminPhotoController::class, 'index'])->name('admin.photos');
+    Route::put('/admin/photos/{id}', [AdminPhotoController::class, 'editPhoto'])->name('admin.photos.edit');
+    Route::delete('/admin/photos/{id}', [AdminPhotoController::class, 'deletePhoto'])->name('admin.photos.delete');
+    Route::put('/admin/photos/{id}/ban', [AdminPhotoController::class, 'banPhoto'])->name('admin.photos.ban');
+    
+    // Manage Comments
+    Route::get('/admin/comments', [AdminCommentController::class, 'index'])->name('admin.manageComments');
+    Route::get('/admin/comments/comments', [AdminCommentController::class, 'comments'])->name('admin.comments');
+    Route::get('/admin/comments/replies', [AdminCommentController::class, 'replies'])->name('admin.replies');
+    Route::delete('/admin/comments/{id}', [AdminCommentController::class, 'deleteComment'])->name('admin.comments.delete');
+    Route::delete('/admin/replies/{id}', [AdminCommentController::class, 'deleteReply'])->name('admin.replies.delete');
+    Route::put('/admin/comments/{id}/ban', [AdminCommentController::class, 'banComment'])->name('admin.comments.ban');
+    
+    // Manage Reports
+    Route::get('/admin/reports', [AdminReportController::class, 'index'])->name('admin.manageReports');
+    Route::get('/admin/reports/users', [AdminReportController::class, 'reportUsers'])->name('admin.reports.users');
+    Route::get('/admin/reports/comments', [AdminReportController::class, 'reportComments'])->name('admin.reports.comments');
+    Route::get('/admin/reports/photos', [AdminReportController::class, 'reportPhotos'])->name('admin.reports.photos');
+    Route::delete('/admin/reports/{id}', [AdminReportController::class, 'deleteReport'])->name('admin.reports.delete');
+    
+    // Manage Subscriptions
+    Route::get('/subscriptions', [AdminSubscriptionController::class, 'index'])->name('admin.subscriptions');
+    Route::get('/subscriptions/transactions', [AdminSubscriptionController::class, 'transactions'])->name('admin.subscriptions.transactions');
+    Route::get('/subscriptions/system-prices', [AdminSubscriptionController::class, 'systemPrices'])->name('admin.subscriptions.systemPrices');
+    Route::get('/subscriptions/user-prices', [AdminSubscriptionController::class, 'userPrices'])->name('admin.subscriptions.userPrices');
+    Route::get('/subscriptions/user-subscriptions', [AdminSubscriptionController::class, 'userSubscriptions'])->name('admin.subscriptions.userSubscriptions');
+    Route::get('/subscriptions/system-subscriptions', [AdminSubscriptionController::class, 'systemSubscriptions'])->name('admin.subscriptions.systemSubscriptions');
+    Route::get('/subscriptions/combo-subscriptions', [AdminSubscriptionController::class, 'comboSubscriptions'])->name('admin.subscriptions.comboSubscriptions');
+    
+    // Manage Verification Requests
+    Route::get('/admin/verification-requests', [AdminVerificationController::class, 'index'])->name('admin.verificationRequests');
+    Route::get('/admin/verification-requests/{id}/documents', [AdminVerificationController::class, 'showVerificationDocuments'])->name('admin.verificationDocuments');
+    Route::put('/admin/verification-requests/{id}/approve', [AdminVerificationController::class, 'approveVerificationRequest'])->name('admin.verificationRequests.approve');
+    Route::put('/admin/verification-requests/{id}/reject', [AdminVerificationController::class, 'rejectVerificationRequest'])->name('admin.verificationRequests.reject');
 });
 
-// Grup untuk User
-Route::middleware(['auth', 'role:user', 'logout_if_authenticated'])->group(function () {
+// Grup untuk User dan Pro
+Route::middleware(['auth', 'role:user,pro', 'logout_if_authenticated'])->group(function () {
     Route::get('/profil', [UserController::class, 'profile'])->name('user.profile');
-    Route::put('/profil', [UserController::class, 'updateProfile'])->name('user.updateProfile');
-    Route::get('/subscription', [UserController::class, 'subscription'])->name('subscription');
+    Route::put('/profile', [UserController::class, 'updateProfile'])->name('user.updateProfile');
+    Route::get('/subscription', [UserSubscriptionController::class, 'index'])->name('subscription');
     Route::delete('/profil/foto', [UserController::class, 'deleteProfilePhoto'])->name('user.deleteProfilePhoto');
     Route::post('/check-username', [UserController::class, 'checkUsername'])->name('user.checkUsername');
     Route::post('/check-email', [UserController::class, 'checkEmail'])->name('user.checkEmail');
@@ -103,9 +129,15 @@ Route::middleware(['auth', 'role:user', 'logout_if_authenticated'])->group(funct
     Route::get('/settings', [UserController::class, 'settings'])->name('user.settings');
     Route::put('/settings/username', [UserController::class, 'updateUsername'])->name('user.updateUsername');
     Route::put('/settings/password', [UserController::class, 'updatePassword'])->name('user.updatePassword');
-    Route::put('/settings/email', [UserController::class, 'updateEmail'])->name('user.updateEmail');
-    Route::post('/settings/email/send-code', [AuthController::class, 'sendEmailVerificationCode'])->name('user.sendEmailVerificationCode');
-    Route::post('/submit-verification', [UserController::class, 'submitVerification'])->name('user.submitVerification');
+    Route::post('/settings/send-email-verification', [AuthController::class, 'sendEmailVerification'])->name('user.sendEmailVerification');
+    Route::post('/settings/verify-email-code', [AuthController::class, 'verifyEmailCode'])->name('user.verifyEmailCode');
+    Route::put('/settings/update-email', [UserController::class, 'updateEmail'])->name('user.updateEmail');
+    Route::post('/settings/submit-verification', [UserController::class, 'submitVerification'])->name('user.submitVerification');
+    Route::get('/photos/{id}/edit', [UserController::class, 'editPhoto'])->name('photos.edit');
+    Route::put('/photos/{id}', [UserController::class, 'updatePhoto'])->name('photos.update');
+    Route::delete('/photos/{id}', [UserController::class, 'destroyPhoto'])->name('photos.destroy');
+    Route::post('/transaction/create', [UserSubscriptionController::class, 'createTransaction'])->name('transaction.create');
+    Route::post('/transaction/check-status', [UserSubscriptionController::class, 'checkTransactionStatus'])->name('transaction.checkStatus');
 });
 
 // Rute untuk guest melihat album

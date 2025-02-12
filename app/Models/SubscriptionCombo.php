@@ -5,14 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SystemSubscription extends Model
+class SubscriptionCombo extends Model
 {
     use HasFactory;
 
-    protected $table = 'langganan_sistem';
+    protected $table = 'langganan_kombo';
 
     protected $fillable = [
         'user_id',
+        'target_user_id',
+        'user_price',
+        'total_price',
         'start_date',
         'end_date',
         'transaction_id',
@@ -20,7 +23,12 @@ class SystemSubscription extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function targetUser()
+    {
+        return $this->belongsTo(User::class, 'target_user_id');
     }
 
     public function transaction()
