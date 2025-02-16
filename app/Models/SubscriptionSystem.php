@@ -28,4 +28,9 @@ class SubscriptionSystem extends Model
     {
         return $this->belongsTo(Transaction::class);
     }
+
+    public function getSubscriptionSystemCount()
+    {
+        return SubscriptionSystem::count();
+    }
 }

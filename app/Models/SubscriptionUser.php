@@ -22,4 +22,9 @@ class SubscriptionUser extends Model
     {
         return $this->belongsTo(User::class, 'verified_user_id');
     }
+
+    public function getSubscriptionUserCount()
+    {
+        return SubscriptionUser::count();
+    }
 }

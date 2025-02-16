@@ -12219,7 +12219,7 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
   padding: var(--bs-nav-link-padding-y) var(--bs-nav-link-padding-x);
   font-size: var(--bs-nav-link-font-size);
   font-weight: var(--bs-nav-link-font-weight);
-  color: var(--bs-nav-link-color);
+  color: #14b426;
   text-decoration: none;
   background: none;
   border: 0;
@@ -12231,7 +12231,7 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
   }
 }
 .nav-link:hover, .nav-link:focus {
-  color: var(--bs-nav-link-hover-color);
+  color: #14b426;
 }
 .nav-link:focus-visible {
   outline: 0;
@@ -12278,7 +12278,7 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
 .nav-pills {
   --bs-nav-pills-border-radius: var(--bs-border-radius);
   --bs-nav-pills-link-active-color: #fff;
-  --bs-nav-pills-link-active-bg: #0d6efd;
+  --bs-nav-pills-link-active-bg: #0aa91d;
 }
 .nav-pills .nav-link {
   border-radius: var(--bs-nav-pills-border-radius);
@@ -13873,7 +13873,7 @@ textarea.is-invalid.tt-hint, .select2-container--default .select2-selection--sin
   --bs-modal-title-line-height: 1.5;
   --bs-modal-footer-gap: 0.5rem;
   --bs-modal-footer-bg: ;
-  --bs-modal-footer-border-color: #CED4DA;
+  --bs-modal-footer-border-color: #ffffff;
   --bs-modal-footer-border-width: 1px;
   position: fixed;
   top: 0;
@@ -24016,7 +24016,7 @@ table.dataTable tbody td.select-checkbox:after {
 }
 
 .content-wrapper {
-  background: #f7f8fa;
+  background: #f7f7f7;
   padding: 2.375rem 2.375rem;
   width: 100%;
   -webkit-flex-grow: 1;

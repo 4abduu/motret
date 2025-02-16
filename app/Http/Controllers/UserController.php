@@ -459,6 +459,14 @@ class UserController extends Controller
         return redirect()->route('user.settings')->with('success', 'Email berhasil diperbarui.');
     }
 
+    public function checkVerificationUsername(Request $request)
+    {
+        $username = $request->input('username');
+        $isValid = $username === Auth::user()->username;
+    
+        return response()->json(['isValid' => $isValid]);
+    }
+    
     public function submitVerification(Request $request)
     {
         $validated = $request->validate([
@@ -470,7 +478,12 @@ class UserController extends Controller
             'certificate' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',
             'reason' => 'required|string|max:1000',
         ]);
-
+    
+        // Cek apakah username yang diinputkan sesuai dengan username yang ada di tabel users
+        if ($validated['username'] !== Auth::user()->username) {
+            return redirect()->back()->withErrors(['username' => 'Username tidak sesuai dengan username yang terdaftar di sistem.'])->withInput();
+        }
+    
         $verificationRequest = VerificationRequest::create([
             'user_id' => Auth::id(),
             'full_name' => $validated['full_name'],
@@ -478,14 +491,14 @@ class UserController extends Controller
             'reason' => $validated['reason'],
             'status' => 'pending',
         ]);
-
+    
         $documents = [
             'ktp' => $request->file('ktp'),
             'selfie' => $request->file('selfie'),
             'portfolio' => $request->file('portfolio'),
             'certificate' => $request->file('certificate'),
         ];
-
+    
         foreach ($documents as $type => $file) {
             if ($file) {
                 $path = $file->store('verifications/' . $type, 'public');
@@ -496,7 +509,7 @@ class UserController extends Controller
                 ]);
             }
         }
-
+    
         Notif::create([
             'notify_for' => Auth::id(),
             'notify_from' => null,
@@ -504,7 +517,7 @@ class UserController extends Controller
             'type' => 'system',
             'message' => 'Pengajuan verifikasi Anda telah diterima dan sedang diproses.',
         ]);
-
+    
         return redirect()->route('user.settings')->with('success', 'Pengajuan verifikasi telah dikirim.');
     }
 }

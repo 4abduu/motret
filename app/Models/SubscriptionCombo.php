@@ -35,4 +35,9 @@ class SubscriptionCombo extends Model
     {
         return $this->belongsTo(Transaction::class);
     }
+
+    public function getSubscriptionComboCount()
+    {
+        return SubscriptionCombo::count();
+    }
 }

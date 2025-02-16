@@ -1,35 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-5">
+
 <div class="row">
     <h3>Manage Comments</h3>
-      <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a  href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-success">Dashboard</a></li>
         <li class="breadcrumb-item active">Manage Comments</li>
-      </ol>
+    </ol>
 </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4>Manage Comments</h4>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="example" class="table table-striped" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Photo</th>
-                                    <th>Uploaded By</th>
-                                    <th>Commented By</th>
-                                    <th>Comment</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($comments as $index => $comment)
+
+<div class="row">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="example" class="table table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Photo</th>
+                                <th>Uploaded By</th>
+                                <th>Commented By</th>
+                                <th>Comment</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($comments as $index => $comment)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>
@@ -39,7 +37,7 @@
                                         <td>{{ $comment->user->username }}</td>
                                         <td>{{ $comment->comment }}</td>
                                         <td>
-                                            <button class="btn btn-info btn-icon" data-bs-toggle="modal" data-bs-target="#detailCommentModal{{ $comment->id }}"><i class="fa-solid fa-circle-info" style="color: white;"></i></button>
+                                            <button class="btn btn-info btn-icon" data-bs-toggle="modal" data-bs-target="#detailCommentModal{{ $comment->id }}"><i class="ti-info-alt" style="color: white;"></i></button>
                                             <button class="btn btn-danger btn-icon" data-bs-toggle="modal" data-bs-target="#deleteCommentModal{{ $comment->id }}"><i class="ti-trash" style="color: white;"></i></button>
                                         </td>
                                     </tr>
@@ -91,12 +89,14 @@
                                         </div>
                                     </div>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+
 @endsection

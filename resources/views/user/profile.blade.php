@@ -2,65 +2,82 @@
 
 @section('content')
 
-<div class="container mt-5">
-<div class="col-md-12 d-flex justify-content-between align-items-center">
-            @if(Auth::check() && Auth::id() !== $user->id)
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportUserModal">
-                    <i class="fas fa-exclamation-triangle"></i> Laporkan
-                </button>
-            @endif
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<div class="d-flex justify-content-center">
+    <div class="col-md-4 grid-margin grid-margin-md-0 stretch-card">
+        <div class="card shadow-lg">
+            <div class="card-body text-center">
+                <div>
+                    <img src="{{ $user->profile_photo_url }}" class="img-lg rounded-circle mb-2" alt="profile image" />
+                    <h4>{{ $user->name }} 
+                        @if($user->verified)
+                        <i class="ti-medall-alt" style="color: gold;"></i> <!-- Tambahkan ini -->
+                        @endif
+                        @if ($user->role === 'pro')
+                        <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
+                        @endif
+                    </h4>
+                    <p class="text-muted mb-0">{{ $user->username }}</p>
+                </div>
+                @if(Auth::id() === $user->id)
+                            <p class="mt-2 card-text">Email: {{ $user->email }}</p>
+                            <p>{{ $user->bio }}</p> <!-- Tambahkan ini -->
+                            <p><a href="{{ $user->website }}" target="_blank">{{ $user->website }}</a></p> <!-- Tambahkan ini -->
+                            <button class="btn btn-success btn-sm mt-3 mb-4 text-white" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profil</button>
+                         @else
+                            <div id="follow-section">
+                                @if(Auth::check())
+                                    <button id="follow-button"  class="btn btn-success btn-sm mt-3 mb-4 text-white" data-user-id="{{ $user->id }}" data-following="{{ Auth::user()->isFollowing($user) ? 'true' : 'false' }}">
+                                        {{ Auth::user()->isFollowing($user) ? 'Unfollow' : 'Follow' }}
+                                    </button>
+                                    <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportUserModal">
+                                        <i class="bi bi-flag text-danger"></i> 
+                                    </button>
+                                @else
+                                <button id="follow-button" class="btn btn-success btn-sm mt-3 mb-4 text-white" onclick="window.location.href='{{ route('login') }}'">
+                                    Follow
+                                </button>                                
+                                @endif
+                            </div>
+                        @endif
+                        <div class="border-top pt-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <h6 id="followers-count" >{{ $user->followers()->count() }}</h6>
+                                    <p class="btn btn-link text-success" data-bs-toggle="modal" data-bs-target="#followersModal">Followers</p>
+                                </div>
+                                <div class="col-6">
+                                    <h6 id="following-count" >{{ $user->following()->count() }}</h6>
+                                    <p class="btn btn-link text-success" data-bs-toggle="modal" data-bs-target="#followingModal">Following</p>
+                                </div>
+                            </div>
+                        </div>      
+                    </div>
+                </div>
+            </div>
         </div>
-    <h1>Profil Pengguna</h1>
-    <img src="{{ $user->profile_photo_url }}" alt="Profile Photo" class="img-thumbnail rounded-circle" width="150">
-    <p>Nama: {{ $user->name }}</p>
-    <p>Username: {{ $user->username }}
-    @if($user->verified)
-        <i class="ti-medall-alt" style="color: gold;"></i> <!-- Tambahkan ini -->
-    @endif
-    @if ($user->role === 'pro')
-    <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
-    @endif
-    </p>
-    <p>Bio: {{ $user->bio }}</p> <!-- Tambahkan ini -->
-    <p>Website: <a href="{{ $user->website }}" target="_blank">{{ $user->website }}</a></p> <!-- Tambahkan ini -->
-    <p>Followers: <span id="followers-count">{{ $user->followers()->count() }}</span></p>
-    <p>Following: <span id="following-count">{{ $user->following()->count() }}</span></p>
-    @if(Auth::id() === $user->id)
-        <p>Email: {{ $user->email }}</p>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profil</button>
-    @else
-        <div id="follow-section">
-            @if(Auth::check())
-                <button id="follow-button" class="btn btn-link" data-user-id="{{ $user->id }}" data-following="{{ Auth::user()->isFollowing($user) ? 'true' : 'false' }}">
-                    {{ Auth::user()->isFollowing($user) ? 'Unfollow' : 'Follow' }}
-                </button>
-            @else
-                <a href="{{ route('login') }}" class="btn btn-link">Follow</a>
-            @endif
-        </div>
-    @endif
-
-    <button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#followersModal">Lihat Followers</button>
-    <button class="btn btn-link" data-bs-toggle="modal" data-bs-target="#followingModal">Lihat Following</button>
-
-    <ul class="nav nav-tabs nav-justified mt-3" id="myTab" role="tablist">
-        <li class="nav-item">
-            <a class="nav-link active" id="photos-tab" data-bs-toggle="tab" href="#photos" role="tab" aria-controls="photos" aria-selected="true">Foto</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" id="albums-tab" data-bs-toggle="tab" href="#albums" role="tab" aria-controls="albums" aria-selected="false">Album</a>
-        </li>
-        @if($user->verified)
-            <li class="nav-item">
-                <a class="nav-link" id="subscription-tab" data-bs-toggle="tab" href="#subscription" role="tab" aria-controls="subscription" aria-selected="false">Langganan</a>
-            </li>
-        @endif
-    </ul>
-    
-    <div class="tab-content" id="myTabContent">
-        <!-- Tab Foto -->
-        <div class="tab-pane fade show active" id="photos" role="tabpanel" aria-labelledby="photos-tab">
-            <h2 class="mt-5">Foto yang Diunggah</h2>
+         
+        <div class="container mt-5">
+            <ul class="nav nav-tabs nav-justified mt-3" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="photos-tab" data-bs-toggle="tab" href="#photos" role="tab" aria-controls="photos" aria-selected="true">Foto</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="albums-tab" data-bs-toggle="tab" href="#albums" role="tab" aria-controls="albums" aria-selected="false">Album</a>
+                </li>
+                @if($user->verified)
+                    <li class="nav-item">
+                        <a class="nav-link" id="subscription-tab" data-bs-toggle="tab" href="#subscription" role="tab" aria-controls="subscription" aria-selected="false">Langganan</a>
+                    </li>
+                @endif
+            </ul>
+            
+            <div class="tab-content" id="myTabContent">
+                <!-- Tab Foto -->
+                 <div class="tab-pane fade show active" id="photos" role="tabpanel" aria-labelledby="photos-tab">
+            <h3 class="mt-5">Foto yang Diunggah</h3>
             <div class="row">
                 @foreach($photos as $photo)
                     @if($photo->banned && $photo->user_id !== Auth::id())
@@ -84,7 +101,7 @@
                                     <p class="card-text">{{ $photo->description }}</p>
                                     <div class="dropdown">
                                         <button class="btn btn-link p-0" type="button" id="dropdownMenuButton-{{ $photo->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-v"></i>
+                                            <i class="bi bi-three-dots"></i>
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $photo->id }}">
                                             @if(Auth::id() === $photo->user_id)
@@ -122,9 +139,8 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Modal Laporkan Foto -->
-                    <div class="modal fade" id="reportPhotoModal-{{ $photo->id }}" tabindex="-1" role="dialog" aria-labelledby="reportPhotoModalLabel-{{ $photo->id }}" aria-hidden="true">
+                    {{-- <div class="modal fade" id="reportPhotoModal-{{ $photo->id }}" tabindex="-1" role="dialog" aria-labelledby="reportPhotoModalLabel-{{ $photo->id }}" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -137,22 +153,33 @@
                                         <div class="form-group">
                                             <label for="reason">Alasan Melaporkan</label>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason1" value="Konten tidak pantas" required>
-                                                <label class="form-check-label" for="reason1">Konten tidak pantas</label>
+                                                <label class="form-check-label">
+                                                  <input type="radio" class="form-check-input"name="reason" id="reason1"
+                                                    value="Konten tidak pantas">
+                                                    Konten tidak pantas
+                                                </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason2" value="Spam" required>
-                                                <label class="form-check-label" for="reason2">Spam</label>
+                                                <label class="form-check-label">
+                                                  <input type="radio" class="form-check-input" name="reason" id="reason2" 
+                                                    value="Spam">
+                                                    Spam
+                                                </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
-                                                <label class="form-check-label" for="reason3">Pelanggaran hak cipta</label>
+                                                <label class="form-check-label">
+                                                  <input type="radio" class="form-check-input"name="reason" id="reason3" 
+                                                    value="Pelanggaran hak cipta">
+                                                    Pelanggaran hak cipta
+                                                </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
-                                                <label class="form-check-label" for="reason4">Lainnya</label>
+                                                <label class="form-check-label">
+                                                  <input type="radio" class="form-check-input" name="reason" id="reason4"
+                                                    value="Lainnya">
+                                                    Lainnya
+                                                </label>
                                             </div>
-                                        </div>
                                         <div class="form-group" id="description-group-{{ $photo->id }}" style="display: none;">
                                             <label for="description">Alasan</label>
                                             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
@@ -162,122 +189,125 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    
-        <!-- Tab Album -->
-        <div class="tab-pane fade" id="albums" role="tabpanel" aria-labelledby="albums-tab">
-            <h2 class="mt-5">Album</h2>
-            @if(Auth::id() === $user->id)
-                <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createAlbumModal">Buat Album Baru</button>
-            @endif
-            <div class="row">
-                @foreach($albums as $album)
-                    <div class="col-md-4 mb-4">
-                        <div class="card">
-                            <a href="{{ route('albums.show', $album->id) }}">
-                                <div class="album-cover">
-                                    @foreach($album->photos->take(3) as $photo)
-                                        <img src="{{ asset('storage/' . $photo->path) }}" class="album-cover-photo" alt="{{ $photo->title }}">
-                                    @endforeach
-                                </div>
-                            </a>
-                            <div class="card-body">
-                                <h5 class="card-title">{{ $album->name }}</h5>
-                                <p class="card-text">{{ $album->description }}</p>
-                                @if(Auth::id() === $album->user_id)
-                                    <div class="dropdown">
-                                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ $album->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-v"></i>
-                                        </button>
-                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $album->id }}">
-                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editAlbumModal-{{ $album->id }}">Edit</a></li>
-                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deleteAlbumModal-{{ $album->id }}">Hapus</a></li>
-                                        </ul>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Modal Edit Album -->
-                    <div class="modal fade" id="editAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="editAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="editAlbumModalLabel-{{ $album->id }}">Edit Album</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <form method="POST" action="{{ route('albums.update', $album->id) }}">
-                                        @csrf
-                                        @method('PUT')
-                                        <div class="form-group">
-                                            <label for="albumName">Nama Album</label>
-                                            <input type="text" class="form-control" name="name" value="{{ $album->name }}" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="albumDescription">Deskripsi</label>
-                                            <textarea class="form-control" name="description" rows="3">{{ $album->description }}</textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Modal Hapus Album -->
-                    <div class="modal fade" id="deleteAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="deleteAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="deleteAlbumModalLabel-{{ $album->id }}">Hapus Album</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    Apakah Anda yakin ingin menghapus album ini?
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                    <form method="POST" action="{{ route('albums.destroy', $album->id) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Hapus</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    
-        <!-- Tab Langganan -->
-        @if($user->verified)
-            <div class="tab-pane fade" id="subscription" role="tabpanel" aria-labelledby="subscription-tab">
-                <h2 class="mt-5">Langganan</h2>
-                <div class="row">
-                    @if(Auth::id() === $user->id)
-                        <button class="btn btn-success mb-3">Tambah Foto Anda</button>
-                    @elseif(Auth::check() && Auth::user()->subscriptions()->where('verified_user_id', $user->id)->exists())
-                        <h5>Foto foto eksklusif</h5>
-                    @else
-                        <h5>Anda belum berlangganan!</h5>
-                        <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>
-                        <button class="btn btn-primary">Langganan Sekarang</button>
-                    @endif
-                </div>
-            </div>
-        @endif
-    </div>
-    
-</div>
+                    </div> --}}
 
-<!-- Modal Edit Profil -->
-@if(Auth::id() === $user->id)
+  
+                @endforeach
+            </div>
+        </div>
+            
+                <!-- Tab Album -->
+                <div class="tab-pane fade" id="albums" role="tabpanel" aria-labelledby="albums-tab">
+                    <h3 class="mt-5">Album</h3>
+                    @if(Auth::id() === $user->id)
+                        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createAlbumModal">Buat Album Baru</button>
+                    @endif
+                    <div class="row">
+                        @foreach($albums as $album)
+                            <div class="col-md-4 mb-4">
+                                <div class="card">
+                                    <a href="{{ route('albums.show', $album->id) }}">
+                                        <div class="album-cover">
+                                            @foreach($album->photos->take(3) as $photo)
+                                                <img src="{{ asset('storage/' . $photo->path) }}" class="album-cover-photo" alt="{{ $photo->title }}">
+                                            @endforeach
+                                        </div>
+                                    </a>
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ $album->name }}</h5>
+                                        <p class="card-text">{{ $album->description }}</p>
+                                        @if(Auth::id() === $album->user_id)
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ $album->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="bi bi-bookmark-fill"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $album->id }}">
+                                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editAlbumModal-{{ $album->id }}">Edit</a></li>
+                                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deleteAlbumModal-{{ $album->id }}">Hapus</a></li>
+                                                </ul>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Modal Edit Album -->
+                            <div class="modal fade" id="editAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="editAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="editAlbumModalLabel-{{ $album->id }}">Edit Album</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form method="POST" action="{{ route('albums.update', $album->id) }}">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="form-group">
+                                                    <label for="albumName">Nama Album</label>
+                                                    <input type="text" class="form-control" name="name" value="{{ $album->name }}" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="albumDescription">Deskripsi</label>
+                                                    <textarea class="form-control" name="description" rows="3">{{ $album->description }}</textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-success">Simpan Perubahan</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Modal Hapus Album -->
+                            <div class="modal fade" id="deleteAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="deleteAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteAlbumModalLabel-{{ $album->id }}">Hapus Album</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Apakah Anda yakin ingin menghapus album ini?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                            <form method="POST" action="{{ route('albums.destroy', $album->id) }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger">Hapus</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            
+                <!-- Tab Langganan -->
+                @if($user->verified)
+                    <div class="tab-pane fade" id="subscription" role="tabpanel" aria-labelledby="subscription-tab">
+                        <h2 class="mt-5">Langganan</h2>
+                        <div class="row">
+                            @if(Auth::id() === $user->id)
+                                <button class="btn btn-success mb-3">Tambah Foto Anda</button>
+                            @elseif(Auth::check() && Auth::user()->subscriptions()->where('verified_user_id', $user->id)->exists())
+                                <h5>Foto foto eksklusif</h5>
+                            @else
+                                <h5>Anda belum berlangganan!</h5>
+                                <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>
+                                <button class="btn btn-primary">Langganan Sekarang</button>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- Modal Edit Profil -->
+    @if(Auth::id() === $user->id)
     <div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -308,143 +338,157 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                        <button type="submit" class="btn btn-success">Simpan Perubahan</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-@endif
+    @endif
 
-<!-- Modal Buat Album -->
-@if(Auth::id() === $user->id)
-    <div class="modal fade" id="createAlbumModal" tabindex="-1" role="dialog" aria-labelledby="createAlbumModalLabel" aria-hidden="true">
+    
+    <!-- Modal Buat Album -->
+    @if(Auth::id() === $user->id)
+        <div class="modal fade" id="createAlbumModal" tabindex="-1" role="dialog" aria-labelledby="createAlbumModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form action="{{ route('albums.store') }}" method="POST">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createAlbumModalLabel">Buat Album Baru</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nama Album</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Deskripsi Album</label>
+                                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Buat Album</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+    
+    <!-- Modal Followers -->
+    <div class="modal fade" id="followersModal" tabindex="-1" role="dialog" aria-labelledby="followersModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form action="{{ route('albums.store') }}" method="POST">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="createAlbumModalLabel">Buat Album Baru</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">Nama Album</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Deskripsi Album</label>
-                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">Buat Album</button>
-                    </div>
-                </form>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="followersModalLabel">Followers</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group" id="followers-list">
+                        @foreach($user->followers as $follower)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{{ route('user.showProfile', $follower->username) }}"><b>{{ $follower->username }}</b></a>
+                                @if(Auth::check() && Auth::id() !== $follower->id)
+                                    <button 
+                                        class="btn btn-sm {{ Auth::user()->isFollowing($follower) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }}" 
+                                        data-user-id="{{ $follower->id }}">
+                                        {{ Auth::user()->isFollowing($follower) ? 'Unfollow' : 'Follow' }}
+                                    </button>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-@endif
-
-<!-- Modal Followers -->
-<div class="modal fade" id="followersModal" tabindex="-1" role="dialog" aria-labelledby="followersModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="followersModalLabel">Followers</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <ul class="list-group" id="followers-list">
-                    @foreach($user->followers as $follower)
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{{ route('user.showProfile', $follower->username) }}"><b>{{ $follower->username }}</b></a>
-                            @if(Auth::check() && Auth::id() !== $follower->id)
-                                <button 
-                                    class="btn btn-sm {{ Auth::user()->isFollowing($follower) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }}" 
-                                    data-user-id="{{ $follower->id }}">
-                                    {{ Auth::user()->isFollowing($follower) ? 'Unfollow' : 'Follow' }}
-                                </button>
-                            @endif
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Following -->
-<div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="followingModalLabel">Following</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <ul class="list-group" id="following-list">
-                    @foreach($user->following as $following)
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{{ route('user.showProfile', $following->username) }}"><b>{{ $following->username }}</b></a>
-                            @if(Auth::check() && Auth::id() !== $following->id)
-                                <button 
-                                    class="btn btn-sm {{ Auth::user()->isFollowing($following) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }}" 
-                                    data-user-id="{{ $following->id }}">
-                                    {{ Auth::user()->isFollowing($following) ? 'Unfollow' : 'Follow' }}
-                                </button>
-                            @endif
-                        </li>
-                    @endforeach
-                </ul>
+    
+    <!-- Modal Following -->
+    <div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="followingModalLabel">Following</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group" id="following-list">
+                        @foreach($user->following as $following)
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{{ route('user.showProfile', $following->username) }}"><b>{{ $following->username }}</b></a>
+                                @if(Auth::check() && Auth::id() !== $following->id)
+                                    <button 
+                                        class="btn btn-sm {{ Auth::user()->isFollowing($following) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }}" 
+                                        data-user-id="{{ $following->id }}">
+                                        {{ Auth::user()->isFollowing($following) ? 'Unfollow' : 'Follow' }}
+                                    </button>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Modal Report User -->
-<div class="modal fade" id="reportUserModal" tabindex="-1" role="dialog" aria-labelledby="reportUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="reportUserModalLabel">Laporkan Pengguna</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="reportUserForm" method="POST" action="{{ route('user.report', $user->id) }}">
-                    @csrf
-                    <div class="form-group">
-                        <label for="reason">Alasan Melaporkan</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="reason" id="reason1" value="Konten tidak pantas" required>
-                            <label class="form-check-label" for="reason1">Konten tidak pantas</label>
+    
+    <!-- Modal Report User -->
+    <div class="modal fade" id="reportUserModal" tabindex="-1" role="dialog" aria-labelledby="reportUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportUserModalLabel">Laporkan Pengguna</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reportUserForm" method="POST" action="{{ route('user.report', $user->id) }}">
+                        @csrf
+                        <div class="form-group">
+                            <label for="reason">Alasan Melaporkan</label>
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                  <input type="radio" class="form-check-input"name="reason" id="reason1"
+                                    value="Konten tidak pantas">
+                                    Konten tidak pantas
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                  <input type="radio" class="form-check-input" name="reason" id="reason2" 
+                                    value="Spam">
+                                    Spam
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                  <input type="radio" class="form-check-input"name="reason" id="reason3" 
+                                    value="Pelanggaran hak cipta">
+                                    Pelanggaran hak cipta
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label">
+                                  <input type="radio" class="form-check-input" name="reason" id="reason4"
+                                    value="Lainnya">
+                                    Lainnya
+                                </label>
+                            </div>
+                            
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="reason" id="reason2" value="Spam" required>
-                            <label class="form-check-label" for="reason2">Spam</label>
+                        <div class="form-group" id="description-group" style="display: none;">
+                            <label for="description">Alasan</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
-                            <label class="form-check-label" for="reason3">Pelanggaran hak cipta</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
-                            <label class="form-check-label" for="reason4">Lainnya</label>
-                        </div>
-                    </div>
-                    <div class="form-group" id="description-group" style="display: none;">
-                        <label for="description">Alasan</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-danger">Laporkan</button>
-                </form>
+                        <button type="submit" class="btn btn-danger">Laporkan</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
-@endsection
-
+    @endsection
+    
 @push('scripts')
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -467,12 +511,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateFollowButton(button, following) {
         if (following) {
             button.textContent = 'Unfollow';
-            button.classList.remove('btn-primary', 'follow-button');
-            button.classList.add('btn-danger', 'unfollow-button');
+            button.classList.remove('btn-success', 'follow-button');
+            button.classList.add('btn-dark', 'unfollow-button');
         } else {
             button.textContent = 'Follow';
             button.classList.remove('btn-danger', 'unfollow-button');
-            button.classList.add('btn-primary', 'follow-button');
+            button.classList.add('btn-dark', 'follow-button');
         }
     }
 
@@ -502,7 +546,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 newFollowerItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
                 newFollowerItem.innerHTML = `
                     <a href="/users/${data.current_user.username}"><b>${data.current_user.username}</b></a>
-                    <button class="btn btn-sm btn-danger unfollow-button" data-user-id="${data.current_user.id}">Unfollow</button>
+                    <button class="btn btn-sm btn-dark unfollow-button" data-user-id="${data.current_user.id}">Unfollow</button>
                 `;
                 followersList.appendChild(newFollowerItem);
 
@@ -526,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 newFollowingItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
                 newFollowingItem.innerHTML = `
                     <a href="/users/${data.current_user.username}"><b>${data.current_user.username}</b></a>
-                    <button class="btn btn-sm btn-danger unfollow-button" data-user-id="${data.current_user.id}">Unfollow</button>
+                    <button class="btn btn-sm btn-dark unfollow-button" data-user-id="${data.current_user.id}">Unfollow</button>
                 `;
                 followingList.appendChild(newFollowingItem);
 

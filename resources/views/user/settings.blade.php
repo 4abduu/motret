@@ -59,7 +59,7 @@
                     <label for="current_email">Email Lama</label>
                     <div class="input-group">
                         <input type="email" name="current_email" class="form-control" id="current_email" required>
-                        <button type="button" class="btn btn-primary" onclick="sendVerificationCode()">Send Code</button>
+                        <button type="button" class="btn btn-success" onclick="sendVerificationCode()">Send Code</button>
                     </div>
                     <div id="email-verification-status" class="mt-2"></div>
                 </div>
@@ -79,8 +79,6 @@
         <div class="tab-pane fade" id="verification" role="tabpanel" aria-labelledby="verification-tab">
             <form action="{{ route('user.submitVerification') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <h2>Request Verified User</h2>
-                
                 <!-- Nama Lengkap -->
                 <div class="form-group mt-3">
                     <label for="full_name">Nama Lengkap: <span class="text-danger">*</span></label>
@@ -90,7 +88,8 @@
                 <!-- Username -->
                 <div class="form-group mt-3">
                     <label for="username">Username di Motret: <span class="text-danger">*</span></label>
-                    <input type="text" id="username" name="username" class="form-control" required>
+                    <input type="text" id="username" name="username" class="form-control" required oninput="checkVerificationUsername()">
+                    <div id="username-verification-status" class="mt-2"></div>
                 </div>
                 
                 <!-- Upload KTP -->
@@ -209,6 +208,27 @@
     function validateEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
+    }
+    
+    function checkVerificationUsername() {
+        clearTimeout(usernameTimeout);
+        document.getElementById('username-verification-status').innerHTML = '';
+        usernameTimeout = setTimeout(() => {
+            const username = document.getElementById('username').value;
+            fetch('{{ route('user.checkVerificationUsername') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const verificationStatus = document.getElementById('username-verification-status');
+                verificationStatus.innerHTML = data.isValid ? '<span class="text-success">Username sesuai.</span>' : '<span class="text-danger">Username tidak sesuai dengan username yang terdaftar di sistem.</span>';
+            });
+        }, 500);
     }
 </script>
 @endpush

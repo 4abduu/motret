@@ -16,8 +16,13 @@ class SubscriptionController extends Controller
 {
     public function index()
     {
-        //$prices = SubscriptionPriceSystem::all();
-        //return view('admin.subscriptions.subsSystem', compact('prices'));
+        $subsTransactionCount = Transaction::count();
+        $subsSystemPriceCount = SubscriptionPriceSystem::count();
+        $subsUserPriceCount = SubscriptionPriceUser::count();
+        $subsSystemCount = SubscriptionSystem::count();
+        $subsUserCount = SubscriptionUser::count();
+        $subsComboCount = SubscriptionCombo::count();
+        return view('admin.subscriptions.subscriptions', compact('subsTransactionCount', 'subsSystemPriceCount', 'subsUserPriceCount', 'subsSystemCount', 'subsUserCount', 'subsComboCount'));
     }
 
     public function priceSystem(){

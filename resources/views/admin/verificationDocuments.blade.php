@@ -7,8 +7,8 @@
 <div class="row">
     <h3>Dokumen Verifikasi</h3>
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('admin.verificationRequests') }}">Permintaan Verifikasi</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-success">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.verificationRequests') }}" class="text-success">Permintaan Verifikasi</a></li>
         <li class="breadcrumb-item active">Dokumen Verifikasi</li>
     </ol>
 </div>
@@ -30,13 +30,13 @@
                             @foreach($verificationRequest->documents as $document)
                                 <tr>
                                     <td>{{ ucfirst($document->file_type) }}</td>
-                                    <td><a href="{{ asset('storage/' . $document->file_path) }}" target="_blank" class="btn btn-info btn-sm">Lihat Dokumen</a></td>
+                                    <td><a href="{{ asset('storage/' . $document->file_path) }}" target="_blank" class="btn btn-info btn-sm" style="color: white;">Lihat Dokumen</a></td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-                <a href="{{ route('admin.verificationRequests') }}" class="btn btn-primary mt-3">Kembali</a>
+                <a href="{{ route('admin.verificationRequests') }}" class="btn btn-success mt-3">Kembali</a>
             </div>
         </div>
     </div>

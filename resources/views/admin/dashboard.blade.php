@@ -8,11 +8,11 @@
                     <h2 class="font-weight-bold">Welcome Admin</h2>
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item active">Dashboard</li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.users') }}">Manage User</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.photos') }}">Manage Foto</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.manageComments') }}">Manage Comment</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions') }}">Manage Berlangganan</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.manageReports') }}">Manage Report</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.users') }}" class="text-success">Manage User</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.photos') }}" class="text-success">Manage Foto</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.manageComments') }}" class="text-success">Manage Comment</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions') }}" class="text-success">Manage Berlangganan</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.manageReports') }}" class="text-success">Manage Report</a></li>
                     </ol>
                   </div>
                 </div>

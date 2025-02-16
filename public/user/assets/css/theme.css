@@ -12,10 +12,7 @@ a, .a:hover {
   transition: all 0.2s; }
 
 /* line 8, src/assets/scss/theme.scss */
-.container-fluid {
-  width: 94%;
-  margin: 0px auto;
-  max-width: 94%; }
+
 
 /* line 13, src/assets/scss/theme.scss */
 .border-round-0 {
@@ -118,4 +115,39 @@ footer.footer {
 
 .btn-link:hover {
   color: #24b47e !important; /* Hijau lebih gelap saat hover */
+}
+.most-searched-container {
+  display: flex;
+  align-items: center; /* Menyatukan teks dan keyword secara vertikal */
+  justify-content: center; /* Memusatkan seluruh elemen */
+  flex-wrap: wrap; /* Jika terlalu panjang, pindah ke baris berikutnya */
+  gap: 15px; /* Beri jarak antara teks dan keyword */
+  text-align: center;
+}
+
+.most-searched-title {
+  font-size: 18px;
+  margin: 0; /* Hilangkan margin default */
+  white-space: nowrap; /* Agar teks tidak turun ke bawah */
+}
+
+.most-searched-keywords {
+  display: flex;
+  gap: 10px; /* Jarak antar keyword */
+  flex-wrap: wrap; /* Agar responsif */
+}
+
+.keyword-item {
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  transition: 0.3s;
+  display: inline-block;
+}
+
+.keyword-item:hover {
+  background-color: #ddd;
 }

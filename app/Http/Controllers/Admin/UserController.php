@@ -117,10 +117,10 @@ class UserController extends Controller
 
             return redirect()->route('admin.users')->with('success', 'User updated successfully.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.users')->with('error', 'Failed to update user.');
+            return redirect()->route('admin.users')->with('error', 'Failed to update user. Pesan: ' . $e->getMessage());
         }
     }
-
+//wes mari
     public function deleteProfilePhoto($id)
     {
         try {

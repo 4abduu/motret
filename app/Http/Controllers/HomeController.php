@@ -13,7 +13,7 @@ class HomeController extends Controller
         $photos = Photo::where(function ($query) {
             $query->where('banned', false)
                   ->orWhere(function ($query) {
-                      $query->where('banned', true)
+                      $query->where('banned', false)
                             ->where('updated_at', '>=', now()->subWeek());
                   });
         })->get();

@@ -52,7 +52,7 @@
                 <a class="nav-link" data-bs-toggle="collapse" href="#report" aria-expanded="{{ $isReportActive ? 'true' : 'false' }}" aria-controls="report">
                     <i class="icon-ban menu-icon"></i>
                     <span class="menu-title" onclick="window.location='{{ route('admin.manageReports') }}'">Report</span>
-                    <i class="menu-arrow" onclick="toggleDropdown(event, '#report')"></i>
+                    <i class="menu-arrow" id="dropdown-icon-report" onclick="toggleDropdown(event, '#report')"></i>
                 </a>
                 <div class="collapse {{ $isReportActive ? 'show' : '' }}" id="report">
                     <ul class="nav flex-column sub-menu">
@@ -76,8 +76,8 @@
                 <div class="collapse {{ $isSubscriptionActive ? 'show' : '' }}" id="subscription">
                     <ul class="nav flex-column sub-menu">
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.subscriptions.transactions') }}"> Transaksi </a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.subscriptions.systemPrices') }}"> Harga Langganan Sistem </a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.subscriptions.userPrices') }}"> Harga Langganan User </a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.subscriptions.systemPrices') }}"> Harga Sistem </a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ route('admin.subscriptions.userPrices') }}"> Harga User </a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.subscriptions.userSubscriptions') }}"> Langganan User </a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.subscriptions.systemSubscriptions') }}"> Langganan Sistem </a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.subscriptions.comboSubscriptions') }}"> Langganan Kombo </a></li>

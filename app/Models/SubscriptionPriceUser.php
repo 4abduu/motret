@@ -26,4 +26,9 @@ class SubscriptionPriceUser extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function getSubsPriceUserCount()
+    {
+        return SubscriptionPriceUser::count();
+    }
 }

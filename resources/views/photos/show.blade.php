@@ -27,7 +27,33 @@
         position: relative;
         z-index: 2; /* Pastikan tombol berada di atas overlay */
     }
+    .comment-container {
+        max-height: 300px; /* Sesuaikan tinggi maksimal */
+        overflow-y: auto; /* Tambahkan scrollbar jika konten terlalu panjang */
+        padding-right: 10px; /* Hindari konten tertutup scrollbar */
+    }
+
+/* (Opsional) Custom scrollbar agar lebih bagus */
+.comment-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.comment-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+.comment-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+.comment-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 </style>
+
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6 position-relative">
@@ -37,12 +63,12 @@
                 <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="me-3 download-button">
                     @csrf
                     <button type="submit" class="btn btn-link p-0">
-                        <i class="bi bi-download"></i>
+                        <i class="bi bi-download text-dark fw-bold fs-5"></i>
                     </button>
                 </form>
                 <div id="like-section" class="me-3">
                     <button id="like-button" class="btn btn-link p-0" data-liked="{{ $photo->isLikedBy(Auth::user()) ? 'true' : 'false' }}">
-                        <i class="{{ $photo->isLikedBy(Auth::user()) ? 'bi bi-heart-fill' : 'bi bi-heart' }}" 
+                        <i class="{{ $photo->isLikedBy(Auth::user()) ? 'bi bi-heart-fill fs-5' : 'bi bi-heart fs-5' }}" 
                            style="color: {{ $photo->isLikedBy(Auth::user()) ? 'red' : 'black' }};"></i>
                     </button>
                     @php
@@ -57,7 +83,7 @@
                 
                 <div class="dropdown">
                     <button class="btn btn-link p-0" id="bookmark-button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bookmark"></i>
+                        <i class="bi bi-bookmark text-dark fw-bold fs-5"></i>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="bookmark-button">
                         @if($albums)
@@ -82,38 +108,30 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 ">
             <div class="d-flex align-items-center mb-3">
                 <button type="button" class="btn btn-link p-0 me-3">
-                    <i class="bi bi-share"></i> 
+                    <i class="bi bi-share text-dark fw-bold fs-5"></i> 
                 </button>
                 <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}">
-                    <i class="bi bi-flag"></i>
+                    <i class="bi bi-flag text-dark fw-bold fs-5"></i>
                 </button>
             </div>
-            <h2 class="mb-4 text-start">{{ $photo->title }}</h2>
-            <h4 class="text-start">{{ $photo->description }}</h4>
-            <p class="text-start">Hashtags: {{ implode(', ', json_decode($photo->hashtags)) }}</p>
-            <p class="text-start"><a href="{{ route('user.showProfile', $photo->user->username) }}">{{ $photo->user->username }}</a>
-                @if($photo->user->verified)
-                    <i class="ti-medall-alt" style="color: gold;"></i> <!-- Tambahkan ini -->
-                @endif    
-            </p>
-            <h5 class="text-start mt-5">Komentar</h5>
-            @if(Auth::check())
-            <form method="POST" action="{{ route('photos.comments.store', $photo->id) }}" class="text-start">
-                @csrf
-                <div class="mb-3 d-flex">
-                    <textarea class="form-control" name="comment" rows="1" placeholder="Tambahkan komentar..." required></textarea>
-                    <button type="submit" class="btn btn-link p-0 ms-2">
-                        <i class="bi bi-send"></i>
-                    </button>
-                </div>
-            </form>            
-            @else
-                <p class="text-start">Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
-            @endif
-            <div class="mt-4">
+            <div class="mt-4 text-start comment-container">
+                <h3 class="mb-4 text-start">{{ $photo->title }}</h3>
+                <h5 class="text-start">{{ $photo->description }}</h5>
+                <p class="text-start">Hashtags: {{ implode(', ', json_decode($photo->hashtags)) }}</p>
+                
+                <p class="text-start d-flex align-items-center">
+                    <img src="{{ asset($photo->user->profile_picture) }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40">
+                    <a href="{{ route('user.showProfile', $photo->user->username) }}">{{ $photo->user->username }}</a>
+                    @if($photo->user->verified)
+                        <i class="ti-medall-alt" style="color: gold;"></i>
+                    @endif    
+                </p>
+                
+                <h6 class="text-start">komentar</h6>
+                
                 @foreach($photo->comments as $comment)
                     @php
                         $isOwner = Auth::check() && Auth::id() === $comment->user_id;
@@ -143,7 +161,7 @@
                                         <button class="btn btn-link reply-button" data-comment-id="{{ $comment->id }}">Balas</button>
                                         <div class="dropdown ms-2">
                                             <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v"></i>
+                                                <i class="bi bi-three-dots"></i>
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $comment->id }}">
                                                 @if($isOwner)
@@ -170,7 +188,7 @@
                                             <div class="input-group mb-3">
                                                 <input type="text" class="form-control" name="reply" placeholder="Tambahkan balasan..." required>
                                                 <button class="btn btn-outline-secondary" type="submit">
-                                                    <i class="fas fa-paper-plane"></i>
+                                                    <i class="bi bi-send-fill text-dark fw-bold fs-5 rotate-90"></i>
                                                 </button>
                                             </div>
                                         </form>
@@ -187,11 +205,11 @@
                                     <strong>{{ $reply->user->username }}</strong>
                                     <p>{{ $reply->reply }}</p>
                                     <small class="text-muted">{{ $reply->created_at->diffForHumans() }}</small>
+                                    <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $reply->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
                                     @if(Auth::check())
                                         <div class="dropdown">
-                                            <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $reply->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $reply->id }}">
                                                 @if($reply->user_id === Auth::id())
                                                     <li>
@@ -212,7 +230,6 @@
                                 </div>
                             @endif
                         @endforeach
-                        
                         </div>
                         <div class="modal fade" id="reportCommentModal-{{ $comment->id }}" tabindex="-1" role="dialog" aria-labelledby="reportCommentModalLabel-{{ $comment->id }}" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -227,20 +244,32 @@
                                             <div class="form-group">
                                                 <label for="reason">Alasan Melaporkan</label>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="reason" id="reason1" value="Konten tidak pantas" required>
-                                                    <label class="form-check-label" for="reason1">Konten tidak pantas</label>
+                                                    <label class="form-check-label">
+                                                      <input type="radio" class="form-check-input"name="reason" id="reason1"
+                                                        value="Konten tidak pantas">
+                                                        Konten tidak pantas
+                                                    </label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="reason" id="reason2" value="Spam" required>
-                                                    <label class="form-check-label" for="reason2">Spam</label>
+                                                    <label class="form-check-label">
+                                                      <input type="radio" class="form-check-input" name="reason" id="reason2" 
+                                                        value="Spam">
+                                                        Spam
+                                                    </label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
-                                                    <label class="form-check-label" for="reason3">Pelanggaran hak cipta</label>
+                                                    <label class="form-check-label">
+                                                      <input type="radio" class="form-check-input"name="reason" id="reason3" 
+                                                        value="Pelanggaran hak cipta">
+                                                        Pelanggaran hak cipta
+                                                    </label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
-                                                    <label class="form-check-label" for="reason4">Lainnya</label>
+                                                    <label class="form-check-label">
+                                                      <input type="radio" class="form-check-input" name="reason" id="reason4"
+                                                        value="Lainnya">
+                                                        Lainnya
+                                                    </label>
                                                 </div>
                                             </div>
                                             <div class="form-group" id="description-group" style="display: none;">
@@ -255,7 +284,22 @@
                         </div>
                     @endif
                 @endforeach
-            </div>                  
+            </div>  
+            @if(Auth::check())
+            <div class="card-footer mt-auto">
+                <form method="POST" action="{{ route('photos.comments.store', $photo->id) }}" class="text-start">
+                    @csrf
+                    <div class="mb-3 d-flex">
+                        <textarea class="form-control" name="comment" rows="1" placeholder="Tambahkan komentar..." required></textarea>
+                        <button type="submit" class="btn btn-link p-0 ms-2">
+                            <i class="bi bi-send text-dark fw-bold fs-5"></i>
+                        </button>
+                    </div>
+                </form>
+                @else
+                    <p class="text-start">Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
+                @endif
+            </div>               
         </div>
     </div>
 </div>
@@ -273,8 +317,6 @@
                     <a href="{{ route('photos.show', $randomPhoto->id) }}">
                         <img src="{{ asset('storage/' . $randomPhoto->path) }}" class="img-fluid rounded" alt="{{ $randomPhoto->title }}">
                     </a>
-                    <h5 class="mt-2">{{ $randomPhoto->title }}</h5>
-                    <p>Hashtags: {{ implode(', ', json_decode($randomPhoto->hashtags)) }}</p>
                 </div>
             @endforeach
         @endif
@@ -324,20 +366,32 @@
                     <div class="form-group">
                         <label for="reason">Alasan Melaporkan</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="reason" id="reason1" value="Konten tidak pantas" required>
-                            <label class="form-check-label" for="reason1">Konten tidak pantas</label>
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input"name="reason" id="reason1"
+                                value="Konten tidak pantas">
+                                Konten tidak pantas
+                            </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="reason" id="reason2" value="Spam" required>
-                            <label class="form-check-label" for="reason2">Spam</label>
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input" name="reason" id="reason2" 
+                                value="Spam">
+                                Spam
+                            </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
-                            <label class="form-check-label" for="reason3">Pelanggaran hak cipta</label>
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input"name="reason" id="reason3" 
+                                value="Pelanggaran hak cipta">
+                                Pelanggaran hak cipta
+                            </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
-                            <label class="form-check-label" for="reason4">Lainnya</label>
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input" name="reason" id="reason4"
+                                value="Lainnya">
+                                Lainnya
+                            </label>
                         </div>
                     </div>
                     <div class="form-group" id="description-group" style="display: none;">

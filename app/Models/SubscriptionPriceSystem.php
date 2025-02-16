@@ -15,4 +15,9 @@ class SubscriptionPriceSystem extends Model
         'duration',
         'price',
     ];
+
+    public function getSubsPriceSystemCount()
+    {
+        return SubscriptionPriceSystem::count();
+    }
 }

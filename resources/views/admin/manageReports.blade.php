@@ -8,10 +8,10 @@
                     <h2 class="font-weight-bold">Manage Report</h2>
                     <ol class="breadcrumb">
                       <li class="breadcrumb-item active">Dashboard</li>
-                      <li class="breadcrumb-item"><a href="{{ route('admin.manageReports') }}">Manage Report</a></li>
-                      <li class="breadcrumb-item"><a href="{{ route('admin.reports.users') }}">Report User</a></li>
-                      <li class="breadcrumb-item"><a href="{{ route('admin.reports.comments') }}">Report Comment</a></li>
-                      <li class="breadcrumb-item"><a href="{{ route('admin.reports.photos') }}">Report Photo</a></li>
+                      <li class="breadcrumb-item"><a href="{{ route('admin.manageReports') }}" class="text-success">Manage Report</a></li>
+                      <li class="breadcrumb-item"><a href="{{ route('admin.reports.users') }}" class="text-success">Report User</a></li>
+                      <li class="breadcrumb-item"><a href="{{ route('admin.reports.comments') }}" class="text-success">Report Comment</a></li>
+                      <li class="breadcrumb-item"><a href="{{ route('admin.reports.photos') }}" class="text-success">Report Photo</a></li>
                     </ol>
                   </div>
                 </div>

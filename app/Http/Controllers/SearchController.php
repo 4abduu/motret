@@ -15,13 +15,14 @@ class SearchController extends Controller
         $search = Search::firstOrCreate(['keyword' => $keyword]);
         $search->increment('count');
 
-        // Cari akun berdasarkan username atau nama, dan hanya pengguna dengan peran 'user'
-        $users = User::where('role', 'user')
-            ->where(function($q) use ($keyword) {
-                $q->where('username', 'LIKE', "%{$keyword}%")
-                  ->orWhere('name', 'LIKE', "%{$keyword}%");
-            })
-            ->get();
+        // Cari akun berdasarkan username atau nama, dan hanya pengguna dengan peran 'user dan pro'
+        $users = User::whereIn('role', ['user', 'pro'])
+                ->where(function($q) use ($keyword) {
+                    $q->where('username', 'LIKE', "%{$keyword}%")
+                    ->orWhere('name', 'LIKE', "%{$keyword}%");
+                })
+                ->get();
+
 
         // Ambil ID pengguna yang ditemukan
         $userIds = $users->pluck('id');

@@ -7,7 +7,7 @@
 <div class="row">
     <h3>Permintaan Verifikasi</h3>
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-success">Dashboard</a></li>
         <li class="breadcrumb-item active">Permintaan Verifikasi</li>
     </ol>
 </div>
@@ -38,7 +38,7 @@
                                     <td>{{ $request->username }}</td>
                                     <td>{{ $request->reason }}</td>
                                     <td>
-                                        <a href="{{ route('admin.verificationDocuments', $request->id) }}" class="btn btn-info btn-sm">Lihat Dokumen</a>
+                                        <a href="{{ route('admin.verificationDocuments', $request->id) }}" class="btn btn-info btn-sm" style="color: white;">Lihat Dokumen</a>
                                     </td>
                                     <td>
                                         @if($request->status === 'pending')

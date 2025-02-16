@@ -5,7 +5,7 @@
                 <img src="{{ asset('images/Motret logo.png') }}" class="me-2" alt="logo" />
             </a>
             <a class="navbar-brand brand-logo-mini" href="{{ url('/') }}">
-                <img src="{{ asset('assets/images/logo-mini.svg') }}" alt="logo" />
+                <img src="{{ asset('images/Motret logo kecil.png') }}" alt="logo" />
             </a>
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
@@ -19,7 +19,7 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
                         <a class="dropdown-item" href="{{ route('logout') }}">
-                            <i class="ti-power-off text-primary"></i> Logout
+                            <i class="ti-power-off text-success"></i> Logout
                         </a>
                     </div>
                 </li>
@@ -45,19 +45,19 @@
                                 <i class="icon-search"></i>
                             </span>
                         </div>
-                        <input type="text" name="query" class="form-control" id="navbar-search-input" placeholder="Search now" aria-label="search" aria-describedby="search">
+                        <input type="text" name="query" class="form-control" id="navbar-search-input" placeholder="Cari foto sekarang" aria-label="search" aria-describedby="search">
                     </form>
                 </li>
             </ul>
             <ul class="navbar-nav navbar-nav-right">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('photos.create') }}">
-                        <i class="ti-upload text-primary"></i> Upload
+                        <i class="ti-upload text-success"></i> Unggah
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('notifications.index') }}">
-                        <i class="ti-bell text-primary"></i> Notifications
+                        <i class="icon-bell mx-0 fs-5 text-dark"></i> 
                     </a>
                 </li>
                 <li class="nav-item">
@@ -71,13 +71,13 @@
                     </a>
                     <div class="dropdown-menu dropdown-menu-end navbar-dropdown" aria-labelledby="profileDropdown">
                         <a class="dropdown-item" href="{{ route('user.profile') }}">
-                            <i class="ti-user text-primary"></i> Profil
+                            <i class="ti-user text-success"></i> Profil
                         </a>                        
                         <a class="dropdown-item" href="{{ route('user.settings') }}">
-                            <i class="ti-settings text-primary"></i> Pengaturan
+                            <i class="ti-settings text-success"></i> Pengaturan
                         </a>
                         <a class="dropdown-item" href="{{ route('logout') }}">
-                            <i class="ti-power-off text-primary"></i> Keluar
+                            <i class="ti-power-off text-success"></i> Keluar
                         </a>
                     </div>
                 </li>
@@ -103,16 +103,16 @@
                                 <i class="icon-search"></i>
                             </span>
                         </div>
-                        <input type="text" name="query" class="form-control" id="navbar-search-input" placeholder="Search now" aria-label="search" aria-describedby="search">
+                        <input type="text" name="query" class="form-control" id="navbar-search-input" placeholder="Cari foto sekarang" aria-label="search" aria-describedby="search">
                     </form>
                 </li>
             </ul>
             <ul class="navbar-nav navbar-nav-right">
                 <li class="nav-item">
-                    <a class="btn btn-success ml-auto" style="border-radius: 30px; padding: 9px 25px; margin-right: -15px;" href="{{ route('login') }}">Login</a>
+                    <a class="btn btn-success ml-auto text-white" style="border-radius: 30px; padding: 9px 25px; margin-right: -15px;" href="{{ route('login') }}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="btn btn-secondary" style="border-radius: 30px; padding: 9px 20px;" href="{{ route('login') }}?register=true">Register</a>
+                    <a class="btn btn-secondary text-white" style="border-radius: 30px; padding: 9px 20px;" href="{{ route('login') }}?register=true">Register</a>
                 </li>
             </ul>
         </div>

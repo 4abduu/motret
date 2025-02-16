@@ -50,7 +50,7 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('
 
 // Grup untuk Admin
 Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(function () {
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     
     // Manage Users
     Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users');
@@ -82,14 +82,14 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
     Route::delete('/admin/reports/{id}', [AdminReportController::class, 'deleteReport'])->name('admin.reports.delete');
     
     // Manage Subscriptions
-    Route::get('/subscriptions', [AdminSubscriptionController::class, 'index'])->name('admin.subscriptions');
-    Route::get('/subscriptions/transactions', [AdminSubscriptionController::class, 'transactions'])->name('admin.subscriptions.transactions');
-    Route::get('/subscriptions/system-prices', [AdminSubscriptionController::class, 'systemPrices'])->name('admin.subscriptions.systemPrices');
-    Route::get('/subscriptions/user-prices', [AdminSubscriptionController::class, 'userPrices'])->name('admin.subscriptions.userPrices');
-    Route::get('/subscriptions/user-subscriptions', [AdminSubscriptionController::class, 'userSubscriptions'])->name('admin.subscriptions.userSubscriptions');
-    Route::get('/subscriptions/system-subscriptions', [AdminSubscriptionController::class, 'systemSubscriptions'])->name('admin.subscriptions.systemSubscriptions');
-    Route::get('/subscriptions/combo-subscriptions', [AdminSubscriptionController::class, 'comboSubscriptions'])->name('admin.subscriptions.comboSubscriptions');
-    
+    Route::get('/admin/subscriptions', [AdminSubscriptionController::class, 'index'])->name('admin.subscriptions');
+    Route::get('/admin/subscriptions/transactions', [AdminSubscriptionController::class, 'transactions'])->name('admin.subscriptions.transactions');
+    Route::get('/admin/subscriptions/system-prices', [AdminSubscriptionController::class, 'systemPrices'])->name('admin.subscriptions.systemPrices');
+    Route::get('/admin/subscriptions/user-prices', [AdminSubscriptionController::class, 'userPrices'])->name('admin.subscriptions.userPrices');
+    Route::get('/admin/subscriptions/user-subscriptions', [AdminSubscriptionController::class, 'userSubscriptions'])->name('admin.subscriptions.userSubscriptions');
+    Route::get('/admin/subscriptions/system-subscriptions', [AdminSubscriptionController::class, 'systemSubscriptions'])->name('admin.subscriptions.systemSubscriptions');
+    Route::get('/admin/subscriptions/combo-subscriptions', [AdminSubscriptionController::class, 'comboSubscriptions'])->name('admin.subscriptions.comboSubscriptions');
+    Route::put('/subscriptions/system-prices/{id}', [AdminSubscriptionController::class, 'updatePriceSystem'])->name('admin.subscriptions.updatePriceSystem');
     // Manage Verification Requests
     Route::get('/admin/verification-requests', [AdminVerificationController::class, 'index'])->name('admin.verificationRequests');
     Route::get('/admin/verification-requests/{id}/documents', [AdminVerificationController::class, 'showVerificationDocuments'])->name('admin.verificationDocuments');
@@ -131,6 +131,8 @@ Route::middleware(['auth', 'role:user,pro', 'logout_if_authenticated'])->group(f
     Route::put('/settings/password', [UserController::class, 'updatePassword'])->name('user.updatePassword');
     Route::post('/settings/send-email-verification', [AuthController::class, 'sendEmailVerification'])->name('user.sendEmailVerification');
     Route::post('/settings/verify-email-code', [AuthController::class, 'verifyEmailCode'])->name('user.verifyEmailCode');
+    Route::put('/settings/update-email', [UserController::class, 'updateEmail'])->name('user.updateEmail');
+    Route::post('/check-verification-username', [UserController::class, 'checkVerificationUsername'])->name('user.checkVerificationUsername');
     Route::put('/settings/update-email', [UserController::class, 'updateEmail'])->name('user.updateEmail');
     Route::post('/settings/submit-verification', [UserController::class, 'submitVerification'])->name('user.submitVerification');
     Route::get('/photos/{id}/edit', [UserController::class, 'editPhoto'])->name('photos.edit');

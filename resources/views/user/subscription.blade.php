@@ -12,6 +12,7 @@
         padding: 50px;
         text-align: center;
         height: 100%;
+        margin-bottom: 20px; /* Atur jarak sesuai kebutuhan */
     }
     .card h4 {
         margin-bottom: 50px;
@@ -54,7 +55,7 @@
     <div class="container mt-5 pt-10">
         <div class="row justify-content-center equal-height">
             @foreach($prices as $price)
-                <div class="col-md-4 d-flex">
+                <div class="col-md-4 d-flex mb-4">
                     <div class="card flex-fill">
                         <h4 class="fw-bold">Unlimited Subscription</h4>
                         <p><i class="bi bi-check-circle"></i> Unggah foto tanpa batas</p>

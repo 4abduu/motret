@@ -1,4 +1,3 @@
-manageusers blade:
 @extends('layouts.app')
 
 @section('title', 'Manage Users')
@@ -8,7 +7,7 @@ manageusers blade:
 <div class="row">
     <h3>Manage User</h3>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a  href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item" ><a  href="{{ route('admin.dashboard') }}" class="text-success">Dashboard</a></li>
         <li class="breadcrumb-item active">Manage User</li>
       </ol>
 </div>
@@ -19,7 +18,7 @@ manageusers blade:
             <div class="card-body">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">Data User</h4>
-                    <button type="button" class="btn btn-primary btn-icon-text" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                    <button type="button" class="btn btn-success btn-icon-text" style="color: white;" data-bs-toggle="modal" data-bs-target="#createUserModal">
                         <i class="mdi mdi-plus btn-icon-prepend"></i> Tambah User
                     </button>
                 </div>
@@ -150,6 +149,14 @@ manageusers blade:
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" name="email" class="form-control" id="email" value="{{ $user->email }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Bio</label>
+                        <input type="text" name="bio" class="form-control" id="bio" value="{{ $user->bio }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="website" class="form-label">Website</label>
+                        <input type="text" name="website" class="form-control" id="website" value="{{ $user->website }}">
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
