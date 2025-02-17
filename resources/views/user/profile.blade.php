@@ -74,10 +74,10 @@
                 @endif
             </ul>
             
-            <div class="tab-content" id="myTabContent">
-                <!-- Tab Foto -->
-                 <div class="tab-pane fade show active" id="photos" role="tabpanel" aria-labelledby="photos-tab">
-            <h3 class="mt-5">Foto yang Diunggah</h3>
+    <div class="tab-content" id="myTabContent">
+        <!-- Tab Foto -->
+        <div class="tab-pane fade show active" id="photos" role="tabpanel" aria-labelledby="photos-tab">
+            <h2 class="mt-5">Foto yang Diunggah</h2>
             <div class="row">
                 @foreach($photos as $photo)
                     @if($photo->banned && $photo->user_id !== Auth::id())
@@ -101,8 +101,7 @@
                                     <p class="card-text">{{ $photo->description }}</p>
                                     <div class="dropdown">
                                         <button class="btn btn-link p-0" type="button" id="dropdownMenuButton-{{ $photo->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-three-dots"></i>
-                                        </button>
+                                            <i class="bi bi-three-dots text-dark"></i>                                        </button>
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $photo->id }}">
                                             @if(Auth::id() === $photo->user_id)
                                                 <li><a class="dropdown-item" href="{{ route('photos.edit', $photo->id) }}">Edit Foto</a></li>
@@ -139,8 +138,9 @@
                             </div>
                         </div>
                     </div>
+
                     <!-- Modal Laporkan Foto -->
-                    {{-- <div class="modal fade" id="reportPhotoModal-{{ $photo->id }}" tabindex="-1" role="dialog" aria-labelledby="reportPhotoModalLabel-{{ $photo->id }}" aria-hidden="true">
+                    <div class="modal fade" id="reportPhotoModal-{{ $photo->id }}" tabindex="-1" role="dialog" aria-labelledby="reportPhotoModalLabel-{{ $photo->id }}" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -153,33 +153,22 @@
                                         <div class="form-group">
                                             <label for="reason">Alasan Melaporkan</label>
                                             <div class="form-check">
-                                                <label class="form-check-label">
-                                                  <input type="radio" class="form-check-input"name="reason" id="reason1"
-                                                    value="Konten tidak pantas">
-                                                    Konten tidak pantas
-                                                </label>
+                                                <input class="form-check-input" type="radio" name="reason" id="reason1" value="Konten tidak pantas" required>
+                                                <label class="form-check-label" for="reason1">Konten tidak pantas</label>
                                             </div>
                                             <div class="form-check">
-                                                <label class="form-check-label">
-                                                  <input type="radio" class="form-check-input" name="reason" id="reason2" 
-                                                    value="Spam">
-                                                    Spam
-                                                </label>
+                                                <input class="form-check-input" type="radio" name="reason" id="reason2" value="Spam" required>
+                                                <label class="form-check-label" for="reason2">Spam</label>
                                             </div>
                                             <div class="form-check">
-                                                <label class="form-check-label">
-                                                  <input type="radio" class="form-check-input"name="reason" id="reason3" 
-                                                    value="Pelanggaran hak cipta">
-                                                    Pelanggaran hak cipta
-                                                </label>
+                                                <input class="form-check-input" type="radio" name="reason" id="reason3" value="Pelanggaran hak cipta" required>
+                                                <label class="form-check-label" for="reason3">Pelanggaran hak cipta</label>
                                             </div>
                                             <div class="form-check">
-                                                <label class="form-check-label">
-                                                  <input type="radio" class="form-check-input" name="reason" id="reason4"
-                                                    value="Lainnya">
-                                                    Lainnya
-                                                </label>
+                                                <input class="form-check-input" type="radio" name="reason" id="reason4" value="Lainnya" required>
+                                                <label class="form-check-label" for="reason4">Lainnya</label>
                                             </div>
+                                        </div>
                                         <div class="form-group" id="description-group-{{ $photo->id }}" style="display: none;">
                                             <label for="description">Alasan</label>
                                             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
@@ -189,122 +178,118 @@
                                 </div>
                             </div>
                         </div>
-                    </div> --}}
-
-  
+                    </div>
                 @endforeach
             </div>
         </div>
-            
-                <!-- Tab Album -->
-                <div class="tab-pane fade" id="albums" role="tabpanel" aria-labelledby="albums-tab">
-                    <h3 class="mt-5">Album</h3>
-                    @if(Auth::id() === $user->id)
-                        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createAlbumModal">Buat Album Baru</button>
-                    @endif
-                    <div class="row">
-                        @foreach($albums as $album)
-                            <div class="col-md-4 mb-4">
-                                <div class="card">
-                                    <a href="{{ route('albums.show', $album->id) }}">
-                                        <div class="album-cover">
-                                            @foreach($album->photos->take(3) as $photo)
-                                                <img src="{{ asset('storage/' . $photo->path) }}" class="album-cover-photo" alt="{{ $photo->title }}">
-                                            @endforeach
-                                        </div>
-                                    </a>
-                                    <div class="card-body">
-                                        <h5 class="card-title">{{ $album->name }}</h5>
-                                        <p class="card-text">{{ $album->description }}</p>
-                                        @if(Auth::id() === $album->user_id)
-                                            <div class="dropdown">
-                                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ $album->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                                    <i class="bi bi-bookmark-fill"></i>
-                                                </button>
-                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $album->id }}">
-                                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editAlbumModal-{{ $album->id }}">Edit</a></li>
-                                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deleteAlbumModal-{{ $album->id }}">Hapus</a></li>
-                                                </ul>
-                                            </div>
-                                        @endif
-                                    </div>
+    {{-- MEK ISONE NGGAWE COPAS AN TEKO KODE KU SENG SUWEEE WKWKWKWKKW, ASLINE ISO CUMAN WAKTU NE GA CUKUP NJINGGG --}}
+        <!-- Tab Album -->
+        <div class="tab-pane fade" id="albums" role="tabpanel" aria-labelledby="albums-tab">
+            <h2 class="mt-5">Album</h2>
+            @if(Auth::id() === $user->id)
+                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createAlbumModal">Buat Album Baru</button>
+            @endif
+            <div class="row">
+                @foreach($albums as $album)
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <a href="{{ route('albums.show', $album->id) }}">
+                                <div class="album-cover">
+                                    @foreach($album->photos->take(3) as $photo)
+                                        <img src="{{ asset('storage/' . $photo->path) }}" class="album-cover-photo" alt="{{ $photo->title }}">
+                                    @endforeach
                                 </div>
-                            </div>
-                            
-                            <!-- Modal Edit Album -->
-                            <div class="modal fade" id="editAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="editAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="editAlbumModalLabel-{{ $album->id }}">Edit Album</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form method="POST" action="{{ route('albums.update', $album->id) }}">
-                                                @csrf
-                                                @method('PUT')
-                                                <div class="form-group">
-                                                    <label for="albumName">Nama Album</label>
-                                                    <input type="text" class="form-control" name="name" value="{{ $album->name }}" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="albumDescription">Deskripsi</label>
-                                                    <textarea class="form-control" name="description" rows="3">{{ $album->description }}</textarea>
-                                                </div>
-                                                <button type="submit" class="btn btn-success">Simpan Perubahan</button>
-                                            </form>
-                                        </div>
+                            </a>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $album->name }}</h5>
+                                <p class="card-text">{{ $album->description }}</p>
+                                @if(Auth::id() === $album->user_id)
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-{{ $album->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-bookmarks-fill "></i>                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $album->id }}">
+                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editAlbumModal-{{ $album->id }}">Edit</a></li>
+                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deleteAlbumModal-{{ $album->id }}">Hapus</a></li>
+                                        </ul>
                                     </div>
-                                </div>
+                                @endif
                             </div>
-                            
-                            <!-- Modal Hapus Album -->
-                            <div class="modal fade" id="deleteAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="deleteAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteAlbumModalLabel-{{ $album->id }}">Hapus Album</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Apakah Anda yakin ingin menghapus album ini?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                            <form method="POST" action="{{ route('albums.destroy', $album->id) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Hapus</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            
-                <!-- Tab Langganan -->
-                @if($user->verified)
-                    <div class="tab-pane fade" id="subscription" role="tabpanel" aria-labelledby="subscription-tab">
-                        <h2 class="mt-5">Langganan</h2>
-                        <div class="row">
-                            @if(Auth::id() === $user->id)
-                                <button class="btn btn-success mb-3">Tambah Foto Anda</button>
-                            @elseif(Auth::check() && Auth::user()->subscriptions()->where('verified_user_id', $user->id)->exists())
-                                <h5>Foto foto eksklusif</h5>
-                            @else
-                                <h5>Anda belum berlangganan!</h5>
-                                <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>
-                                <button class="btn btn-primary">Langganan Sekarang</button>
-                            @endif
                         </div>
                     </div>
-                @endif
+                    
+                    <!-- Modal Edit Album -->
+                    <div class="modal fade" id="editAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="editAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editAlbumModalLabel-{{ $album->id }}">Edit Album</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="POST" action="{{ route('albums.update', $album->id) }}">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="form-group">
+                                            <label for="albumName">Nama Album</label>
+                                            <input type="text" class="form-control" name="name" value="{{ $album->name }}" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="albumDescription">Deskripsi</label>
+                                            <textarea class="form-control" name="description" rows="3">{{ $album->description }}</textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal Hapus Album -->
+                    <div class="modal fade" id="deleteAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="deleteAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteAlbumModalLabel-{{ $album->id }}">Hapus Album</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Apakah Anda yakin ingin menghapus album ini?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <form method="POST" action="{{ route('albums.destroy', $album->id) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Hapus</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
-        
+    
+        <!-- Tab Langganan -->
+        @if($user->verified)
+            <div class="tab-pane fade" id="subscription" role="tabpanel" aria-labelledby="subscription-tab">
+                <h2 class="mt-5">Langganan</h2>
+                <div class="row">
+                    @if(Auth::id() === $user->id)
+                        <button class="btn btn-success mb-3">Tambah Foto Anda</button>
+                    @elseif(Auth::check() && Auth::user()->subscriptions()->where('verified_user_id', $user->id)->exists())
+                        <h5>Foto foto eksklusif</h5>
+                    @else
+                        <h5>Anda belum berlangganan!</h5>
+                        <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>
+                        <button class="btn btn-primary">Langganan Sekarang</button>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
+    
+</div>
 
     <!-- Modal Edit Profil -->
     @if(Auth::id() === $user->id)
@@ -370,7 +355,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary">Buat Album</button>
+                            <button type="submit" class="btn btn-success">Buat Album</button>
                         </div>
                     </form>
                 </div>

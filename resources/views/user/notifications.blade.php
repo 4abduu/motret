@@ -23,11 +23,23 @@
                         <i class="bi bi-info-circle me-2" style="color: gray; font-size: 20px;"></i>
                 @endswitch
                 <div>
-                    <img src="https://via.placeholder.com/40" class="rounded-circle mb-1" alt="Profile">
+                    @if($notification->type !== 'system')
+                        @if($notification->sender)
+                            @if($notification->sender->profile_photo)
+                                <img src="{{ asset('storage/photo_profile/' . $notification->sender->profile_photo) }}" class="rounded-circle mb-1" alt="{{ $notification->sender->username }}" style="width: 40px; height: 40px; object-fit: cover;">
+                            @else
+                                <img src="{{ asset('images/foto profil.jpg') }}" class="rounded-circle mb-1" alt="{{ $notification->sender->username }}" style="width: 40px; height: 40px; object-fit: cover;">
+                            @endif
+                        @else
+                            <img src="{{ asset('images/foto profil.jpg') }}" class="rounded-circle mb-1" alt="Unknown User" style="width: 40px; height: 40px; object-fit: cover;">
+                        @endif
+                    @endif
                     <div class="text-dark fw-bold">
-                        <a href="{{ route('user.showProfile', $notification->sender->username) }}">
-                            {{ $notification->sender->username }}
-                        </a>
+                        @if($notification->sender)
+                            <a href="{{ route('user.showProfile', $notification->sender->username) }}">
+                                {{ $notification->sender->username }}
+                            </a>
+                        @endif
                         @switch($notification->type)
                             @case('follow')
                                 mengikuti anda!
@@ -46,9 +58,6 @@
                         @endswitch
                     </div>
                     <span class="text-muted" style="font-size: 12px;">{{ $notification->created_at->diffForHumans() }}</span>
-                    <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST" class="d-inline">
-                        @csrf
-                    </form>
                 </div>
             </li>
         @endforeach

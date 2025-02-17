@@ -11,11 +11,11 @@ class HomeController extends Controller
     public function index()
     {
         $photos = Photo::where(function ($query) {
-            $query->where('banned', false)
-                  ->orWhere(function ($query) {
-                      $query->where('banned', false)
-                            ->where('updated_at', '>=', now()->subWeek());
-                  });
+            $query->where('banned', false);
+                //   ->orWhere(function ($query) {
+                //       $query->where('banned', false)
+                //             ->where('updated_at', '>=', now()->subWeek());
+                //   });
         })->get();
 
         $mostViewedPhotos = Photo::where('banned', false)->orderBy('views', 'desc')->take(10)->get();
