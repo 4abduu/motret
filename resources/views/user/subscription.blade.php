@@ -58,7 +58,7 @@
                 <div class="col-md-4 d-flex mb-4">
                     <div class="card flex-fill">
                         <h4 class="fw-bold">Unlimited Subscription</h4>
-                        <p><i class="bi bi-check-circle"></i> Unggah foto tanpa batas</p>
+                        <p><i class="bi bi-check-circle"></i> Dapatkan lencana khusus</p>
                         <p><i class="bi bi-check-circle"></i> Download foto tanpa batas</p>
                         <p><i class="bi bi-x-circle" style="color: #ff2929;"></i> Jadi kreator kami</p>
                         <h3 class="fw-bold">Rp. {{ number_format($price->price, 0, ',', '.') }} <small>/{{ str_replace('_', ' ', $price->duration) }}</small></h3>

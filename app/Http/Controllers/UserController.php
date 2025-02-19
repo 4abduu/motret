@@ -62,9 +62,13 @@ class UserController extends Controller
         $randomPhotos = Photo::where('id', '!=', $id)
                              ->where('banned', false)
                              ->inRandomOrder()
-                             ->take(4)
+                             ->take(8)
                              ->get();
         $albums = Auth::check() ? Album::where('user_id', Auth::id())->with('photos')->get() : [];
+            // Cek apakah foto dibanned
+            if ($photo->banned) {
+                return redirect()->route('home')->with('error', 'Foto ini telah dibanned.');
+            }
         return view('photos.show', compact('photo', 'randomPhotos', 'albums'));
     }
 

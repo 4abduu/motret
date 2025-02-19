@@ -67,7 +67,7 @@
                     </button>
                 </form>
                 <div id="like-section" class="me-3">
-                    <button id="like-button" class="btn btn-link p-0" data-liked="{{ $photo->isLikedBy(Auth::user()) ? 'true' : 'false' }}">
+                    <button id="like-button" class="btn btn-link p-0" data-liked="{{ $photo->isLikedBy(Auth::user()) ? 'true' : 'false' }}" {{ Auth::check() ? '' : 'disabled' }}>
                         <i class="{{ $photo->isLikedBy(Auth::user()) ? 'bi bi-heart-fill fs-5' : 'bi bi-heart fs-5' }}" 
                            style="color: {{ $photo->isLikedBy(Auth::user()) ? 'red' : 'black' }};"></i>
                     </button>
@@ -82,7 +82,7 @@
                 </div>
                 
                 <div class="dropdown">
-                    <button class="btn btn-link p-0" id="bookmark-button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-link p-0" id="bookmark-button" data-bs-toggle="dropdown" aria-expanded="false" {{ Auth::check() ? '' : 'disabled' }}>
                         <i class="bi bi-bookmark text-dark fw-bold fs-5"></i>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="bookmark-button">
@@ -123,14 +123,22 @@
                 <p class="text-start">Hashtags: {{ implode(', ', json_decode($photo->hashtags)) }}</p>
                 
                 <p class="text-start d-flex align-items-center">
-                    <img src="{{ asset($photo->user->profile_picture) }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40">
+                    @if($photo->user->profile_photo)
+                        <img src="{{ asset('storage/photo_profile/' . $photo->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40">
+                    @else
+                        <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40"/>
+                    @endif
+
                     <a href="{{ route('user.showProfile', $photo->user->username) }}">{{ $photo->user->username }}</a>
                     @if($photo->user->verified)
                         <i class="ti-medall-alt" style="color: gold;"></i>
-                    @endif    
+                    @endif 
+                    @if($photo->user->role === 'pro')
+                    <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
+                    @endif
                 </p>
                 
-                <h6 class="text-start">komentar</h6>
+                <h6 class="text-start">Komentar</h6>
                 
                 @foreach($photo->comments as $comment)
                     @php
@@ -143,7 +151,10 @@
                         <div class="mb-2">
                             <strong>{{ $comment->user->username }}</strong>
                             @if($photo->user->verified)
-                                <i class="ti-medall-alt" style="color: gold;"></i> <!-- Tambahkan ini -->
+                                <i class="ti-medall-alt" style="color: gold;"></i>
+                            @endif 
+                            @if($photo->user->role === 'pro')
+                                <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
                             @endif
                             @if($comment->user_id === $photo->user_id)
                                 <span class="text-muted">• Pembuat</span>
@@ -558,21 +569,34 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await response.json();
             if (data.success) {
                 const replyId = Date.now(); // Gunakan timestamp sementara sebagai ID unik
+                const userId = data.reply.user.id; // Ambil ID pengguna untuk validasi
+                const currentUserId = data.currentUserId; // ID pengguna yang sedang login
+
+                const isCurrentUser = userId === currentUserId;
+                
                 const replyHtml = `
                     <div class="ms-4 mt-2" id="reply-${replyId}">
                         <strong>${data.reply.user.username}</strong>
                         <p>${data.reply.reply}</p>
                         <small class="text-muted">${data.reply.created_at}</small>
+                        <button class="btn btn-link" type="button" id="dropdownMenuButton-${replyId}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
                         <div class="dropdown">
-                            <button class="btn btn-link" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <button type="button" class="dropdown-item delete-reply" data-reply-id="${replyId}">
-                                        Hapus Komentar
-                                    </button>
-                                </li>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${replyId}">
+                                ${isCurrentUser ? `
+                                    <li>
+                                        <button type="button" class="dropdown-item delete-reply" data-reply-id="${replyId}">
+                                            Hapus Balasan
+                                        </button>
+                                    </li>
+                                ` : `
+                                    <li>
+                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-${replyId}">
+                                            Lapor Balasan
+                                        </button>
+                                    </li>
+                                `}
                             </ul>
                         </div>
                     </div>
@@ -582,6 +606,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 form.reset();
                 form.closest('.reply-form').style.display = 'none';
             }
+
         } catch (error) {
             console.error("Error submitting reply:", error);
         }
