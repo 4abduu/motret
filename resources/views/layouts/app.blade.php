@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="{{ asset('../../../assets/css/vertical-layout-light/style.css') }}">
     <link rel="stylesheet" href="{{ asset('../../../assets/css/style.css') }}">
     <link rel="shortcut icon" href="{{ asset('../../../images/Motret logo kecil.png') }}" />
+    <link rel="stylesheet" href="{{ asset('../../../assets/vendors/dropify/dropify.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('../../../assets/vendors/jquery-file-upload/uploadfile.css') }}" />
+    <link rel="stylesheet" href="{{ asset('../../../assets/vendors/jquery-tags-input/jquery.tagsinput.min.css') }}" />
 
 
     @stack('link')
@@ -123,6 +126,12 @@
     <script src="{{ asset('../../../assets/vendors/datatables.net/jquery.dataTables.js') }}"></script>
     <script src="{{ asset('../../../assets/vendors/datatables.net-bs5/dataTables.bootstrap5.js') }}"></script>
     <script src="{{ asset('.../../../assets/js/data-table.js') }}"></script>
+    <script src="{{ asset('../../../assets/js/dropify.js') }}"></script>
+    <script src="{{ asset('../../../assets/js/dropzone.js') }}"></script>
+    <script src="{{ asset('../../../assets/js/jquery-file-upload.js') }}"></script>
+    <script src="{{ asset('../../../assets/vendors/dropify/dropify.min.js') }}"></script>
+    <script src="{{ asset('../../../assets/vendors/jquery-file-upload/jquery.uploadfile.min.js') }}"></script>
+    <script src="{{ asset('../../../assets/vendors/jquery-tags-input/jquery.tagsinput.min.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/2.2.1/js/dataTables.js"></script>
