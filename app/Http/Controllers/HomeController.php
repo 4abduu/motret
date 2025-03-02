@@ -11,16 +11,18 @@ class HomeController extends Controller
     public function index()
     {
         $photos = Photo::where(function ($query) {
-            $query->where('banned', false);
-                //   ->orWhere(function ($query) {
-                //       $query->where('banned', false)
-                //             ->where('updated_at', '>=', now()->subWeek());
-                //   });
+            $query->where('banned', false)
+                  ->where('premium', false)   
+                  ->orWhere(function ($query) {
+                       $query->where('banned', false)
+                             ->where('premium', false)
+                             ->where('updated_at', '>=', now()->subWeek());
+                   });
         })->get();
 
-        $mostViewedPhotos = Photo::where('banned', false)->orderBy('views', 'desc')->take(10)->get();
-        $mostLikedPhotos = Photo::withCount('likes')->where('banned', false)->orderBy('likes_count', 'desc')->take(10)->get();
-        $mostDownloadedPhotos = Photo::withCount('downloads')->where('banned', false)->orderBy('downloads_count', 'desc')->take(10)->get();
+        $mostViewedPhotos = Photo::where('banned', false)->where('premium', false)->orderBy('views', 'desc')->take(10)->get();
+        $mostLikedPhotos = Photo::withCount('likes')->where('banned', false)->where('premium', false)->orderBy('likes_count', 'desc')->take(10)->get();
+        $mostDownloadedPhotos = Photo::withCount('downloads')->where('banned', false)->where('premium', false)->orderBy('downloads_count', 'desc')->take(10)->get();
         $mostSearchedKeywords = Search::orderBy('count', 'desc')->take(10)->get();
 
         return view('home', compact('photos', 'mostViewedPhotos', 'mostLikedPhotos', 'mostDownloadedPhotos', 'mostSearchedKeywords'));

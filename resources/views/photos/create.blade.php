@@ -42,7 +42,7 @@
                         <label for="hashtags">Hastag (tanpa#)</label>
                         <input type="text" name="hashtags" class="form-control" id="hashtags" placeholder="Hastag">
                       </div>
-                      @if (Auth::user()->role == 'pro')
+                      @if (Auth::user()->verified)
                       <div class="form-group">
                         <label for="premium" class="form-label">Premium</label>
                         <select class="form-select" id="premium" name="premium" required>

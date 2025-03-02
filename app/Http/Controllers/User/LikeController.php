@@ -1,16 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\Photo;
 use App\Models\Like;
 use App\Models\Notif;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class LikeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     public function like($photoId)
     {
         $photo = Photo::findOrFail($photoId);

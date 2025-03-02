@@ -1,7 +1,7 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Follow;
 use App\Models\Notif; // Pastikan model Notif diimport
@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class FollowController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     public function follow($userId)
     {
         $user = User::findOrFail($userId);

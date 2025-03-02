@@ -182,7 +182,6 @@
                 @endforeach
             </div>
         </div>
-    {{-- MEK ISONE NGGAWE COPAS AN TEKO KODE KU SENG SUWEEE WKWKWKWKKW, ASLINE ISO CUMAN WAKTU NE GA CUKUP NJINGGG --}}
         <!-- Tab Album -->
         <div class="tab-pane fade" id="albums" role="tabpanel" aria-labelledby="albums-tab">
             <h2 class="mt-5">Album</h2>

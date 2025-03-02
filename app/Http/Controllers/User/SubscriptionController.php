@@ -10,11 +10,11 @@ use App\Models\SubscriptionSystem;
 use App\Models\Notif; // Tambahkan model Notif
 use Midtrans\Config;
 use Midtrans\Snap;
-use Midtrans\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use function env;
 
 class SubscriptionController extends Controller
 {

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Album;
 use App\Models\Photo;
@@ -10,10 +11,15 @@ use Illuminate\Support\Facades\Validator;
 
 class AlbumController extends Controller
 {
-    public function show($id)
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    public function index($id)
     {
         $album = Album::with(['photos' => function($query) {
-            $query->where('banned', false);
+            $query->where('banned', false)
+            ->where('premium', false);
         }])->findOrFail($id);
         return view('albums.show', compact('album'));
     }

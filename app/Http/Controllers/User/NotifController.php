@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
+use App\Http\Controllers\Controller;
 use App\Models\Notif;
 use App\Models\Comment;
 use App\Models\Photo;
@@ -11,6 +12,10 @@ use Illuminate\Support\Facades\Auth;
 
 class NotifController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     public function index()
     {
         $notifications = Notif::where('notify_for', Auth::id())

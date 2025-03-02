@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use PHPUnit\Event\Telemetry\System;
 
 class DatabaseSeeder extends Seeder
 {
@@ -11,6 +12,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UsersTableSeeder::class,
             FotoTableSeeder::class,
+            SystemSubscriptionPriceSeeder::class,
         ]);
     }
 }
