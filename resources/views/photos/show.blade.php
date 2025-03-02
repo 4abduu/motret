@@ -110,10 +110,10 @@
         </div>
         <div class="col-md-6 ">
             <div class="d-flex align-items-center mb-3">
-                <button type="button" class="btn btn-link p-0 me-3">
+                <button type="button" class="btn btn-link p-0 me-3" id="copy-url-button">
                     <i class="bi bi-share text-dark fw-bold fs-5"></i> 
                 </button>
-                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}">
+                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}" {{ Auth::check() ? '' : 'disabled' }}>
                     <i class="bi bi-flag text-dark fw-bold fs-5"></i>
                 </button>
             </div>
@@ -309,9 +309,8 @@
                 </form>
                 @else
                     <p class="text-start">Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
-                @endif
-            </div>               
-        </div>
+            </div>
+            @endif
     </div>
 </div>
 
@@ -692,6 +691,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         ctx.restore();
     };
+    
+    const copyUrlButton = document.getElementById('copy-url-button');
+    const photoUrl = window.location.href;
+
+    copyUrlButton.addEventListener('click', function () {
+        navigator.clipboard.writeText(photoUrl).then(function () {
+            alert('URL berhasil disalin ke clipboard!');
+        }, function (err) {
+            console.error('Gagal menyalin URL: ', err);
+        });
+    });
 });
 </script>
 @endpush
