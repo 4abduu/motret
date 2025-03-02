@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="container mt-5">
-        <h1 class="my-4">Search Results for "{{ $keyword }}"</h1>
+        <h3 class="my-4">Search Results for "{{ $keyword }}"</h3>
         @if($users->isEmpty() && $photos->isEmpty())
             <p>No results found.</p>
         @else
