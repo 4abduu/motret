@@ -141,6 +141,9 @@ Route::middleware(['auth', 'role:user,pro', 'logout_if_authenticated'])->group(f
     Route::delete('/photos/{id}', [UserPhotoController::class, 'destroyPhoto'])->name('photos.destroy');
     Route::post('/transaction/create', [UserSubscriptionController::class, 'createTransaction'])->name('transaction.create');
     Route::post('/transaction/check-status', [UserSubscriptionController::class, 'checkTransactionStatus'])->name('transaction.checkStatus');
+    Route::get('/subscription/manage', [UserSubscriptionController::class, 'manage'])->name('subscription.manage');
+    Route::post('/subscription/save', [UserSubscriptionController::class, 'saveSubsUser'])->name('subscription.save');
+    Route::get('/subscription/history', [UserSubscriptionController::class, 'history'])->name('subscription.history');
 });
 
 // Rute untuk guest melihat album

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Photo;
 use App\Models\Album;
 use App\Models\User;
+use App\Models\SubscriptionPriceUser;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -23,7 +24,8 @@ class ProfileController extends Controller
         $photos = Photo::where('user_id', $user->id)->where('premium', false)->get();
         $premiumPhotos = Photo::where('user_id', $user->id)->where('premium', true)->get();
         $albums = Album::where('user_id', $user->id)->with('photos')->get();
-        return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums'));
+        $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
+        return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice'));
     }
 
     public function showProfile($username)
@@ -32,7 +34,9 @@ class ProfileController extends Controller
         $photos = Photo::where('user_id', $user->id)->where('premium', false)->get();
         $premiumPhotos = Photo::where('user_id', $user->id)->where('premium', true)->get();
         $albums = Album::where('user_id', $user->id)->with('photos')->get();
-        return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums'));
+        $isSubscribed = Auth::check() && Auth::user()->subscriptions()->where('verified_user_id', $user->id)->exists();
+        $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
+        return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'isSubscribed', 'hasSubscriptionPrice'));
     }
     
     public function updateProfile(Request $request)

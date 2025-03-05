@@ -67,7 +67,7 @@
                 <li class="nav-item">
                     <a class="nav-link" id="albums-tab" data-bs-toggle="tab" href="#albums" role="tab" aria-controls="albums" aria-selected="false">Album</a>
                 </li>
-                @if($user->verified)
+                @if(Auth::check() && $user->verified && ($hasSubscriptionPrice || Auth::id() === $user->id))
                     <li class="nav-item">
                         <a class="nav-link" id="subscription-tab" data-bs-toggle="tab" href="#subscription" role="tab" aria-controls="subscription" aria-selected="false">Langganan</a>
                     </li>
@@ -270,13 +270,18 @@
         </div>
     
         <!-- Tab Langganan -->
-        @if($user->verified)
+        @if(Auth::check() && $user->verified && ($hasSubscriptionPrice || Auth::id() === $user->id))
             <div class="tab-pane fade" id="subscription" role="tabpanel" aria-labelledby="subscription-tab">
                 <h2 class="mt-5">Langganan</h2>
                 <div class="row">
                     @if(Auth::id() === $user->id)
-                        <button class="btn btn-success mb-3">Tambah Foto Anda</button>
-                    @elseif(Auth::check() && Auth::user()->subscriptions()->where('verified_user_id', $user->id)->exists())
+                        @if(!$hasSubscriptionPrice)
+                            <button class="btn btn-warning mb-3" onclick="window.location.href='{{ route('subscription.manage') }}'">Atur langgananmu sekarang</button>
+                        @else
+                            <button class="btn btn-warning mb-3" onclick="window.location.href='{{ route('subscription.manage') }}'">Ubah harga langganan</button>
+                            <button class="btn btn-success mb-3">Tambah Foto Anda</button>
+                        @endif
+                    @elseif(Auth::user()->subscriptions()->where('verified_user_id', $user->id)->exists())
                         <h5>Foto foto eksklusif</h5>
                     @else
                         <h5>Anda belum berlangganan!</h5>
@@ -286,6 +291,7 @@
                 </div>
             </div>
         @endif
+    
     </div>
     
 </div>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Transaction;
 use App\Models\SubscriptionPriceSystem;
+use App\Models\SubscriptionPriceUser;
 use App\Models\SubscriptionSystem;
 use App\Models\Notif; // Tambahkan model Notif
 use Midtrans\Config;
@@ -34,6 +35,11 @@ class SubscriptionController extends Controller
     {
         $prices = SubscriptionPriceSystem::all();
         return view('user.subscription', compact('prices'));
+    }
+    public function manage()
+    {
+        $subscriptionPrices = SubscriptionPriceUser::where('user_id', Auth::id())->first();
+        return view('user.manage_subscription', compact('subscriptionPrices'));
     }
 
     public function createTransaction(Request $request)
@@ -217,4 +223,38 @@ class SubscriptionController extends Controller
                 return 0;
         }
     }
+
+    public function saveSubsUser(Request $request)
+    {
+        $request->validate([
+            'price_1_month' => 'required|string',
+            'price_3_months' => 'nullable|string',
+            'price_6_months' => 'nullable|string',
+            'price_1_year' => 'nullable|string',
+        ]);
+    
+        $price_1_month = str_replace('.', '', $request->price_1_month);
+        $price_3_months = str_replace('.', '', $request->price_3_months) ?: null;
+        $price_6_months = str_replace('.', '', $request->price_6_months) ?: null;
+        $price_1_year = str_replace('.', '', $request->price_1_year) ?: null;
+    
+        SubscriptionPriceUser::updateOrCreate(
+            ['user_id' => Auth::id()],
+            [
+                'price_1_month' => $price_1_month,
+                'price_3_months' => $price_3_months,
+                'price_6_months' => $price_6_months,
+                'price_1_year' => $price_1_year,
+            ]
+        );
+    
+        return redirect()->route('user.profile')->with('success', 'Harga langganan berhasil disimpan.');
+    }
+
+    public function history()
+    {
+        $transactions = Transaction::where('user_id', Auth::id())->get();
+        return view('user.subscription.history', compact('transactions'));
+    }
+
 }
