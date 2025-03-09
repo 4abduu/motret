@@ -1,3 +1,4 @@
+<!-- filepath: /c:/xampp/htdocs/motret/resources/views/user/subscription.blade.php -->
 @extends('layouts.app')
 
 @section('content')
@@ -53,19 +54,75 @@
 <body>
     
     <div class="container mt-5 pt-10">
+        @if($duration && $endDate)
+            <p>Anda memiliki paket langganan {{ $duration }}, yang akan berakhir pada {{ $endDate }}.</p>
+        @endif
         <div class="row justify-content-center equal-height">
-            @foreach($prices as $price)
-                <div class="col-md-4 d-flex mb-4">
-                    <div class="card flex-fill">
-                        <h4 class="fw-bold">Unlimited Subscription</h4>
-                        <p><i class="bi bi-check-circle"></i> Dapatkan lencana khusus</p>
-                        <p><i class="bi bi-check-circle"></i> Download foto tanpa batas</p>
-                        <p><i class="bi bi-x-circle" style="color: #ff2929;"></i> Jadi kreator kami</p>
-                        <h3 class="fw-bold">Rp. {{ number_format($price->price, 0, ',', '.') }} <small>/{{ str_replace('_', ' ', $price->duration) }}</small></h3>
-                        <button class="btn btn-green" onclick="buySubscription({{ $price->id }})">Beli Paket</button>
-                    </div>
+            @php
+                $price1Month = $prices->where('duration', '1_month')->first();
+                $price3Months = $prices->where('duration', '3_months')->first();
+                $price6Months = $prices->where('duration', '6_months')->first();
+                $price1Year = $prices->where('duration', '1_year')->first();
+            @endphp
+            <div class="col-md-4 d-flex mb-4">
+                <div class="card flex-fill">
+                    <h4 class="fw-bold">Paket 1 Bulan</h4>
+                    <p><i class="bi bi-check-circle"></i> Dapatkan lencana khusus</p>
+                    <p><i class="bi bi-check-circle"></i> Download foto tanpa batas</p>
+                    <p><i class="bi bi-x-circle" style="color: #ff2929;"></i> Jadi kreator kami</p>
+                    <h3 class="fw-bold">Rp. {{ number_format($price1Month->price, 0, ',', '.') }} <small>/bulan</small></h3>
+                    @if($existingDuration >= 1)
+                        <button class="btn btn-green" disabled>Beli Paket</button>
+                    @else
+                        <button class="btn btn-green" onclick="buySubscription({{ $price1Month->id }})">Beli Paket</button>
+                    @endif
                 </div>
-            @endforeach
+            </div>
+
+            <div class="col-md-4 d-flex mb-4">
+                <div class="card flex-fill">
+                    <h4 class="fw-bold">Paket 3 Bulan</h4>
+                    <p><i class="bi bi-check-circle"></i> Dapatkan lencana khusus</p>
+                    <p><i class="bi bi-check-circle"></i> Download foto tanpa batas</p>
+                    <p><i class="bi bi-x-circle" style="color: #ff2929;"></i> Jadi kreator kami</p>
+                    <h3 class="fw-bold">Rp. {{ number_format($price3Months->price, 0, ',', '.') }} <small>/3 bulan</small></h3>
+                    @if($existingDuration >= 3)
+                        <button class="btn btn-green" disabled>Beli Paket</button>
+                    @else
+                        <button class="btn btn-green" onclick="buySubscription({{ $price3Months->id }})">Beli Paket</button>
+                    @endif
+                </div>
+            </div>
+
+            <div class="col-md-4 d-flex mb-4">
+                <div class="card flex-fill">
+                    <h4 class="fw-bold">Paket 6 Bulan</h4>
+                    <p><i class="bi bi-check-circle"></i> Dapatkan lencana khusus</p>
+                    <p><i class="bi bi-check-circle"></i> Download foto tanpa batas</p>
+                    <p><i class="bi bi-x-circle" style="color: #ff2929;"></i> Jadi kreator kami</p>
+                    <h3 class="fw-bold">Rp. {{ number_format($price6Months->price, 0, ',', '.') }} <small>/6 bulan</small></h3>
+                    @if($existingDuration >= 6)
+                        <button class="btn btn-green" disabled>Beli Paket</button>
+                    @else
+                        <button class="btn btn-green" onclick="buySubscription({{ $price6Months->id }})">Beli Paket</button>
+                    @endif
+                </div>
+            </div>
+
+            <div class="col-md-4 d-flex mb-4">
+                <div class="card flex-fill">
+                    <h4 class="fw-bold">Paket 1 Tahun</h4>
+                    <p><i class="bi bi-check-circle"></i> Dapatkan lencana khusus</p>
+                    <p><i class="bi bi-check-circle"></i> Download foto tanpa batas</p>
+                    <p><i class="bi bi-x-circle" style="color: #ff2929;"></i> Jadi kreator kami</p>
+                    <h3 class="fw-bold">Rp. {{ number_format($price1Year->price, 0, ',', '.') }} <small>/tahun</small></h3>
+                    @if($existingDuration >= 12)
+                        <button class="btn btn-green" disabled>Beli Paket</button>
+                    @else
+                        <button class="btn btn-green" onclick="buySubscription({{ $price1Year->id }})">Beli Paket</button>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 
