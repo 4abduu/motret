@@ -27,7 +27,7 @@ class ProfileController extends Controller
         $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
         return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice'));
     }
-
+    
     public function showProfile($username)
     {
         $user = User::where('username', $username)->firstOrFail();

@@ -9,28 +9,28 @@
             <label for="price_1_month" class="form-label">Harga 1 Bulan (Wajib)</label>
             <div class="input-group">
                 <span class="input-group-text">Rp.</span>
-                <input type="text" class="form-control" id="price_1_month" name="price_1_month" value="{{ number_format($subscriptionPrices->price_1_month, 0, ',', '.') }}" required>
+                <input type="text" class="form-control" id="price_1_month" name="price_1_month" value="{{ $subscriptionPrices ? number_format($subscriptionPrices->price_1_month, 0, ',', '.') : '' }}" required>
             </div>
         </div>
         <div class="mb-3">
             <label for="price_3_months" class="form-label">Harga 3 Bulan (Opsional)</label>
             <div class="input-group">
                 <span class="input-group-text">Rp.</span>
-                <input type="text" class="form-control" id="price_3_months" name="price_3_months" value="{{ number_format($subscriptionPrices->price_3_months, 0, ',', '.') }}">
+                <input type="text" class="form-control" id="price_3_months" name="price_3_months" value="{{ $subscriptionPrices ? number_format($subscriptionPrices->price_3_months, 0, ',', '.') : '' }}">
             </div>
         </div>
         <div class="mb-3">
             <label for="price_6_months" class="form-label">Harga 6 Bulan (Opsional)</label>
             <div class="input-group">
                 <span class="input-group-text">Rp.</span>
-                <input type="text" class="form-control" id="price_6_months" name="price_6_months" value="{{ number_format($subscriptionPrices->price_6_months, 0, ',', '.') }}">
+                <input type="text" class="form-control" id="price_6_months" name="price_6_months" value="{{ $subscriptionPrices ? number_format($subscriptionPrices->price_6_months, 0, ',', '.') : '' }}">
             </div>
         </div>
         <div class="mb-3">
             <label for="price_1_year" class="form-label">Harga 1 Tahun (Opsional)</label>
             <div class="input-group">
                 <span class="input-group-text">Rp.</span>
-                <input type="text" class="form-control" id="price_1_year" name="price_1_year" value="{{ number_format($subscriptionPrices->price_1_year, 0, ',', '.') }}">
+                <input type="text" class="form-control" id="price_1_year" name="price_1_year" value="{{ $subscriptionPrices ? number_format($subscriptionPrices->price_1_year, 0, ',', '.') : '' }}">
             </div>
         </div>
         <button type="submit" class="btn btn-success">Simpan</button>
