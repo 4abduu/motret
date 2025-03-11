@@ -18,12 +18,14 @@ class PhotoController extends Controller
     {
         $this->middleware('auth')->except(['showPhoto', 'downloadPhoto']);
     }
+
     public function index()
     {
         $photos = Photo::where('user_id', Auth::id())->get();
         $albums = Album::where('user_id', Auth::id())->with('photos')->get();
         return view('user.photos', compact('photos', 'albums'));
     }    
+
     public function showPhoto($id)
     {
         $photo = Photo::with('user')->findOrFail($id);
@@ -34,16 +36,28 @@ class PhotoController extends Controller
                              ->take(8)
                              ->get();
         $albums = Auth::check() ? Album::where('user_id', Auth::id())->with('photos')->get() : [];
-            // Cek apakah foto dibanned
-            if ($photo->banned) {
-                return redirect()->route('home')->with('error', 'Foto ini telah dibanned.');
+
+        // Cek apakah foto dibanned
+        if ($photo->banned) {
+            return redirect()->route('home')->with('error', 'Foto ini telah dibanned.');
+        }
+
+        // Cek apakah foto bersifat premium
+        if ($photo->premium) {
+            // Cek apakah pengguna sudah berlangganan ke pengguna yang mengunggah foto
+            if (!Auth::check() || (Auth::id() !== $photo->user_id && !Auth::user()->subscriptions()->where('target_user_id', $photo->user_id)->exists())) {
+                return redirect()->route('home')->with('error', 'Anda tidak memiliki akses ke foto ini.');
             }
+        }
+
         return view('photos.show', compact('photo', 'randomPhotos', 'albums'));
     }
+
     public function createphotos()
     {
         return view('photos.create');
     }
+
     public function storePhoto(Request $request)
     {
         $validated = $request->validate([

@@ -126,6 +126,7 @@ class User extends Authenticatable
     {
         return self::count();
     }
+
     // User yang berlangganan ke user lain
     public function subscriptions()
     {
@@ -135,7 +136,6 @@ class User extends Authenticatable
     // User verif yang memiliki pelanggan
     public function subscribers()
     {
-        return $this->hasMany(SubscriptionUser::class, 'verified_user_id');
+        return $this->hasMany(SubscriptionUser::class, 'target_user_id');
     }
-
 }

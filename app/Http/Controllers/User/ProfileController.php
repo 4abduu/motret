@@ -18,6 +18,7 @@ class ProfileController extends Controller
     {
         $this->middleware('auth')->except(['showProfile']);
     }
+
     public function index()
     {
         $user = Auth::user();
@@ -27,18 +28,18 @@ class ProfileController extends Controller
         $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
         return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice'));
     }
-    
+
     public function showProfile($username)
     {
         $user = User::where('username', $username)->firstOrFail();
         $photos = Photo::where('user_id', $user->id)->where('premium', false)->get();
         $premiumPhotos = Photo::where('user_id', $user->id)->where('premium', true)->get();
         $albums = Album::where('user_id', $user->id)->with('photos')->get();
-        $isSubscribed = Auth::check() && Auth::user()->subscriptions()->where('verified_user_id', $user->id)->exists();
+        $isSubscribed = Auth::check() && Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists();
         $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
         return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'isSubscribed', 'hasSubscriptionPrice'));
     }
-    
+
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -50,7 +51,7 @@ class ProfileController extends Controller
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
 
-            if ($request->hasFile('profile_photo')) {
+        if ($request->hasFile('profile_photo')) {
             // Hapus foto profil lama jika ada
             if ($user->profile_photo) {
                 Storage::delete('public/photo_profile/' . $user->profile_photo);
@@ -72,7 +73,7 @@ class ProfileController extends Controller
 
         return redirect()->route('user.showProfile', $user->username)->with('success', 'Profil berhasil diperbarui.');
     }
-    
+
     public function deleteProfilePhoto()
     {
         $user = Auth::user();

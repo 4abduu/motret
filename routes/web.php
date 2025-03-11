@@ -144,6 +144,9 @@ Route::middleware(['auth', 'role:user,pro', 'logout_if_authenticated'])->group(f
     Route::get('/subscription/manage', [UserSubscriptionController::class, 'manage'])->name('subscription.manage');
     Route::post('/subscription/save', [UserSubscriptionController::class, 'saveSubsUser'])->name('subscription.save');
     Route::get('/subscription/history', [UserSubscriptionController::class, 'history'])->name('subscription.history');
+    Route::get('/subscribe/{username}', [UserSubscriptionController::class, 'showSubscriptionOptions'])->name('subscription.options');
+    Route::post('/subscribe/{username}', [UserSubscriptionController::class, 'subscribeOn'])->name('subscription.subscribe');
+    Route::post('/transaction/check-status-user', [UserSubscriptionController::class, 'checkTransactionStatusUser'])->name('transaction.checkStatusUser');
 });
 
 // Rute untuk guest melihat album

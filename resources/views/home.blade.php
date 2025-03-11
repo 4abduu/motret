@@ -13,7 +13,7 @@
 
 <div class="container mb-4">
     <div class="most-searched-container">
-        <h4 class="most-searched-title">kata kunci yang sering dicari :</h4>
+        <h4 class="most-searched-title">Kata kunci yang sering dicari: </h4>
         <div class="most-searched-keywords">
             @foreach($mostSearchedKeywords as $search)
                 <a href="{{ route('search', ['query' => $search->keyword]) }}" class="keyword-item">

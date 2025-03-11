@@ -216,26 +216,26 @@
         return re.test(email);
     }
     
-    function checkVerificationUsername() {
-        clearTimeout(usernameTimeout);
-        document.getElementById('username-verification-status').innerHTML = '';
-        usernameTimeout = setTimeout(() => {
-            const username = document.getElementById('username').value;
-            fetch('{{ route('user.checkVerificationUsername') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ username })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const verificationStatus = document.getElementById('username-verification-status');
-                verificationStatus.innerHTML = data.isValid ? '<span class="text-success">Username sesuai.</span>' : '<span class="text-danger">Username tidak sesuai dengan username yang terdaftar di sistem.</span>';
-            });
-        }, 500);
-    }
+    // function checkVerificationUsername() {
+    //     clearTimeout(usernameTimeout);
+    //     document.getElementById('username-verification-status').innerHTML = '';
+    //     usernameTimeout = setTimeout(() => {
+    //         const username = document.getElementById('username').value;
+    //         fetch('{{ route('user.checkVerificationUsername') }}', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    //             },
+    //             body: JSON.stringify({ username })
+    //         })
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             const verificationStatus = document.getElementById('username-verification-status');
+    //             verificationStatus.innerHTML = data.isValid ? '<span class="text-success">Username sesuai.</span>' : '<span class="text-danger">Username tidak sesuai dengan username yang terdaftar di sistem.</span>';
+    //         });
+    //     }, 500);
+    // }
 </script>
 @endpush
 @endsection

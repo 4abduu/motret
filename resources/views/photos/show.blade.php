@@ -33,25 +33,75 @@
         padding-right: 10px; /* Hindari konten tertutup scrollbar */
     }
 
-/* (Opsional) Custom scrollbar agar lebih bagus */
-.comment-container::-webkit-scrollbar {
-    width: 8px;
-}
+    /* (Opsional) Custom scrollbar agar lebih bagus */
+    .comment-container::-webkit-scrollbar {
+        width: 8px;
+    }
 
-.comment-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 5px;
-}
+    .comment-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 5px;
+    }
 
-.comment-container::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 5px;
-}
+    .comment-container::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 5px;
+    }
 
-.comment-container::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
+    .comment-container::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
 
+    .most-searched-container {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px; /* Kurangi jarak antar elemen */
+    }
+
+    .most-searched-title {
+        font-size: 16px; /* Kurangi ukuran font judul */
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    .most-searched-keywords {
+        display: flex;
+        gap: 5px; /* Kurangi jarak antar keyword */
+        flex-wrap: wrap;
+    }
+
+    .keyword-item {
+        display: inline-block;
+        padding: 3px 7px; /* Kurangi padding dalam kotak */
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px; /* Kurangi ukuran font keyword */
+        color: #333;
+    }
+
+    .keyword-item:hover {
+        background-color: #ddd;
+    }
+
+    /* Ubah warna link menjadi hitam */
+    a {
+        color: #000;
+    }
+
+    a:hover {
+        color: #555;
+    }
+
+    /* Ubah warna teks "Balas" dan ikon titik tiga menjadi hitam */
+    .btn-link {
+        color: #000;
+    }
+
+    .btn-link:hover {
+        color: #555;
+    }
 </style>
 
 <div class="container mt-5">
@@ -110,18 +160,26 @@
         </div>
         <div class="col-md-6 ">
             <div class="d-flex align-items-center mb-3">
-                <button type="button" class="btn btn-link p-0 me-3" id="copy-url-button">
+                <button type="button" class="btn btn-link p-0 me-3">
                     <i class="bi bi-share text-dark fw-bold fs-5"></i> 
                 </button>
-                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}" {{ Auth::check() ? '' : 'disabled' }}>
+                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}">
                     <i class="bi bi-flag text-dark fw-bold fs-5"></i>
                 </button>
             </div>
             <div class="mt-4 text-start comment-container">
                 <h3 class="mb-4 text-start">{{ $photo->title }}</h3>
                 <h5 class="text-start">{{ $photo->description }}</h5>
-                <p class="text-start">Hashtags: {{ implode(', ', json_decode($photo->hashtags)) }}</p>
-                
+                    <div class="most-searched-container">
+                        <h4 class="most-searched-title">Hashtags:</h4>
+                        <div class="most-searched-keywords">
+                            @foreach(json_decode($photo->hashtags) as $hashtag)
+                                <a href="{{ route('search', ['query' => $hashtag]) }}" class="keyword-item">
+                                    {{ $hashtag }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
                 <p class="text-start d-flex align-items-center">
                     @if($photo->user->profile_photo)
                         <img src="{{ asset('storage/photo_profile/' . $photo->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40">
@@ -129,12 +187,12 @@
                         <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40"/>
                     @endif
 
-                    <a href="{{ route('user.showProfile', $photo->user->username) }}">{{ $photo->user->username }}</a>
+                    <a href="{{ route('user.showProfile', $photo->user->username) }}" class="fw-bold">{{ $photo->user->username }}</a>
                     @if($photo->user->verified)
                         <i class="ti-medall-alt" style="color: gold;"></i>
                     @endif 
                     @if($photo->user->role === 'pro')
-                    <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
+                        <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
                     @endif
                 </p>
                 
@@ -149,11 +207,20 @@
                     
                     @if(!$hideComment)
                         <div class="mb-2">
-                            <strong>{{ $comment->user->username }}</strong>
-                            @if($photo->user->verified)
+                        @if($comment->user->profile_photo)
+                            <img src="{{ asset('storage/photo_profile/' . $comment->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">
+                        @else
+                            <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>
+                        @endif
+                            <strong>
+                                <a href="{{ route('user.showProfile', $comment->user->username) }}" class="text-dark fw-bold text-decoration-none">
+                                    {{ $comment->user->username }}
+                                </a>
+                            </strong>
+                            @if($comment->user->verified)
                                 <i class="ti-medall-alt" style="color: gold;"></i>
                             @endif 
-                            @if($photo->user->role === 'pro')
+                            @if($comment->user->role === 'pro')
                                 <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
                             @endif
                             @if($comment->user_id === $photo->user_id)
@@ -213,7 +280,25 @@
                             
                             @if(!$hideReply)
                                 <div class="ms-4 mt-2" id="reply-{{ $reply->id }}">
-                                    <strong>{{ $reply->user->username }}</strong>
+                                @if($reply->user->profile_photo)
+                                    <img src="{{ asset('storage/photo_profile/' . $reply->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">
+                                @else
+                                    <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>
+                                @endif
+                                    <strong>
+                                        <a href="{{ route('user.showProfile', $reply->user->username) }}" class="text-dark fw-bold text-decoration-none">
+                                            {{ $reply->user->username }}
+                                        </a>
+                                    </strong>                                    
+                                    @if($comment->user->verified)
+                                        <i class="ti-medall-alt" style="color: gold;"></i>
+                                    @endif 
+                                    @if($comment->user->role === 'pro')
+                                        <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
+                                    @endif
+                                    @if($comment->user_id === $photo->user_id)
+                                        <span class="text-muted">• Pembuat</span>
+                                    @endif
                                     <p>{{ $reply->reply }}</p>
                                     <small class="text-muted">{{ $reply->created_at->diffForHumans() }}</small>
                                     <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $reply->id }}" data-bs-toggle="dropdown" aria-expanded="false">
@@ -309,8 +394,9 @@
                 </form>
                 @else
                     <p class="text-start">Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
-            </div>
-            @endif
+                @endif
+            </div>               
+        </div>
     </div>
 </div>
 
@@ -548,97 +634,108 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         document.body.addEventListener("submit", async function (event) {
-        const form = event.target.closest(".reply-form form");
-        if (!form) return;
+    const form = event.target.closest(".reply-form form");
+    if (!form) return;
 
-        event.preventDefault();
-        event.stopPropagation(); // Mencegah multiple event listener
+    event.preventDefault();
+    event.stopPropagation(); // Mencegah multiple event listener
 
-        const formData = new FormData(form);
-        const commentId = form.closest('.reply-form').id.split('-')[2];
-        const url = form.getAttribute('action');
+    const formData = new FormData(form);
+    const commentId = form.closest('.reply-form').id.split('-')[2];
+    const url = form.getAttribute('action');
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': token },
-                body: formData
-            });
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': token },
+            body: formData
+        });
 
-            const data = await response.json();
-            if (data.success) {
-                const replyId = Date.now(); // Gunakan timestamp sementara sebagai ID unik
-                const userId = data.reply.user.id; // Ambil ID pengguna untuk validasi
-                const currentUserId = data.currentUserId; // ID pengguna yang sedang login
+        const data = await response.json();
+        if (data.success) {
+            const replyId = data.reply.id; // Gunakan timestamp sementara sebagai ID unik
+            const userId = data.reply.user.id; // Ambil ID pengguna untuk validasi
+            const currentUserId = data.currentUserId; // ID pengguna yang sedang login
 
-                const isCurrentUser = userId === currentUserId;
-                
-                const replyHtml = `
-                    <div class="ms-4 mt-2" id="reply-${replyId}">
-                        <strong>${data.reply.user.username}</strong>
-                        <p>${data.reply.reply}</p>
-                        <small class="text-muted">${data.reply.created_at}</small>
-                        <button class="btn btn-link" type="button" id="dropdownMenuButton-${replyId}" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-three-dots"></i>
-                        </button>
-                        <div class="dropdown">
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${replyId}">
-                                ${isCurrentUser ? `
-                                    <li>
-                                        <button type="button" class="dropdown-item delete-reply" data-reply-id="${replyId}">
-                                            Hapus Balasan
-                                        </button>
-                                    </li>
-                                ` : `
-                                    <li>
-                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-${replyId}">
-                                            Lapor Balasan
-                                        </button>
-                                    </li>
-                                `}
-                            </ul>
-                        </div>
+            const isCurrentUser = userId === currentUserId;
+
+            const replyHtml = `
+                <div class="ms-4 mt-2" id="reply-${replyId}">
+                    <strong>
+                        <a href="/${data.reply.user.username}" class="text-dark fw-bold text-decoration-none">
+                            ${data.reply.user.username}
+                        </a> 
+                            ${data.reply.user.verified == true ? '<i class="ti-medall-alt" style="color: gold;"></i>' : ''}
+                            ${data.reply.user.role == 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : ''}
+                    </strong>
+                    <p>${data.reply.reply}</p>
+                    <small class="text-muted">${data.reply.created_at}</small>
+                    <button class="btn btn-link" type="button" id="dropdownMenuButton-${replyId}" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                    <div class="dropdown">
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${replyId}">
+                            ${isCurrentUser ? `
+                                <li>
+                                    <button type="button" class="dropdown-item delete-reply" data-reply-id="${replyId}">
+                                        Hapus Balasan
+                                    </button>
+                                </li>
+                            ` : `
+                                <li>
+                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-${replyId}">
+                                        Lapor Balasan
+                                    </button>
+                                </li>
+                            `}
+                        </ul>
                     </div>
-                `;
+                </div>
+            `;
 
-                document.querySelector(`#reply-form-${commentId}`).insertAdjacentHTML('beforebegin', replyHtml);
-                form.reset();
-                form.closest('.reply-form').style.display = 'none';
-            }
-
-        } catch (error) {
-            console.error("Error submitting reply:", error);
+            document.querySelector(`#reply-form-${commentId}`).insertAdjacentHTML('beforebegin', replyHtml);
+            form.reset();
+            form.closest('.reply-form').style.display = 'none';
         }
-    });
 
-    // Event listener untuk menghapus reply
-    document.body.addEventListener("click", async function (event) {
-        if (event.target.closest(".delete-reply")) {
-            event.preventDefault();
-            const button = event.target.closest(".delete-reply");
-            const replyId = button.getAttribute("data-reply-id");
-            const url = `/replies/${replyId}`;
+    } catch (error) {
+        console.error("Error submitting reply:", error);
+    }
+});
 
-            try {
-                const response = await fetch(url, {
-                    method: "DELETE",
-                    headers: {
-                        "X-CSRF-TOKEN": token,
-                        "Content-Type": "application/json"
+        // Event listener untuk menghapus reply
+        document.body.addEventListener("click", async function (event) {
+            if (event.target.closest(".delete-reply")) {
+                event.preventDefault();
+                const button = event.target.closest(".delete-reply");
+                const replyId = button.getAttribute("data-reply-id");
+                const url = `/replies/${replyId}`;
+
+                try {
+                    const response = await fetch(url, {
+                        method: "DELETE",
+                        headers: {
+                            "X-CSRF-TOKEN": token,
+                            "Content-Type": "application/json"
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-                });
 
-                const data = await response.json();
-                if (data.success) {
-                    document.getElementById(`reply-${replyId}`).remove();
-                } else {
-                    alert(data.message || "Gagal menghapus komentar.");
+                    const data = await response.json();
+                    if (data.success) {
+                        document.getElementById(`reply-${replyId}`).remove();
+                    } else {
+                        alert(data.message || "Gagal menghapus reply.");
+                    }
+                } catch (error) {
+                    console.error("Error deleting reply:", error);
                 }
-            } catch (error) {
-                console.error("Error deleting reply:", error);
             }
-        }
-    });
+        });
+
 
     // Blokir klik kanan
     document.addEventListener('contextmenu', function (e) {
@@ -691,17 +788,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         ctx.restore();
     };
-    
-    const copyUrlButton = document.getElementById('copy-url-button');
-    const photoUrl = window.location.href;
-
-    copyUrlButton.addEventListener('click', function () {
-        navigator.clipboard.writeText(photoUrl).then(function () {
-            alert('URL berhasil disalin ke clipboard!');
-        }, function (err) {
-            console.error('Gagal menyalin URL: ', err);
-        });
-    });
 });
 </script>
 @endpush

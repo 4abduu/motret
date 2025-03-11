@@ -99,13 +99,13 @@ class SettingController extends Controller
         return redirect()->route('user.settings')->with('success', 'Email berhasil diperbarui.');
     }
 
-    public function checkVerificationUsername(Request $request)
-    {
-        $username = $request->input('username');
-        $isValid = $username === Auth::user()->username;
+    // public function checkVerificationUsername(Request $request)
+    // {
+    //     $username = $request->input('username');
+    //     $isValid = $username === Auth::user()->username;
     
-        return response()->json(['isValid' => $isValid]);
-    }
+    //     return response()->json(['isValid' => $isValid]);
+    // }
     
     public function submitVerification(Request $request)
     {
