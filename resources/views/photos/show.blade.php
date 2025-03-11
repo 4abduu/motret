@@ -224,7 +224,7 @@
                                 <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
                             @endif
                             @if($comment->user_id === $photo->user_id)
-                                <span class="text-muted">• Pembuat</span>
+                                <span class="text">• Pembuat</span>
                             @endif
                             @if($comment->banned)
                                 @if($isOwner)
@@ -290,14 +290,14 @@
                                             {{ $reply->user->username }}
                                         </a>
                                     </strong>                                    
-                                    @if($comment->user->verified)
+                                    @if($reply->user->verified)
                                         <i class="ti-medall-alt" style="color: gold;"></i>
                                     @endif 
-                                    @if($comment->user->role === 'pro')
+                                    @if($reply->user->role === 'pro')
                                         <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
                                     @endif
-                                    @if($comment->user_id === $photo->user_id)
-                                        <span class="text-muted">• Pembuat</span>
+                                    @if($reply->user_id === $photo->user_id)
+                                        <span class="text">• Pembuat</span>
                                     @endif
                                     <p>{{ $reply->reply }}</p>
                                     <small class="text-muted">{{ $reply->created_at->diffForHumans() }}</small>
@@ -395,7 +395,10 @@
                 @else
                     <p class="text-start">Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
                 @endif
-            </div>               
+                {{-- PENTING PENTING PENTING !!!!!!!!!! --}}
+                @if(Auth::check())
+            </div> 
+            @endif                 
         </div>
     </div>
 </div>
@@ -653,20 +656,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const data = await response.json();
         if (data.success) {
-            const replyId = data.reply.id; // Gunakan timestamp sementara sebagai ID unik
+            const replyId = data.reply.id; // Gunakan ID balasan dari respons
             const userId = data.reply.user.id; // Ambil ID pengguna untuk validasi
             const currentUserId = data.currentUserId; // ID pengguna yang sedang login
 
             const isCurrentUser = userId === currentUserId;
 
+            const profilePhoto = data.reply.user.profile_photo ? 
+                `<img src="/storage/photo_profile/${data.reply.user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">` : 
+                `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>`;
+
+            const verifiedIcon = data.reply.user.verified ? '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
+            const proIcon = data.reply.user.role === 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : '';
+
             const replyHtml = `
                 <div class="ms-4 mt-2" id="reply-${replyId}">
+                    ${profilePhoto}
                     <strong>
                         <a href="/${data.reply.user.username}" class="text-dark fw-bold text-decoration-none">
                             ${data.reply.user.username}
                         </a> 
-                            ${data.reply.user.verified == true ? '<i class="ti-medall-alt" style="color: gold;"></i>' : ''}
-                            ${data.reply.user.role == 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : ''}
+                        ${verifiedIcon}
+                        ${proIcon}
                     </strong>
                     <p>${data.reply.reply}</p>
                     <small class="text-muted">${data.reply.created_at}</small>

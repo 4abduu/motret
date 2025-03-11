@@ -236,6 +236,15 @@
                                             <label for="albumDescription">Deskripsi</label>
                                             <textarea class="form-control" name="description" rows="3">{{ $album->description }}</textarea>
                                         </div>
+                                        @if (Auth::check() && Auth::user()->role === 'pro')
+                                            <div class="form-group">
+                                                <label for="status" class="form-label">Visibilitas</label>
+                                                <select class="form-select" id="status" name="status" required>
+                                                    <option value="1" {{ $album->status === '1' ? 'selected' : '' }}>Publik</option>
+                                                    <option value="0" {{ $album->status === '0' ? 'selected' : '' }}>Privat</option>
+                                                </select>
+                                            </div>
+                                        @endif
                                         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                                     </form>
                                 </div>
@@ -388,6 +397,15 @@
                                 <label for="description" class="form-label">Deskripsi Album</label>
                                 <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                             </div>
+                            @if (Auth::check() && Auth::user()->role === 'pro')
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Visibilitas</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="1">Publik</option>
+                                        <option value="0">Privat</option>
+                                    </select>
+                                </div>
+                            @endif
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>

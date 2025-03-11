@@ -32,6 +32,8 @@ class PhotoController extends Controller
         $photo->increment('views');
         $randomPhotos = Photo::where('id', '!=', $id)
                              ->where('banned', false)
+                             ->where('premium', false)
+                             ->where('status', true)
                              ->inRandomOrder()
                              ->take(8)
                              ->get();
@@ -58,6 +60,15 @@ class PhotoController extends Controller
         return view('photos.create');
     }
 
+    public function editPhoto($id)
+    {
+        $photo = Photo::findOrFail($id);
+        if (Auth::id() !== $photo->user_id) {
+            return redirect()->route('user.profile')->with('error', 'Anda tidak memiliki izin untuk mengedit foto ini.');
+        }
+        return view('photos.edit', compact('photo'));
+    }
+
     public function storePhoto(Request $request)
     {
         $validated = $request->validate([
@@ -66,6 +77,7 @@ class PhotoController extends Controller
             'photo' => 'required|image|mimes:jpeg,png,jpg',
             'hashtags' => 'required|string',
             'premium' => 'required|boolean',
+            'status' => 'required|in:1,0',
         ]);
 
         $path = $request->file('photo')->store('photos', 'public');
@@ -87,7 +99,7 @@ class PhotoController extends Controller
             'path' => $path,
             'hashtags' => json_encode(explode(',', $validated['hashtags'])),
             'premium' => $request->premium,
-            'status' => '1',
+            'status' => $validated['status'],
         ]);
 
         return redirect()->route('home')->with('success', 'Foto berhasil diunggah.');
@@ -176,15 +188,6 @@ class PhotoController extends Controller
         ]);
     }
 
-    public function editPhoto($id)
-    {
-        $photo = Photo::findOrFail($id);
-        if (Auth::id() !== $photo->user_id) {
-            return redirect()->route('user.profile')->with('error', 'Anda tidak memiliki izin untuk mengedit foto ini.');
-        }
-        return view('photos.edit', compact('photo'));
-    }
-
     public function updatePhoto(Request $request, $id)
     {
         $photo = Photo::findOrFail($id);
@@ -196,12 +199,14 @@ class PhotoController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'hashtags' => 'required|string',
+            'status' => 'required|in:1,0',
         ]);
 
         $photo->update([
             'title' => $validated['title'],
             'description' => $validated['description'],
             'hashtags' => json_encode(explode(',', $validated['hashtags'])),
+            'status' => $validated['status'],
         ]);
 
         return redirect()->route('user.profile')->with('success', 'Foto berhasil diperbarui.');

@@ -51,6 +51,15 @@
                         </select>
                       </div>
                       @endif
+                      @if (Auth::user()->role === 'pro')
+                      <div class="form-group">
+                        <label for="status" class="form-label">Visibilitas</label>
+                        <select class="form-select" id="status" name="status" required>
+                          <option value="1">Publik</option>
+                          <option value="0">Privat</option>
+                        </select>
+                      </div>
+                      @endif
                       <button type="submit" class="btn btn-success me-2">Upload</button>
                     </form>
                   </div>

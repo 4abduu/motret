@@ -30,6 +30,7 @@ class AlbumController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
+            'status' => 'required|in:0,1',
         ]);
     
         // Jika validasi gagal, kembalikan error dalam format JSON untuk AJAX, atau redirect untuk non-AJAX
@@ -50,6 +51,7 @@ class AlbumController extends Controller
                 'user_id' => Auth::id(),
                 'name' => $request->name,
                 'description' => $request->description,
+                'status' => $request->status
             ]);
     
             // Jika request berasal dari AJAX, kembalikan JSON
@@ -86,6 +88,7 @@ class AlbumController extends Controller
 
         $album->name = $request->name;
         $album->description = $request->description;
+        $album->status = $request->status;
 
         $album->save();
 

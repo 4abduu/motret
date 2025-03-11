@@ -24,28 +24,6 @@
     </div>
 </div>
 
-
-
-        <div class="container-fluid">
-            <div class="row">
-                <div class="card-columns">
-                    @foreach($photos as $photo)
-                    <div class="card card-pin">
-                        <a href="{{ route('photos.show', $photo->id) }}">
-                            @if(Auth::check() && (Auth::user()->role === 'user' || Auth::user()->role === 'pro'))
-                                <img src="{{ asset('storage/' . $photo->path) }}" class="card-img" alt="{{ $photo->title }}">
-                            @else
-                                <canvas class="card-img" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
-                            @endif
-                            <div class="overlay">
-                            </div>                                        
-                        </a>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
         <div class="container-fluid">
             <h6>Foto yang paling banyak dilihat</h6>
             <div class="row">

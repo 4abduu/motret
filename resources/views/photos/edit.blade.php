@@ -18,6 +18,15 @@
             <label for="hashtags" class="form-label">Hashtags</label>
             <input type="text" class="form-control" id="hashtags" name="hashtags" value="{{ implode(', ', json_decode($photo->hashtags)) }}" required>
         </div>
+        @if (Auth::user()->role === 'pro')
+        <div class="mb-3">
+            <label for="status" class="form-label">Visibilitas</label>
+            <select class="form-select" id="status" name="status" required>
+                <option value="1" {{ $photo->status === '1' ? 'selected' : '' }}>Publik</option>
+                <option value="0" {{ $photo->status === '0' ? 'selected' : '' }}>Privat</option>
+            </select>
+        </div>
+        @endif
         <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
     </form>
 </div>

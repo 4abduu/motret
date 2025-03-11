@@ -29,6 +29,7 @@ class SearchController extends Controller
 
         // Cari foto berdasarkan judul, deskripsi, atau hashtag, atau yang diunggah oleh pengguna yang ditemukan
         $photos = Photo::where('banned', false)
+            ->where('premium', false)
             ->where(function($q) use ($keyword, $userIds) {
                 $q->whereIn('user_id', $userIds)
                   ->orWhere('title', 'LIKE', "%{$keyword}%")

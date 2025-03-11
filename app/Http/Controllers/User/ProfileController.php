@@ -22,23 +22,52 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $photos = Photo::where('user_id', $user->id)->where('premium', false)->get();
-        $premiumPhotos = Photo::where('user_id', $user->id)->where('premium', true)->get();
-        $albums = Album::where('user_id', $user->id)->with('photos')->get();
+        
+        // Hanya ambil foto dan album milik user sendiri
+        $photos = Photo::where('user_id', $user->id)
+                        ->where('premium', false)
+                        ->get();
+        
+        $premiumPhotos = Photo::where('user_id', $user->id)
+                              ->where('premium', true)
+                              ->get();
+        
+        $albums = Album::where('user_id', $user->id)
+                       ->with(['photos' => function ($query) {
+                           $query->where('status', 1); // Ambil hanya foto publik dalam album
+                       }])
+                       ->get();
+        
         $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
+        
         return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice'));
     }
-
+    
     public function showProfile($username)
     {
         $user = User::where('username', $username)->firstOrFail();
-        $photos = Photo::where('user_id', $user->id)->where('premium', false)->get();
-        $premiumPhotos = Photo::where('user_id', $user->id)->where('premium', true)->get();
-        $albums = Album::where('user_id', $user->id)->with('photos')->get();
+        $isOwner = Auth::check() && Auth::user()->id == $user->id;
+        
+        // Jika pemilik akun yang buka, tampilkan semua foto
+        if ($isOwner) {
+            $photos = Photo::where('user_id', $user->id)->where('premium', false)->get();
+            $premiumPhotos = Photo::where('user_id', $user->id)->where('premium', true)->get();
+            $albums = Album::where('user_id', $user->id)->with('photos')->get();
+        } else {
+            // Jika bukan pemilik akun, hanya tampilkan yang publik
+            $photos = Photo::where('user_id', $user->id)->where('premium', false)->where('status', 1)->get();
+            $premiumPhotos = Photo::where('user_id', $user->id)->where('premium', true)->where('status', 1)->get();
+            $albums = Album::where('user_id', $user->id)->where('status', 1)->with(['photos' => function ($query) {
+                $query->where('status', 1);
+            }])->get();
+        }
+        
         $isSubscribed = Auth::check() && Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists();
         $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
+        
         return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'isSubscribed', 'hasSubscriptionPrice'));
     }
+    
 
     public function updateProfile(Request $request)
     {
