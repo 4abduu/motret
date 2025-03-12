@@ -10,10 +10,12 @@ class SubscriptionCombo extends Model
     use HasFactory;
 
     protected $table = 'langganan_kombo';
+    protected $primaryKey = 'id';
 
     protected $fillable = [
         'user_id',
         'target_user_id',
+        'system_price',
         'user_price',
         'total_price',
         'start_date',
@@ -21,23 +23,31 @@ class SubscriptionCombo extends Model
         'transaction_id',
     ];
 
+    public $timestamps = true; // Otomatis kelola created_at & updated_at
+
+    // Relasi ke user yang berlangganan
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
+    // Relasi ke kreator/target user
     public function targetUser()
     {
-        return $this->belongsTo(User::class, 'target_user_id');
+        return $this->belongsTo(User::class, 'target_user_id', 'id');
     }
 
+    // Relasi ke transaksi
     public function transaction()
     {
-        return $this->belongsTo(Transaction::class);
+        return $this->belongsTo(Transaction::class, 'transaction_id', 'id');
     }
 
-    public function getSubscriptionComboCount()
+    // Menghitung jumlah subscription combo (bisa ditambahkan filter jika perlu)
+    public static function getSubscriptionComboCount($userId = null)
     {
-        return SubscriptionCombo::count();
+        return self::when($userId, function ($query) use ($userId) {
+            return $query->where('user_id', $userId);
+        })->count();
     }
 }

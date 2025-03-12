@@ -323,6 +323,7 @@
                     </div>
                 </div>
             </div>
+            <button class="btn btn-primary mt-3" onclick="window.location.href='{{ route('subscription.options', $user->username) }}'">Perpanjang Langganan</button>
         @else
             <h5>Anda belum berlangganan!</h5>
             <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>

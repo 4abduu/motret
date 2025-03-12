@@ -21,6 +21,7 @@ use App\Http\Controllers\User\ReportController as UserReportController;
 use App\Http\Controllers\User\SettingController as UserSettingController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
+use App\Models\User;
 
 // Route untuk homepage
 Route::middleware(['logout_if_authenticated'])->group(function () {
@@ -101,6 +102,8 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
 
     Route::get('/admin/users/{id}/preview', [AdminUserController::class, 'previewProfile'])->name('admin.users.previewProfile');
     Route::get('/admin/users/{id}/photos', [AdminUserController::class, 'previewPhotos'])->name('admin.users.previewPhotos');
+    Route::get('/admin/users/{id}/comments', [AdminUserController::class, 'previewComment'])->name('admin.users.previewComments');
+    Route::get('/admin/users/{id}/replies', [AdminUserController::class, 'previewReply'])->name('admin.users.previewReplies');
     Route::get('/admin/users/{id}/albums', [AdminUserController::class, 'previewAlbum'])->name('admin.users.previewAlbums');
 });
 
@@ -152,6 +155,8 @@ Route::middleware(['auth', 'role:user,pro', 'logout_if_authenticated'])->group(f
     Route::get('/subscribe/{username}', [UserSubscriptionController::class, 'showSubscriptionOptions'])->name('subscription.options');
     Route::post('/subscribe/{username}', [UserSubscriptionController::class, 'subscribeOn'])->name('subscription.subscribe');
     Route::post('/transaction/check-status-user', [UserSubscriptionController::class, 'checkTransactionStatusUser'])->name('transaction.checkStatusUser');
+    Route::post('/subscribe/combo/{username}', [UserSubscriptionController::class, 'subscribeCombo'])->name('subscription.subscribeCombo');
+    Route::post('/transaction/check-status-combo', [UserSubscriptionController::class, 'checkTransactionStatusCombo'])->name('transaction.checkStatusCombo');
 });
 
 // Rute untuk guest melihat album

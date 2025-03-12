@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Photo;
 use App\Models\Album;
+use App\Models\Comment;
+use App\Models\Reply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -45,6 +47,18 @@ class UserController extends Controller
         $album = Album::findOrFail($id);
         $album->load('photos');
         return view('admin.preview.albums', compact('album'));
+    }
+
+    public function previewComment($id)
+    {
+        $comment = Comment::findOrFail($id);
+        return view('admin.preview.comments', compact('comment'));
+    }
+
+    public function previewReply($id)
+    {
+        $reply = Reply::findOrFail($id);
+        return view('admin.preview.replies', compact('reply'));
     }
 
     public function createUser(Request $request)

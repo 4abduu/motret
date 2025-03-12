@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Preview User Photos')
+@section('title', 'Preview Reply')
 
 @section('content')
 
@@ -111,22 +111,22 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6 position-relative">
-            <canvas id="photoCanvas" class="img-fluid" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+            <canvas id="photoCanvas" class="img-fluid" data-src="{{ asset('storage/' . $reply->photo->path) }}" alt="{{ $reply->photo->title }}"></canvas>
             <div class="overlay"></div>
             <div class="d-flex align-items-center mt-3">
-                <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="me-3 download-button">
+                <form method="POST" action="{{ route('photos.download', $reply->photo->id) }}" class="me-3 download-button">
                     @csrf
                     <button type="submit" class="btn btn-link p-0" disabled>
                         <i class="bi bi-download text-dark fw-bold fs-5"></i>
                     </button>
                 </form>
                 <div id="like-section" class="me-3">
-                    <button id="like-button" class="btn btn-link p-0" data-liked="{{ $photo->isLikedBy(Auth::user()) ? 'true' : 'false' }}" disabled>
-                        <i class="{{ $photo->isLikedBy(Auth::user()) ? 'bi bi-heart-fill fs-5' : 'bi bi-heart fs-5' }}" 
-                           style="color: {{ $photo->isLikedBy(Auth::user()) ? 'red' : 'black' }};"></i>
+                    <button id="like-button" class="btn btn-link p-0" data-liked="{{ $reply->photo->isLikedBy(Auth::user()) ? 'true' : 'false' }}" disabled>
+                        <i class="{{ $reply->photo->isLikedBy(Auth::user()) ? 'bi bi-heart-fill fs-5' : 'bi bi-heart fs-5' }}" 
+                           style="color: {{ $reply->photo->isLikedBy(Auth::user()) ? 'red' : 'black' }};"></i>
                     </button>
                     @php
-                        $likeCount = $photo->likes()->count();
+                        $likeCount = $reply->photo->likes()->count();
                     @endphp
                     @if ($likeCount > 0)
                         <span id="likes-count">{{ $likeCount }} {{ $likeCount === 1 ? 'like' : 'likes' }}</span>
@@ -141,17 +141,17 @@
                 <button type="button" class="btn btn-link p-0 me-3" disabled>
                     <i class="bi bi-share text-dark fw-bold fs-5"></i> 
                 </button>
-                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}" disabled>
+                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $reply->photo->id }}" disabled>
                     <i class="bi bi-flag text-dark fw-bold fs-5"></i>
                 </button>
             </div>
             <div class="mt-4 text-start comment-container">
-                <h3 class="mb-4 text-start">{{ $photo->title }}</h3>
-                <h5 class="text-start">{{ $photo->description }}</h5>
+                <h3 class="mb-4 text-start">{{ $reply->photo->title }}</h3>
+                <h5 class="text-start">{{ $reply->photo->description }}</h5>
                     <div class="most-searched-container">
                         <h4 class="most-searched-title">Hashtags:</h4>
                         <div class="most-searched-keywords">
-                            @foreach(json_decode($photo->hashtags) as $hashtag)
+                            @foreach(json_decode($reply->photo->hashtags) as $hashtag)
                                 <a href="#" class="keyword-item">
                                     {{ $hashtag }}
                                 </a>
@@ -159,24 +159,24 @@
                         </div>
                     </div>
                 <p class="text-start d-flex align-items-center">
-                    @if($photo->user->profile_photo)
-                        <img src="{{ asset('storage/photo_profile/' . $photo->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40">
+                    @if($reply->photo->user->profile_photo)
+                        <img src="{{ asset('storage/photo_profile/' . $reply->photo->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40">
                     @else
                         <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40"/>
                     @endif
 
-                    <a href="{{ route('admin.users.previewProfile', $photo->user->id) }}" class="fw-bold">{{ $photo->user->username }}</a>
-                    @if($photo->user->verified)
+                    <a href="{{ route('admin.users.previewProfile', $reply->photo->user->id) }}" class="fw-bold">{{ $reply->photo->user->username }}</a>
+                    @if($reply->photo->user->verified)
                         <i class="ti-medall-alt" style="color: gold;"></i>
                     @endif 
-                    @if($photo->user->role === 'pro')
+                    @if($reply->photo->user->role === 'pro')
                         <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
                     @endif
                 </p>
                 
                 <h6 class="text-start">Komentar</h6>
                 
-                @foreach($photo->comments as $comment)
+                @foreach($reply->photo->comments as $comment)
                     @php
                         $isOwner = Auth::check() && Auth::id() === $comment->user_id;
                         $hideComment = !$isOwner && $comment->banned;
@@ -201,7 +201,7 @@
                             @if($comment->user->role === 'pro')
                                 <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
                             @endif
-                            @if($comment->user_id === $photo->user_id)
+                            @if($comment->user_id === $reply->photo->user_id)
                                 <span class="text">• Pembuat</span>
                             @endif
                             @if($comment->banned)
@@ -236,7 +236,7 @@
                                     @if($reply->user->role === 'pro')
                                         <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
                                     @endif
-                                    @if($reply->user_id === $photo->user_id)
+                                    @if($reply->user_id === $reply->photo->user_id)
                                         <span class="text">• Pembuat</span>
                                     @endif
                                     <p>{{ $reply->reply }}</p>
@@ -260,7 +260,7 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const token = '{{ csrf_token() }}';
-    const photoId = {{ $photo->id }};
+    const photoId = {{ $reply->photo->id }};
 
     // Blokir klik kanan
     document.addEventListener('contextmenu', function (e) {

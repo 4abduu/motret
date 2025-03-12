@@ -47,7 +47,7 @@
                                     </td>
                                     <td>
                                         <!-- Button "preview" -->
-                                        <a href="{{ route('admin.users.previewPhotos', $report->comment->photo_id) }}" class="btn btn-info btn-icon">
+                                        <a href="{{ route('admin.users.previewComments', $report->comment_id) }}" class="btn btn-info btn-icon">
                                             <i class="ti-eye" style="color: white;"></i>
                                         </a>
                                         <!-- Button "ban" -->

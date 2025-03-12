@@ -25,7 +25,7 @@ class RedirectIfAuthenticated
                 if ($user->role === 'admin') {
                     return redirect()->route('admin.dashboard');
                 } elseif ($user->role === 'user' || $user->role === 'pro') {
-                    return redirect()->route('user.profile');
+                    return redirect()->route('home');
                 }
             }
         }
