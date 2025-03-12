@@ -46,6 +46,10 @@
                                         @endif
                                     </td>
                                     <td>
+                                        <!-- Button "preview" -->
+                                        <a href="{{ route('admin.users.previewPhotos', $report->comment->photo_id) }}" class="btn btn-info btn-icon">
+                                            <i class="ti-eye" style="color: white;"></i>
+                                        </a>
                                         <!-- Button "ban" -->
                                         <button type="button" class="btn btn-warning btn-icon" data-bs-toggle="modal" data-bs-target="#banCommentModal{{ $report->id }}">
                                             <i class="icon-ban" style="color: white;"></i>

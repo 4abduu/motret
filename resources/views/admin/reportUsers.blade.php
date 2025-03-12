@@ -34,8 +34,8 @@
                             @foreach($reportUsers as $index => $report)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $report->reportedUser->username }}</td>
-                                    <td>{{ $report->user->username }}</td>
+                                    <td><a href="{{ route('admin.users.previewProfile', $report->reportedUser->id) }}" style="color: black;"><b>{{ $report->reportedUser->username }}</b></a></td>
+                                    <td><a href="{{ route('admin.users.previewProfile', $report->user->id) }}" style="color: black;"><b>{{ $report->user->username }}</b></a></td>
                                     <td>{{ $report->reason }}</td>
                                     <td>
                                         @if($report->reportedUser->banned)

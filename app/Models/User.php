@@ -59,6 +59,16 @@ class User extends Authenticatable
         return asset('storage/photo_profile/default_photo_profile.jpg');
     }
 
+    public function photos()
+    {
+        return $this->hasMany(Photo::class);
+    }
+
+    public function albums()
+    {
+        return $this->hasMany(Album::class);
+    }
+
     public function likes()
     {
         return $this->hasMany(Like::class);

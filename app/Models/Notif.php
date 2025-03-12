@@ -17,7 +17,6 @@ class Notif extends Model
         'target_id',
         'type',
         'message',
-        'status',
     ];
 
     public function user()

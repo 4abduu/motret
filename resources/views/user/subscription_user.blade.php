@@ -117,7 +117,7 @@
             console.log(data);
             if (data.status === 'success') {
                 alert('Status transaksi berhasil diperbarui.');
-                location.reload();
+                window.location.href = data.redirect_url; // Arahkan ke halaman profil akun yang dilanggan
             } else {
                 alert('Gagal memperbarui status transaksi.');
             }

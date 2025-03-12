@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Photo;
+use App\Models\Album;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -22,6 +24,27 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         return view('admin.editUser', compact('user'));
+    }
+    public function previewProfile($id)
+    {
+        $user = User::findOrFail($id);
+        $photos = $user->photos()->get();
+        $albums = $user->albums()->get();
+
+        return view('admin.preview.profile', compact('user', 'photos', 'albums'));
+    }
+
+    public function previewPhotos($id)
+    {
+        $photo = Photo::findOrFail($id);
+        return view('admin.preview.photos', compact('photo'));
+    }
+
+    public function previewAlbum($id)
+    {
+        $album = Album::findOrFail($id);
+        $album->load('photos');
+        return view('admin.preview.albums', compact('album'));
     }
 
     public function createUser(Request $request)

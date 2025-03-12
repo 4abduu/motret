@@ -76,12 +76,12 @@ class PhotoController extends Controller
             'description' => 'required|string|max:255',
             'photo' => 'required|image|mimes:jpeg,png,jpg',
             'hashtags' => 'required|string',
-            'premium' => 'required|boolean',
-            'status' => 'required|in:1,0',
+            'premium' => 'boolean',
+            'status' => 'in:1,0',
         ]);
-
+    
         $path = $request->file('photo')->store('photos', 'public');
-
+    
         // Buat versi buram dari foto
         $lowResDir = storage_path('app/public/low_res_photos');
         if (!file_exists($lowResDir)) {
@@ -91,17 +91,17 @@ class PhotoController extends Controller
         $image = Image::make(storage_path('app/public/' . $path));
         $image->blur(50);
         $image->save($lowResPath);
-
+    
         Photo::create([
             'user_id' => Auth::id(),
             'title' => $validated['title'],
             'description' => $validated['description'],
             'path' => $path,
             'hashtags' => json_encode(explode(',', $validated['hashtags'])),
-            'premium' => $request->premium,
-            'status' => $validated['status'],
+            'premium' => $request->input('premium', false),
+            'status' => $request->input('status', true),
         ]);
-
+    
         return redirect()->route('home')->with('success', 'Foto berhasil diunggah.');
     }
 
@@ -199,14 +199,16 @@ class PhotoController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'hashtags' => 'required|string',
-            'status' => 'required|in:1,0',
+            'premium' => 'boolean',
+            'status' => 'in:1,0',
         ]);
 
         $photo->update([
             'title' => $validated['title'],
             'description' => $validated['description'],
             'hashtags' => json_encode(explode(',', $validated['hashtags'])),
-            'status' => $validated['status'],
+            'premium' => $request->input('premium', false),
+            'status' => $request->input('status', true),
         ]);
 
         return redirect()->route('user.profile')->with('success', 'Foto berhasil diperbarui.');

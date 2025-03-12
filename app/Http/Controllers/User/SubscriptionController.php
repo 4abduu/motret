@@ -176,7 +176,6 @@ class SubscriptionController extends Controller
                         'target_id' => $transaction->id,
                         'type' => 'system',
                         'message' => 'Selamat! Anda telah berlangganan ke sistem sampai dengan ' . $endDate->format('d F Y'),
-                        'status' => false,
                     ]);
 
                     Log::info('Notification created for user:', ['user_id' => $user->id]);
@@ -302,7 +301,7 @@ class SubscriptionController extends Controller
             $status = json_decode(json_encode($status)); // Pastikan $status adalah objek
             Log::info('Midtrans Transaction Status:', (array) $status);
     
-            DB::transaction(function () use ($status) {
+            DB::transaction(function () use ($status, &$redirectUrl) {
                 $transaction = Transaction::where('order_id', $status->order_id)->firstOrFail();
                 Log::info('Transaction found:', $transaction->toArray());
     
@@ -374,14 +373,16 @@ class SubscriptionController extends Controller
                         'target_id' => $transaction->id,
                         'type' => 'system',
                         'message' => 'Selamat! Anda telah berlangganan ke '. $targetUser->username .' sampai dengan ' . $endDate->format('d F Y'),
-                        'status' => false,
                     ]);
     
                     Log::info('Notification created:', $notif->toArray());
+    
+                    // Set redirect URL to target user's profile
+                    $redirectUrl = route('user.showProfile', $targetUser->username);
                 }
             });
     
-            return response()->json(['status' => 'success']);
+            return response()->json(['status' => 'success', 'redirect_url' => $redirectUrl]);
         } catch (\Exception $e) {
             Log::error('Midtrans Error CheckTransactions: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => 'Could not connect to Midtrans. Please try again later.'], 500);
