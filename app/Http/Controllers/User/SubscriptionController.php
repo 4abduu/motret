@@ -42,28 +42,29 @@ class SubscriptionController extends Controller
         $existingComboSubscription = SubscriptionCombo::where('user_id', $user->id)->where('end_date', '>=', Carbon::now())->first();
     
         if ($existingSubscription && $existingComboSubscription) {
-            $existingDuration = max(
-                Carbon::parse($existingSubscription->end_date)->diffInMonths(Carbon::parse($existingSubscription->updated_at)),
-                Carbon::parse($existingComboSubscription->end_date)->diffInMonths(Carbon::parse($existingComboSubscription->updated_at))
-            );
             $endDate = max(
                 Carbon::parse($existingSubscription->end_date),
                 Carbon::parse($existingComboSubscription->end_date)
-            )->format('d F Y');
+            );
         } elseif ($existingSubscription) {
-            $existingDuration = Carbon::parse($existingSubscription->end_date)->diffInMonths(Carbon::parse($existingSubscription->updated_at));
-            $endDate = Carbon::parse($existingSubscription->end_date)->format('d F Y');
+            $endDate = Carbon::parse($existingSubscription->end_date);
         } elseif ($existingComboSubscription) {
-            $existingDuration = Carbon::parse($existingComboSubscription->end_date)->diffInMonths(Carbon::parse($existingComboSubscription->updated_at));
-            $endDate = Carbon::parse($existingComboSubscription->end_date)->format('d F Y');
+            $endDate = Carbon::parse($existingComboSubscription->end_date);
+        } else {
+            $endDate = null;
+        }
+    
+        if ($endDate) {
+            $existingDuration = Carbon::now()->diffInMonths($endDate) + (Carbon::now()->diffInDays($endDate) > 0 ? 1 : 0);
+            $endDateFormatted = $endDate->format('d F Y');
         } else {
             $existingDuration = 0;
-            $endDate = null;
+            $endDateFormatted = null;
         }
     
         $duration = $existingDuration ? $this->getDurationText($existingDuration) : null;
     
-        return view('user.subscription', compact('prices', 'existingDuration', 'endDate', 'duration'));
+        return view('user.subscription', compact('prices', 'existingDuration', 'endDateFormatted', 'duration'));
     }
 
     public function showSubscriptionOptions($username)
@@ -80,29 +81,25 @@ class SubscriptionController extends Controller
             ->where('end_date', '>', Carbon::now())
             ->first();
     
-        if ($existingSubscription && $existingComboSubscription) {
-            $existingDuration = max(
-                Carbon::parse($existingSubscription->end_date)->diffInMonths(Carbon::parse($existingSubscription->updated_at)),
-                Carbon::parse($existingComboSubscription->end_date)->diffInMonths(Carbon::parse($existingComboSubscription->updated_at))
-            );
-            $endDate = max(
-                Carbon::parse($existingSubscription->end_date),
-                Carbon::parse($existingComboSubscription->end_date)
-            )->format('d F Y');
+        if ($existingComboSubscription) {
+            $endDate = Carbon::parse($existingComboSubscription->end_date);
         } elseif ($existingSubscription) {
-            $existingDuration = Carbon::parse($existingSubscription->end_date)->diffInMonths(Carbon::parse($existingSubscription->updated_at));
-            $endDate = Carbon::parse($existingSubscription->end_date)->format('d F Y');
-        } elseif ($existingComboSubscription) {
-            $existingDuration = Carbon::parse($existingComboSubscription->end_date)->diffInMonths(Carbon::parse($existingComboSubscription->updated_at));
-            $endDate = Carbon::parse($existingComboSubscription->end_date)->format('d F Y');
+            $endDate = Carbon::parse($existingSubscription->end_date);
+        } else {
+            $endDate = null;
+        }
+    
+        if ($endDate) {
+            $existingDuration = Carbon::now()->diffInMonths($endDate) + (Carbon::now()->diffInDays($endDate) > 0 ? 1 : 0);
+            $endDateFormatted = $endDate->format('d F Y');
         } else {
             $existingDuration = 0;
-            $endDate = null;
+            $endDateFormatted = null;
         }
     
         $duration = $existingDuration ? $this->getDurationText($existingDuration) : null;
     
-        return view('user.subscription_user', compact('user', 'subscriptionPrices', 'systemPrices', 'existingDuration', 'endDate', 'duration'));
+        return view('user.subscription_user', compact('user', 'subscriptionPrices', 'systemPrices', 'existingDuration', 'endDateFormatted', 'duration'));
     }
 
     private function getDurationText($months)

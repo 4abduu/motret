@@ -54,8 +54,8 @@
 <body>
     
     <div class="container mt-5 pt-10">
-        @if($duration && $endDate)
-            <p>Anda memiliki paket langganan {{ $duration }}, yang akan berakhir pada {{ $endDate }}.</p>
+        @if($duration && $endDateFormatted)
+            <p>Anda memiliki paket langganan {{ $duration }}, yang akan berakhir pada {{ $endDateFormatted }}.</p>
         @endif
         <div class="row justify-content-center equal-height">
             @php

@@ -8,8 +8,8 @@
         <p class="text-muted mb-0">{{ $user->username }}</p>
     </div>
     <h2 class="mt-5 text-center">Pilih Paket Langganan</h2>
-    @if($duration && $endDate)
-        <p>Anda memiliki paket langganan {{ $duration }}, yang akan berakhir pada {{ $endDate }}.</p>
+    @if($duration && $endDateFormatted)
+        <p>Anda memiliki paket langganan {{ $duration }}, yang akan berakhir pada {{ $endDateFormatted }}.</p>
     @endif
     <div class="d-flex justify-content-center">
         <div class="row">
