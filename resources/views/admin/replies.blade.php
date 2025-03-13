@@ -35,10 +35,6 @@
                                 <td>{{ $reply->user->username }}</td>
                                 <td>{{ $reply->reply }}</td>
                                 <td>
-                                    <!-- Button "preview" -->
-                                    <a href="{{ route('admin.users.previewReplies', $report->reply_id) }}" class="btn btn-info btn-icon">
-                                        <i class="ti-eye" style="color: white;"></i>
-                                    </a>
                                     <button class="btn btn-info btn-icon" data-bs-toggle="modal" data-bs-target="#detailReplyModal{{ $reply->id }}"><i class="fa-solid fa-circle-info" style="color: white;"></i></button>
                                     <button class="btn btn-danger btn-icon" data-bs-toggle="modal" data-bs-target="#deleteReplyModal{{ $reply->id }}"><i class="ti-trash" style="color: white;"></i></button>
                                 </td>

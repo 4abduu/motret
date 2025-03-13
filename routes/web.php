@@ -21,7 +21,6 @@ use App\Http\Controllers\User\ReportController as UserReportController;
 use App\Http\Controllers\User\SettingController as UserSettingController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
-use App\Models\User;
 
 // Route untuk homepage
 Route::middleware(['logout_if_authenticated'])->group(function () {
@@ -109,33 +108,51 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
 
 // Grup untuk User dan Pro
 Route::middleware(['auth', 'role:user,pro', 'logout_if_authenticated'])->group(function () {
+    // Profil
     Route::get('/profil', [UserProfileController::class, 'index'])->name('user.profile');
     Route::put('/profile', [UserProfileController::class, 'updateProfile'])->name('user.updateProfile');
-    Route::get('/subscription', [UserSubscriptionController::class, 'index'])->name('subscription');
     Route::delete('/profil/foto', [UserProfileController::class, 'deleteProfilePhoto'])->name('user.deleteProfilePhoto');
     Route::post('/check-username', [UserProfileController::class, 'checkUsername'])->name('user.checkUsername');
     Route::post('/check-email', [UserProfileController::class, 'checkEmail'])->name('user.checkEmail');
+    
+    // Foto
     Route::get('/foto', [UserPhotoController::class, 'index'])->name('user.photos');
-    Route::post('/photo/{id}/report', [UserReportController::class, 'reportPhoto'])->name('photo.report');
-    Route::post('/comment/{id}/report', [UserReportController::class, 'reportComment'])->name('comment.report');
-    Route::post('/user/{id}/report', [UserReportController::class, 'reportUser'])->name('user.report');    
+    Route::get('/photos/{id}/edit', [UserPhotoController::class, 'editPhoto'])->name('photos.edit');
+    Route::put('/photos/{id}', [UserPhotoController::class, 'updatePhoto'])->name('photos.update');
+    Route::delete('/photos/{id}', [UserPhotoController::class, 'destroyPhoto'])->name('photos.destroy');
     Route::post('/photos/{photo}/like', [UserLikeController::class, 'like'])->name('photos.like');
     Route::post('/photos/{photo}/unlike', [UserLikeController::class, 'unlike'])->name('photos.unlike');
-    Route::delete('/comments/{id}', [UserCommentController::class, 'destroy'])->name('comments.destroy');
-    Route::post('/comments/{comment}/reply', [UserCommentController::class, 'storeReply'])->name('comments.reply'); 
-    Route::delete('/replies/{id}', [UserCommentController::class, 'destroyReply'])->name('reply.destroy');
     Route::post('/photos/{photo}/comments', [UserCommentController::class, 'store'])->name('photos.comments.store');
+    
+    // Komentar & Balasan
+    Route::delete('/comments/{id}', [UserCommentController::class, 'destroy'])->name('comments.destroy');
+    Route::post('/comments/{comment}/reply', [UserCommentController::class, 'storeReply'])->name('comments.reply');
+    Route::delete('/replies/{id}', [UserCommentController::class, 'destroyReply'])->name('reply.destroy');
+    
+    // Pelaporan
+    Route::post('/photo/{id}/report', [UserReportController::class, 'reportPhoto'])->name('photo.report');
+    Route::post('/comment/{id}/report', [UserReportController::class, 'reportComment'])->name('comment.report');
+    Route::post('/user/{id}/report', [UserReportController::class, 'reportUser'])->name('user.report');
+    
+    // Pengikut
     Route::post('/users/{user}/follow', [UserFollowController::class, 'follow'])->name('users.follow');
     Route::post('/users/{user}/unfollow', [UserFollowController::class, 'unfollow'])->name('users.unfollow');
-    Route::get('/notifications', [UserNotifController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{id}/read', [UserNotifController::class, 'markAsRead'])->name('notifications.markAsRead');
+    
+    // Album
     Route::post('/albums', [UserAlbumController::class, 'store'])->name('albums.store');
     Route::put('/albums/{id}', [UserAlbumController::class, 'update'])->name('albums.update');
     Route::delete('/albums/{id}', [UserAlbumController::class, 'destroy'])->name('albums.destroy');
     Route::post('/albums/{albumId}/photos/{photoId}/add', [UserAlbumController::class, 'addPhoto'])->name('albums.addPhoto');
     Route::post('/albums/{albumId}/photos/{photoId}/remove', [UserAlbumController::class, 'removePhoto'])->name('albums.removePhoto');
     Route::put('/albums/{id}/updateTitle', [UserAlbumController::class, 'updateTitle'])->name('albums.updateTitle');
-    Route::put('/albums/{id}/updateDescription', [UserAlbumController::class, 'updateDescription'])->name('albums.updateDescription'); 
+    Route::put('/albums/{id}/updateDescription', [UserAlbumController::class, 'updateDescription'])->name('albums.updateDescription');
+    
+    // Notifikasi
+    Route::get('/notifications', [UserNotifController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [UserNotifController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::get('/fetch-notifications', [UserNotifController::class, 'fetchNotifications'])->name('notifications.fetch');
+
+    // Pengaturan
     Route::get('/settings', [UserSettingController::class, 'index'])->name('user.settings');
     Route::put('/settings/username', [UserSettingController::class, 'updateUsername'])->name('user.updateUsername');
     Route::put('/settings/password', [UserSettingController::class, 'updatePassword'])->name('user.updatePassword');
@@ -144,22 +161,22 @@ Route::middleware(['auth', 'role:user,pro', 'logout_if_authenticated'])->group(f
     Route::put('/settings/update-email', [UserSettingController::class, 'updateEmail'])->name('user.updateEmail');
     Route::post('/check-verification-username', [UserSettingController::class, 'checkVerificationUsername'])->name('user.checkVerificationUsername');
     Route::post('/settings/submit-verification', [UserSettingController::class, 'submitVerification'])->name('user.submitVerification');
-    Route::get('/photos/{id}/edit', [UserPhotoController::class, 'editPhoto'])->name('photos.edit');
-    Route::put('/photos/{id}', [UserPhotoController::class, 'updatePhoto'])->name('photos.update');
-    Route::delete('/photos/{id}', [UserPhotoController::class, 'destroyPhoto'])->name('photos.destroy');
-    Route::post('/transaction/create', [UserSubscriptionController::class, 'createTransaction'])->name('transaction.create');
-    Route::post('/transaction/check-status', [UserSubscriptionController::class, 'checkTransactionStatus'])->name('transaction.checkStatus');
+    
+    // Subscription & Transaksi
+    Route::get('/subscription', [UserSubscriptionController::class, 'index'])->name('subscription');
     Route::get('/subscription/manage', [UserSubscriptionController::class, 'manage'])->name('subscription.manage');
-    Route::post('/subscription/save', [UserSubscriptionController::class, 'saveSubsUser'])->name('subscription.save');
     Route::get('/subscription/history', [UserSubscriptionController::class, 'history'])->name('subscription.history');
     Route::get('/subscribe/{username}', [UserSubscriptionController::class, 'showSubscriptionOptions'])->name('subscription.options');
     Route::post('/subscribe/{username}', [UserSubscriptionController::class, 'subscribeOn'])->name('subscription.subscribe');
-    Route::post('/transaction/check-status-user', [UserSubscriptionController::class, 'checkTransactionStatusUser'])->name('transaction.checkStatusUser');
     Route::post('/subscribe/combo/{username}', [UserSubscriptionController::class, 'subscribeCombo'])->name('subscription.subscribeCombo');
+    Route::post('/subscription/save', [UserSubscriptionController::class, 'saveSubsUser'])->name('subscription.save');
+    Route::post('/transaction/create', [UserSubscriptionController::class, 'createTransaction'])->name('transaction.create');
+    Route::post('/transaction/check-status', [UserSubscriptionController::class, 'checkTransactionStatus'])->name('transaction.checkStatus');
+    Route::post('/transaction/check-status-user', [UserSubscriptionController::class, 'checkTransactionStatusUser'])->name('transaction.checkStatusUser');
     Route::post('/transaction/check-status-combo', [UserSubscriptionController::class, 'checkTransactionStatusCombo'])->name('transaction.checkStatusCombo');
 });
 
 // Rute untuk guest melihat album
-Route::get('/albums/{id}', [UserAlbumController::class, 'show'])->name('albums.show');
+Route::get('/albums/{id}', [UserAlbumController::class, 'index'])->name('albums.show');
 Route::get('/cari', [SearchController::class, 'search'])->name('search');
 Route::get('/{username}', [UserProfileController::class, 'showProfile'])->name('user.showProfile');
