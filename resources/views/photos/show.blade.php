@@ -637,82 +637,111 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         document.body.addEventListener("submit", async function (event) {
-    const form = event.target.closest(".reply-form form");
-    if (!form) return;
+        const form = event.target.closest(".reply-form form");
+        if (!form) return;
 
-    event.preventDefault();
-    event.stopPropagation(); // Mencegah multiple event listener
+        event.preventDefault();
+        event.stopPropagation(); // Mencegah multiple event listener
 
-    const formData = new FormData(form);
-    const commentId = form.closest('.reply-form').id.split('-')[2];
-    const url = form.getAttribute('action');
+        const formData = new FormData(form);
+        const commentId = form.closest('.reply-form').id.split('-')[2]; // Ambil ID komentar
+        const url = form.getAttribute('action'); // Ambil URL action dari form
 
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': token },
-            body: formData
-        });
+        try {
+            // Kirim request AJAX
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token, // Kirim CSRF token
+                    'Accept': 'application/json' // Minta response JSON
+                },
+                body: formData
+            });
 
-        const data = await response.json();
-        if (data.success) {
-            const replyId = data.reply.id; // Gunakan ID balasan dari respons
-            const userId = data.reply.user.id; // Ambil ID pengguna untuk validasi
-            const currentUserId = data.currentUserId; // ID pengguna yang sedang login
+            // Cek jika response tidak OK
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
 
-            const isCurrentUser = userId === currentUserId;
+            // Parse response JSON
+            const data = await response.json();
 
-            const profilePhoto = data.reply.user.profile_photo ? 
-                `<img src="/storage/photo_profile/${data.reply.user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">` : 
-                `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>`;
+            // Jika reply berhasil dikirim
+            if (data.success) {
+                const replyId = data.reply.id; // ID balasan
+                const userId = data.reply.user.id; // ID user yang melakukan reply
+                const currentUserId = data.currentUserId; // ID user yang sedang login
+                const photoUserId = data.photoUserId; // ID pembuat foto
 
-            const verifiedIcon = data.reply.user.verified ? '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
-            const proIcon = data.reply.user.role === 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : '';
+                const isCurrentUser = userId === currentUserId; // Cek apakah user yang melakukan reply adalah user yang sedang login
+                const isPhotoOwner = userId === photoUserId; // Cek apakah user adalah pembuat foto
 
-            const replyHtml = `
-                <div class="ms-4 mt-2" id="reply-${replyId}">
-                    ${profilePhoto}
-                    <strong>
-                        <a href="/${data.reply.user.username}" class="text-dark fw-bold text-decoration-none">
-                            ${data.reply.user.username}
-                        </a> 
-                        ${verifiedIcon}
-                        ${proIcon}
-                    </strong>
-                    <p>${data.reply.reply}</p>
-                    <small class="text-muted">${data.reply.created_at}</small>
-                    <button class="btn btn-link" type="button" id="dropdownMenuButton-${replyId}" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-three-dots"></i>
-                    </button>
-                    <div class="dropdown">
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${replyId}">
-                            ${isCurrentUser ? `
-                                <li>
-                                    <button type="button" class="dropdown-item delete-reply" data-reply-id="${replyId}">
-                                        Hapus Balasan
-                                    </button>
-                                </li>
-                            ` : `
-                                <li>
-                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-${replyId}">
-                                        Lapor Balasan
-                                    </button>
-                                </li>
-                            `}
-                        </ul>
+                // Foto profil user
+                const profilePhoto = data.reply.user.profile_photo ?
+                    `<img src="/storage/photo_profile/${data.reply.user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">` :
+                    `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>`;
+
+                // Badge verifikasi
+                const verifiedIcon = data.reply.user.verified ?
+                    '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
+
+                // Badge pro
+                const proIcon = data.reply.user.role === 'pro' ?
+                    '<i class="ti-star" style="color: gold;"></i>' : '';
+
+                // Tanda "• Pembuat" jika user adalah pembuat foto
+                const photoOwnerBadge = isPhotoOwner ?
+                    '<span class="text">• Pembuat</span>' : '';
+
+                // Buat HTML untuk reply baru
+                const replyHtml = `
+                    <div class="ms-4 mt-2" id="reply-${replyId}">
+                        ${profilePhoto}
+                        <strong>
+                            <a href="/${data.reply.user.username}" class="text-dark fw-bold text-decoration-none">
+                                ${data.reply.user.username}
+                            </a>
+                        </strong>
+                            ${verifiedIcon}
+                            ${proIcon}
+                            ${photoOwnerBadge} <!-- Tanda "• Pembuat" -->
+                        <p>${data.reply.reply}</p>
+                        <small class="text-muted">${data.reply.created_at}</small>
+                        <button class="btn btn-link" type="button" id="dropdownMenuButton-${replyId}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <div class="dropdown">
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${replyId}">
+                                ${isCurrentUser ? `
+                                    <li>
+                                        <button type="button" class="dropdown-item delete-reply" data-reply-id="${replyId}">
+                                            Hapus Balasan
+                                        </button>
+                                    </li>
+                                ` : `
+                                    <li>
+                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-${replyId}">
+                                            Lapor Balasan
+                                        </button>
+                                    </li>
+                                `}
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
 
-            document.querySelector(`#reply-form-${commentId}`).insertAdjacentHTML('beforebegin', replyHtml);
-            form.reset();
-            form.closest('.reply-form').style.display = 'none';
+                // Tambahkan reply baru ke DOM
+                document.querySelector(`#reply-form-${commentId}`).insertAdjacentHTML('beforebegin', replyHtml);
+
+                // Reset form dan sembunyikan form reply
+                form.reset();
+                form.closest('.reply-form').style.display = 'none';
+            }
+        } catch (error) {
+            console.error("Error submitting reply:", error);
+            alert("Terjadi kesalahan saat mengirim balasan. Silakan coba lagi.");
         }
-
-    } catch (error) {
-        console.error("Error submitting reply:", error);
-    }
-});
+    });
 
         // Event listener untuk menghapus reply
         document.body.addEventListener("click", async function (event) {

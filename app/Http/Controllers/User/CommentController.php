@@ -8,6 +8,7 @@ use App\Models\Reply;
 use App\Models\Photo;
 use App\Models\Notif;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CommentController extends Controller
 {
@@ -62,10 +63,12 @@ class CommentController extends Controller
         return redirect()->back()->with('success', "Anda telah menghapus komentar.");
     }
 
+
     public function storeReply($commentId, Request $request)
     {
         $comment = Comment::findOrFail($commentId);
         $user = Auth::user(); // Ambil objek user yang sedang login
+        $photo = Photo::findOrFail($comment->photo_id);
     
         $reply = Reply::create([
             'reply' => $request->reply,
@@ -81,16 +84,28 @@ class CommentController extends Controller
             'message' => 'membalas komentar Anda.',
         ]);
     
+        // Format JSON response yang mau di-log
         return response()->json([
             'success' => true,
             'reply' => [
-                'user' => [
-                    'username' => $user->username, // Pastikan username dikembalikan dengan benar
-                ],
+                'id' => $reply->id,
                 'reply' => $reply->reply,
                 'created_at' => $reply->created_at->diffForHumans(),
+                'user' => [
+                    'id' => $reply->user->id,
+                    'username' => $reply->user->username,
+                    'profile_photo' => $reply->user->profile_photo,
+                    'verified' => $reply->user->verified,
+                    'role' => $reply->user->role,
+                ],
             ],
+            'photoUserId' => $photo->user_id, // ID pembuat foto
         ]);
+    
+        // Simpan log ke storage/logs/laravel.log
+        Log::info(json_encode($response));
+    
+        return response()->json($response);
     }
 
     public function destroyReply($id)
