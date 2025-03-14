@@ -281,65 +281,107 @@
 <!-- Tab Langganan -->
 @if(Auth::check() && $user->verified && ($hasSubscriptionPrice || Auth::id() === $user->id))
 <div class="tab-pane fade" id="subscription" role="tabpanel" aria-labelledby="subscription-tab">
-    <h2 class="mt-5">Langganan</h2>
+    <h2 class="mt-5 mb-4">Langganan</h2>
+    
     @if(Auth::id() === $user->id)
         @if(!$hasSubscriptionPrice)
-            <button class="btn btn-warning mb-3" onclick="window.location.href='{{ route('subscription.manage') }}'">Atur langgananmu sekarang</button>
+            <button class="btn btn-warning mb-4" onclick="window.location.href='{{ route('subscription.manage') }}'">
+                <i class="bi bi-gear me-2"></i> Atur Langgananmu Sekarang
+            </button>
         @else
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <button class="btn btn-warning" onclick="window.location.href='{{ route('subscription.manage') }}'">Ubah harga langganan</button>
+            <!-- Tombol Aksi -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <button class="btn btn-warning me-3" onclick="window.location.href='{{ route('subscription.manage') }}'">
+                        <i class="bi bi-pencil me-2"></i> Ubah Harga Langganan
+                    </button>
+                    <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#subscribersModal">
+                        <i class="bi bi-people me-2"></i> Lihat Daftar Langganan
+                    </button>
                 </div>
-                <div class="col-md-4">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#subscribersModal">Lihat Daftar Langganan</button>
-                </div>
-                <div class="col-md-4 text-end">
-                    <button class="btn btn-success" onclick="window.location.href='{{ route('photos.create') }}'">Tambah Foto Anda</button>
-                </div>
+                <button class="btn btn-success" onclick="window.location.href='{{ route('photos.create') }}'">
+                    <i class="bi bi-plus me-2"></i> Tambah Foto Anda
+                </button>
             </div>
-        @endif
-    @endif
-    @if(Auth::id() !== $user->id && Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists())
-    <h5>Foto Eksklusif</h5>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="card-columns">
+
+            <!-- Tampilkan Foto Premium -->
+            <h5 class="mb-3">Foto Premium Anda</h5>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
                 @forelse($premiumPhotos as $photo)
-                    <a href="{{ route('photos.show', $photo->id) }}">
-                        <div class="card card-pin">
-                            <img src="{{ asset('storage/' . $photo->path) }}" class="img-fluid rounded" alt="Premium Photo">
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            <a href="{{ route('photos.show', $photo->id) }}">
+                                <img src="{{ asset('storage/' . $photo->path) }}" class="card-img-top img-fluid" alt="Premium Photo" style="height: 200px; object-fit: cover;">
+                            </a>
+                            <div class="card-body">
+                                <p class="card-text text-muted">Uploaded on {{ $photo->created_at->format('d M Y') }}</p>
+                            </div>
                         </div>
-                    </a>
+                    </div>
                 @empty
-                    <p>Belum ada foto eksklusif.</p>
+                    <div class="col">
+                        <p class="text-muted">Anda belum mengunggah foto eksklusif.</p>
+                    </div>
                 @endforelse
             </div>
-        </div>
-    </div>
+        @endif
+    @else
+        @if(Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists())
+            <button class="btn btn-info" onclick="window.location.href='{{ route('subscription.options', ['username' => $user->username]) }}'">
+                <i class="bi bi-arrow-repeat me-2"></i> Perpanjang Langganan
+            </button>
+        @endif
+    @endif
 
-        <button class="btn btn-primary mt-3" onclick="window.location.href='{{ route('subscription.options', ['username' => $user->username]) }}'">Perpanjang Langganan</button>
+    @if(Auth::id() !== $user->id && Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists())
+        <!-- Tampilkan Foto Eksklusif untuk Pelanggan -->
+        <h5 class="mt-4 mb-3">Foto Eksklusif</h5>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @forelse($premiumPhotos as $photo)
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <a href="{{ route('photos.show', $photo->id) }}">
+                            <img src="{{ asset('storage/' . $photo->path) }}" class="card-img-top img-fluid" alt="Premium Photo" style="height: 200px; object-fit: cover;">
+                        </a>
+                        <div class="card-body">
+                            <p class="card-text text-muted">Uploaded on {{ $photo->created_at->format('d M Y') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col">
+                    <p class="text-muted">Belum ada foto eksklusif.</p>
+                </div>
+            @endforelse
+        </div>
     @elseif(Auth::id() !== $user->id)
-        <h5>Anda belum berlangganan!</h5>
-        <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>
-        <a href="{{ route('subscription.options', ['username' => $user->username]) }}" class="btn btn-primary">Langganan Sekarang</a>
+        <!-- Pesan untuk Pengguna yang Belum Berlangganan -->
+        <div class="alert alert-info mt-4">
+            <h5 class="alert-heading">Anda belum berlangganan!</h5>
+            <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>
+            <hr>
+            <a href="{{ route('subscription.options', ['username' => $user->username]) }}" class="btn btn-primary">
+                <i class="bi bi-star me-2"></i> Langganan Sekarang
+            </a>
+        </div>
     @endif
 </div>
 @endif
 
 <!-- Modal Daftar Langganan -->
 <div class="modal fade" id="subscribersModal" tabindex="-1" role="dialog" aria-labelledby="subscribersModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="subscribersModalLabel">Daftar Langganan</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <ul class="list-group" id="subscribers-list">
+                <ul class="list-group">
                     @foreach($subscribers as $subscriber)
                         @if(isset($subscriber->user->username))
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="{{ route('user.showProfile', ['username' => $subscriber->user->username]) }}">
+                                <a href="{{ route('user.showProfile', ['username' => $subscriber->user->username]) }}" class="text-decoration-none">
                                     <b>{{ $subscriber->user->username }}</b>
                                 </a>
                                 @if(Auth::check() && Auth::id() !== $subscriber->user_id)
@@ -357,7 +399,6 @@
         </div>
     </div>
 </div>
-        
 
 
     <!-- Modal Edit Profil -->
