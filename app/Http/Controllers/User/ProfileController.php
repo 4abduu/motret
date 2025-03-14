@@ -9,6 +9,7 @@ use App\Models\Photo;
 use App\Models\Album;
 use App\Models\User;
 use App\Models\SubscriptionPriceUser;
+use App\Models\SubscriptionUser;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -39,8 +40,10 @@ class ProfileController extends Controller
                        ->get();
         
         $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
+        $subscribers = SubscriptionUser::where('target_user_id', $user->id)->with('user')->get();
+
         
-        return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice'));
+        return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice', 'subscribers'));
     }
     
     public function showProfile($username)
@@ -64,8 +67,10 @@ class ProfileController extends Controller
         
         $isSubscribed = Auth::check() && Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists();
         $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
+        $subscribers = SubscriptionUser::where('target_user_id', $user->id)->with('user')->get();
+
         
-        return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'isSubscribed', 'hasSubscriptionPrice'));
+        return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'isSubscribed', 'hasSubscriptionPrice', 'subscribers'));
     }
     
 

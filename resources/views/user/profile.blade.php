@@ -277,65 +277,88 @@
                 @endforeach
             </div>
         </div>
-    
+
 <!-- Tab Langganan -->
 @if(Auth::check() && $user->verified && ($hasSubscriptionPrice || Auth::id() === $user->id))
 <div class="tab-pane fade" id="subscription" role="tabpanel" aria-labelledby="subscription-tab">
     <h2 class="mt-5">Langganan</h2>
-    <div class="row">
-        @if(Auth::id() === $user->id)
-            @if(!$hasSubscriptionPrice)
-                <button class="btn btn-warning mb-3" onclick="window.location.href='{{ route('subscription.manage') }}'">Atur langgananmu sekarang</button>
-            @else
-                <button class="btn btn-warning mb-3" onclick="window.location.href='{{ route('subscription.manage') }}'">Ubah harga langganan</button>
-                <button class="btn btn-success mb-3" onclick="window.location.href='{{ route('photos.create') }}'">Tambah Foto Anda</button>
-                <h5>Foto Eksklusif</h5>
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="card-columns">
-                            @forelse($premiumPhotos as $photo)
-                                <a href="{{ route('photos.show', $photo->id) }}">
-                                    <div class="card card-pin">
-                                        <img src="{{ asset('storage/' . $photo->path) }}" class="img-fluid rounded" alt="Premium Photo">
-                                    </div>
-                                </a>
-                            @empty
-                                <p>Belum ada foto eksklusif.</p>
-                            @endforelse
-                        </div>
-                    </div>
+    @if(Auth::id() === $user->id)
+        @if(!$hasSubscriptionPrice)
+            <button class="btn btn-warning mb-3" onclick="window.location.href='{{ route('subscription.manage') }}'">Atur langgananmu sekarang</button>
+        @else
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <button class="btn btn-warning" onclick="window.location.href='{{ route('subscription.manage') }}'">Ubah harga langganan</button>
                 </div>
-            @endif
-        @elseif(Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists())
-            <h5>Foto Eksklusif</h5>
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="card-columns">
-                        @forelse($premiumPhotos as $photo)
-                            <a href="{{ route('photos.show', $photo->id) }}">
-                                <div class="card card-pin">
-                                    <img src="{{ asset('storage/' . $photo->path) }}" class="img-fluid rounded" alt="Premium Photo">
-                                </div>
-                            </a>
-                        @empty
-                            <p>Belum ada foto eksklusif.</p>
-                        @endforelse
-                    </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#subscribersModal">Lihat Daftar Langganan</button>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-success" onclick="window.location.href='{{ route('photos.create') }}'">Tambah Foto Anda</button>
                 </div>
             </div>
-            <button class="btn btn-primary mt-3" onclick="window.location.href='{{ route('subscription.options', $user->username) }}'">Perpanjang Langganan</button>
-        @else
-            <h5>Anda belum berlangganan!</h5>
-            <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>
-            <a href="{{ route('subscription.options', $user->username) }}" class="btn btn-primary">Langganan Sekarang</a>
         @endif
+    @endif
+    @if(Auth::id() !== $user->id && Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists())
+    <h5>Foto Eksklusif</h5>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="card-columns">
+                @forelse($premiumPhotos as $photo)
+                    <a href="{{ route('photos.show', $photo->id) }}">
+                        <div class="card card-pin">
+                            <img src="{{ asset('storage/' . $photo->path) }}" class="img-fluid rounded" alt="Premium Photo">
+                        </div>
+                    </a>
+                @empty
+                    <p>Belum ada foto eksklusif.</p>
+                @endforelse
+            </div>
+        </div>
     </div>
+
+        <button class="btn btn-primary mt-3" onclick="window.location.href='{{ route('subscription.options', ['username' => $user->username]) }}'">Perpanjang Langganan</button>
+    @elseif(Auth::id() !== $user->id)
+        <h5>Anda belum berlangganan!</h5>
+        <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>
+        <a href="{{ route('subscription.options', ['username' => $user->username]) }}" class="btn btn-primary">Langganan Sekarang</a>
+    @endif
 </div>
 @endif
-    
+
+<!-- Modal Daftar Langganan -->
+<div class="modal fade" id="subscribersModal" tabindex="-1" role="dialog" aria-labelledby="subscribersModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="subscribersModalLabel">Daftar Langganan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="subscribers-list">
+                    @foreach($subscribers as $subscriber)
+                        @if(isset($subscriber->user->username))
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{{ route('user.showProfile', ['username' => $subscriber->user->username]) }}">
+                                    <b>{{ $subscriber->user->username }}</b>
+                                </a>
+                                @if(Auth::check() && Auth::id() !== $subscriber->user_id)
+                                    <button 
+                                        class="btn btn-sm {{ Auth::user()->isFollowing($subscriber->user) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }}" 
+                                        data-user-id="{{ $subscriber->user->id }}">
+                                        {{ Auth::user()->isFollowing($subscriber->user) ? 'Unfollow' : 'Follow' }}
+                                    </button>
+                                @endif
+                            </li>
+                        @endif
+                    @endforeach
+                </ul>
+            </div>
+        </div>
     </div>
-    
 </div>
+        
+
 
     <!-- Modal Edit Profil -->
     @if(Auth::id() === $user->id)
@@ -645,5 +668,105 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function updateFollowButton(button, following) {
+            if (following) {
+                button.textContent = 'Unfollow';
+                button.classList.remove('btn-primary', 'follow-button');
+                button.classList.add('btn-danger', 'unfollow-button');
+            } else {
+                button.textContent = 'Follow';
+                button.classList.remove('btn-danger', 'unfollow-button');
+                button.classList.add('btn-primary', 'follow-button');
+            }
+        }
+
+        function handleFollowUnfollow(button) {
+            const userId = button.getAttribute('data-user-id');
+            const isUnfollow = button.classList.contains('unfollow-button');
+            const url = isUnfollow ? `/users/${userId}/unfollow` : `/users/${userId}/follow`;
+            const token = '{{ csrf_token() }}';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateFollowButton(button, !isUnfollow);
+                const followersCount = document.getElementById('followers-count');
+                followersCount.textContent = data.followers_count;
+
+                // Update followers list in the modal
+                const followersList = document.getElementById('followers-list');
+                if (!isUnfollow) {
+                    const newFollowerItem = document.createElement('li');
+                    newFollowerItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                    newFollowerItem.innerHTML = `
+                        <a href="/users/${data.current_user.username}"><b>${data.current_user.username}</b></a>
+                        <button class="btn btn-sm btn-danger unfollow-button" data-user-id="${data.current_user.id}">Unfollow</button>
+                    `;
+                    followersList.appendChild(newFollowerItem);
+
+                    // Add event listener to the new unfollow button
+                    newFollowerItem.querySelector('.unfollow-button').addEventListener('click', function () {
+                        handleFollowUnfollow(this);
+                    });
+                } else {
+                    const followerItems = followersList.querySelectorAll('li');
+                    followerItems.forEach(item => {
+                        if (item.querySelector('button').getAttribute('data-user-id') === data.current_user.id) {
+                            item.remove();
+                        }
+                    });
+                }
+
+                // Update following list in the modal
+                const followingList = document.getElementById('following-list');
+                if (!isUnfollow) {
+                    const newFollowingItem = document.createElement('li');
+                    newFollowingItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                    newFollowingItem.innerHTML = `
+                        <a href="/users/${data.current_user.username}"><b>${data.current_user.username}</b></a>
+                        <button class="btn btn-sm btn-danger unfollow-button" data-user-id="${data.current_user.id}">Unfollow</button>
+                    `;
+                    followingList.appendChild(newFollowingItem);
+
+                    // Add event listener to the new unfollow button
+                    newFollowingItem.querySelector('.unfollow-button').addEventListener('click', function () {
+                        handleFollowUnfollow(this);
+                    });
+                } else {
+                    const followingItems = followingList.querySelectorAll('li');
+                    followingItems.forEach(item => {
+                        if (item.querySelector('button').getAttribute('data-user-id') === data.current_user.id) {
+                            item.remove();
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Tombol Follow/Unfollow di profil pengguna
+        const followButton = document.getElementById('follow-button');
+        if (followButton) {
+            followButton.addEventListener('click', function () {
+                handleFollowUnfollow(followButton);
+            });
+        }
+
+        // Tombol Follow/Unfollow di modal followers/following
+        document.querySelectorAll('.follow-button, .unfollow-button').forEach(button => {
+            button.addEventListener('click', function () {
+                handleFollowUnfollow(button);
+            });
+        });
+    });
 </script>
 @endpush
