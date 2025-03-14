@@ -6,11 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\Photo;
 use App\Models\User;
 use App\Models\Search;
+use Illuminate\Support\Facades\Auth;
 
 class SearchController extends Controller
 {
     public function search(Request $request)
     {
+        if (Auth::user()->role === 'admin') {
+            abort(403, 'Admin tidak diizinkan mengakses halaman ini.');
+        }
         $keyword = $request->input('query');
         $search = Search::firstOrCreate(['keyword' => $keyword]);
         $search->increment('count');

@@ -23,11 +23,11 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
 
 // Route untuk homepage
-Route::middleware(['logout_if_authenticated'])->group(function () {
+Route::middleware(['logout_if_authenticated', 'redirect.if.admin'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
 });
 
-Route::middleware(['auth', 'logout_if_authenticated'])->group(function () {
+Route::middleware(['auth', 'logout_if_authenticated', 'redirect.if.admin'])->group(function () {
     Route::get('/foto/upload', [UserPhotoController::class, 'createphotos'])->name('photos.create');
     Route::post('/foto/upload', [UserPhotoController::class, 'storePhoto'])->name('photos.store');
     Route::post('/settings/email/send-code', [AuthController::class, 'sendEmailVerificationCode'])->name('user.sendEmailVerificationCode');
@@ -107,13 +107,11 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
 });
 
 // Grup untuk User dan Pro
-Route::middleware(['auth', 'role:user,pro', 'logout_if_authenticated'])->group(function () {
+Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_authenticated'])->group(function () {
     // Profil
     Route::get('/profil', [UserProfileController::class, 'index'])->name('user.profile');
     Route::put('/profile', [UserProfileController::class, 'updateProfile'])->name('user.updateProfile');
     Route::delete('/profil/foto', [UserProfileController::class, 'deleteProfilePhoto'])->name('user.deleteProfilePhoto');
-    Route::post('/check-username', [UserProfileController::class, 'checkUsername'])->name('user.checkUsername');
-    Route::post('/check-email', [UserProfileController::class, 'checkEmail'])->name('user.checkEmail');
     
     // Foto
     Route::get('/foto', [UserPhotoController::class, 'index'])->name('user.photos');
@@ -161,6 +159,8 @@ Route::middleware(['auth', 'role:user,pro', 'logout_if_authenticated'])->group(f
     Route::put('/settings/update-email', [UserSettingController::class, 'updateEmail'])->name('user.updateEmail');
     Route::post('/check-verification-username', [UserSettingController::class, 'checkVerificationUsername'])->name('user.checkVerificationUsername');
     Route::post('/settings/submit-verification', [UserSettingController::class, 'submitVerification'])->name('user.submitVerification');
+    Route::post('/check-username', [UserSettingController::class, 'checkUsername'])->name('user.checkUsername');
+    Route::post('/check-email', [UserSettingController::class, 'checkEmail'])->name('user.checkEmail');
     
     // Subscription & Transaksi
     Route::get('/subscription', [UserSubscriptionController::class, 'index'])->name('subscription');

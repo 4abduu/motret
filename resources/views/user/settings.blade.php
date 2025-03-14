@@ -29,8 +29,7 @@
                         @method('PUT')
                         <div class="form-group mt-3">
                             <label for="username">Username Baru</label>
-                            <input type="text" name="username" class="form-control" id="username" required oninput="checkUsername()">
-                            <div id="username-availability" class="mt-2"></div>
+                            <input type="text" name="username" class="form-control" id="username-input" required oninput="checkUsername()">                            <div id="username-availability" class="mt-2"></div>
                         </div>
                         <button type="submit" class="btn btn-success mt-3">Ubah Username</button>
                     </form>
@@ -91,7 +90,7 @@
                         <!-- Username -->
                         <div class="form-group mt-3">
                             <label for="username">Username di Motret: <span class="text-danger">*</span></label>
-                            <input type="text" id="username" name="username" class="form-control" required oninput="checkVerificationUsername()">
+                            <input type="text" id="verification-username" name="username" class="form-control" required oninput="checkVerificationUsername()">
                             <div id="username-verification-status" class="mt-2"></div>
                         </div>
                         
@@ -127,7 +126,7 @@
                         
                         <button type="submit" class="btn btn-success mt-3">Kirim Pengajuan</button>
                     </form>
-                </div>        
+                </div>    
                 @endif
             </div>
           </div>
@@ -139,7 +138,7 @@
 <script>
     let usernameTimeout, emailTimeout;
     
-    document.getElementById('username').addEventListener('input', function() {
+    document.getElementById('username-input').addEventListener('input', function() {
         clearTimeout(usernameTimeout);
         usernameTimeout = setTimeout(checkUsername, 500);
     });
@@ -150,25 +149,40 @@
     });
 
     function checkUsername() {
-        clearTimeout(usernameTimeout);
-        document.getElementById('username-availability').innerHTML = '';
-        usernameTimeout = setTimeout(() => {
-            const username = document.getElementById('username').value;
-            fetch('{{ route('user.checkUsername') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ username })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const availability = document.getElementById('username-availability');
-                availability.innerHTML = data.exists ? '<span class="text-danger">Username sudah digunakan.</span>' : '<span class="text-success">Username tersedia.</span>';
-            });
-        }, 500);
-    }
+    clearTimeout(usernameTimeout);
+    document.getElementById('username-availability').innerHTML = '';
+    usernameTimeout = setTimeout(() => {
+        const username = document.getElementById('username-input').value; // Gunakan ID baru
+        console.log('Username input:', username); // Debugging: Lihat nilai username
+
+        if (!username) {
+            console.log('Username is empty'); // Debugging: Cek jika username kosong
+            return;
+        }
+
+        fetch('{{ route('user.checkUsername') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ username })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Backend response:', data); // Debugging: Lihat respons dari backend
+            const availability = document.getElementById('username-availability');
+            if (data.exists) {
+                availability.innerHTML = '<span class="text-danger">Username sudah digunakan.</span>';
+            } else {
+                availability.innerHTML = '<span class="text-success">Username tersedia.</span>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error); // Debugging: Tangani error
+        });
+    }, 500);
+}
 
     function checkEmail() {
         clearTimeout(emailTimeout);
@@ -216,26 +230,26 @@
         return re.test(email);
     }
     
-    // function checkVerificationUsername() {
-    //     clearTimeout(usernameTimeout);
-    //     document.getElementById('username-verification-status').innerHTML = '';
-    //     usernameTimeout = setTimeout(() => {
-    //         const username = document.getElementById('username').value;
-    //         fetch('{{ route('user.checkVerificationUsername') }}', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
-    //             },
-    //             body: JSON.stringify({ username })
-    //         })
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             const verificationStatus = document.getElementById('username-verification-status');
-    //             verificationStatus.innerHTML = data.isValid ? '<span class="text-success">Username sesuai.</span>' : '<span class="text-danger">Username tidak sesuai dengan username yang terdaftar di sistem.</span>';
-    //         });
-    //     }, 500);
-    // }
+    function checkVerificationUsername() {
+        clearTimeout(usernameTimeout);
+        document.getElementById('username-verification-status').innerHTML = '';
+        usernameTimeout = setTimeout(() => {
+            const username = document.getElementById('verification-username').value;
+            fetch('{{ route('user.checkVerificationUsername') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const verificationStatus = document.getElementById('username-verification-status');
+                verificationStatus.innerHTML = data.isValid ? '<span class="text-success">Username sesuai.</span>' : '<span class="text-danger">Username tidak sesuai.</span>';
+            });
+        }, 500);
+    }
 </script>
 @endpush
 @endsection

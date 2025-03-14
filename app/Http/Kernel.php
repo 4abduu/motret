@@ -64,8 +64,9 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'role' => \App\Http\Middleware\RoleMiddleware::class, // Tambahkan ini
-        'redirect.if.admin' => \App\Http\Middleware\RedirectIfAdmin::class, 
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'redirect.if.admin' => \App\Http\Middleware\RedirectIfAdmin::class,
         'logout_if_authenticated' => \App\Http\Middleware\RedirectIfAuthenticatedAndLogout::class,
+        'prevent.admin.access' => \App\Http\Middleware\PreventAdminAccess::class,
     ];
 }

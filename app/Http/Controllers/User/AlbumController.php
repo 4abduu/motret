@@ -17,6 +17,9 @@ class AlbumController extends Controller
     }
     public function index($id)
     {
+        if (Auth::user()->role === 'admin') {
+            abort(403, 'Admin tidak diizinkan mengakses halaman ini.');
+        }
         $album = Album::with(['photos' => function($query) {
             $query->where('banned', false)
             ->where('premium', false);

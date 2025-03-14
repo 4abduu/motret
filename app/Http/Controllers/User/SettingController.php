@@ -14,6 +14,7 @@ use App\Models\Notif;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Log;
 
 class SettingController extends Controller
 {
@@ -28,9 +29,20 @@ class SettingController extends Controller
     
     public function checkUsername(Request $request)
     {
-        $exists = User::where('username', $request->username)->exists();
+        $username = trim($request->username);
+        Log::info('Checking username:', ['username' => $username]); // Log input username
+        $exists = User::where('username', 'LIKE', $username)->exists();
+        Log::info('Username exists:', ['exists' => $exists]); // Log hasil query
         return response()->json(['exists' => $exists]);
     }
+
+    public function checkVerificationUsername(Request $request)
+{
+    $username = $request->input('username');
+    $isValid = $username === Auth::user()->username;
+
+    return response()->json(['isValid' => $isValid]);
+}
 
     public function checkEmail(Request $request)
     {
@@ -98,14 +110,6 @@ class SettingController extends Controller
 
         return redirect()->route('user.settings')->with('success', 'Email berhasil diperbarui.');
     }
-
-    // public function checkVerificationUsername(Request $request)
-    // {
-    //     $username = $request->input('username');
-    //     $isValid = $username === Auth::user()->username;
-    
-    //     return response()->json(['isValid' => $isValid]);
-    // }
     
     public function submitVerification(Request $request)
     {
