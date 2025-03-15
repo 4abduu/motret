@@ -120,7 +120,7 @@
                     <a class="btn btn-success ml-auto text-white" style="border-radius: 30px; padding: 9px 25px; margin-right: -15px;" href="{{ route('login') }}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="btn btn-secondary text-white" style="border-radius: 30px; padding: 9px 20px;" href="{{ route('login') }}?register=true">Register</a>
+                    <a class="btn btn-secondary text-white" style="border-radius: 30px; padding: 9px 20px;" href="{{ route('register') }}">Register</a>
                 </li>
             </ul>
         </div>

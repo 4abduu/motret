@@ -2,14 +2,100 @@
 
 @section('title', 'Search Results')
 
+@push('styles')
+    <style>
+            html, body{
+                margin: 0; /* Reset margin */
+            }
+        /* Search Results Page */
+        .search-results-container {
+            padding: 20px; /* Berikan padding */
+        }
+    
+        .search-results-container h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    
+        .search-results-container h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    
+        .list-group-item {
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+    
+        .list-group-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+    
+        .list-group-item h5 {
+            color: #32bd40; /* Warna hijau untuk nama user */
+        }
+    
+        .list-group-item p {
+            color: #666; /* Warna abu-abu untuk username */
+        }
+    
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-img-top {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            color: #333;
+        }
+
+        .card-text {
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .search-results-container {
+                margin-top: 60px;
+                padding: 10px;
+            }
+
+            .col-md-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+@endpush
+
 @section('content')
     <div class="container mt-5">
         <h3 class="my-4">Search Results for "{{ $keyword }}"</h3>
         @if($users->isEmpty() && $photos->isEmpty())
-            <p>No results found.</p>
+            <p class="text-muted">No results found.</p>
         @else
             @if(!$users->isEmpty())
-                <h2>Users</h2>
+                <h2 class="mb-4">Users</h2>
                 <div class="list-group mb-4">
                     @foreach($users as $user)
                         <a href="{{ route('user.showProfile', $user->username) }}" class="list-group-item list-group-item-action">
@@ -25,11 +111,11 @@
             @endif
 
             @if(!$photos->isEmpty())
-                <h2>Photos</h2>
+                <h2 class="mb-4">Photos</h2>
                 <div class="row">
                     @foreach($photos as $photo)
-                        <div class="col-md-4">
-                            <div class="card mb-4 shadow-sm">
+                        <div class="col-md-4 mb-4">
+                            <div class="card shadow-sm">
                                 <a href="{{ route('photos.show', $photo->id) }}">
                                     <img src="{{ asset('storage/' . $photo->path) }}" class="card-img-top" alt="{{ $photo->title }}">
                                 </a>

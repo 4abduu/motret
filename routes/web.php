@@ -40,6 +40,7 @@ Route::post('/foto/{id}/download', [UserPhotoController::class, 'downloadPhoto']
 // Routes untuk login, register, dan logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->middleware('logout_if_authenticated');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register')->middleware('logout_if_authenticated');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/guest', [AuthController::class, 'guest'])->name('guest');

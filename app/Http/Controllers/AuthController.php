@@ -31,6 +31,11 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    public function showRegisterForm()
+    {
+        return view('auth.register');
+    }
+
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->with(['prompt' => 'select_account'])->redirect();

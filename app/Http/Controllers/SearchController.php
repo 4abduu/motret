@@ -12,7 +12,7 @@ class SearchController extends Controller
 {
     public function search(Request $request)
     {
-        if (Auth::user()->role === 'admin') {
+        if (Auth::check() && Auth::user()->role === 'admin') {
             abort(403, 'Admin tidak diizinkan mengakses halaman ini.');
         }
         $keyword = $request->input('query');
