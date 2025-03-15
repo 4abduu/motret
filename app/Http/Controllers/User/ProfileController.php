@@ -48,7 +48,7 @@ class ProfileController extends Controller
     
     public function showProfile($username)
     {
-        if (Auth::user()->role === 'admin') {
+        if (Auth::check() && Auth::user()->role === 'admin') {
             abort(403, 'Admin tidak diizinkan mengakses halaman ini.');
         }
         $user = User::where('username', $username)->firstOrFail();

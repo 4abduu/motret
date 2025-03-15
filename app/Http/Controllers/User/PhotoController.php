@@ -28,6 +28,10 @@ class PhotoController extends Controller
 
     public function showPhoto($id)
     {
+        if (Auth::check() && Auth::user()->role === 'admin') {
+            abort(403, 'Admin tidak diizinkan mengakses halaman ini.');
+        }
+        
         $photo = Photo::with('user')->findOrFail($id);
         $photo->increment('views');
         $randomPhotos = Photo::where('id', '!=', $id)
