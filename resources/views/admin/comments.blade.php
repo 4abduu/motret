@@ -60,7 +60,7 @@
                                                     <p><strong>Commented At:</strong> {{ $comment->created_at->format('d M Y, H:i') }}</p>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Close</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -81,8 +81,8 @@
                                                     <form method="POST" action="{{ route('admin.comments.delete', $comment->id) }}">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger">Delete</button>
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-danger text-white">Delete</button>
+                                                        <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Cancel</button>
                                                     </form>
                                                 </div>
                                             </div>

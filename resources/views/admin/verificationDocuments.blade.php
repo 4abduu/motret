@@ -36,7 +36,7 @@
                         </tbody>
                     </table>
                 </div>
-                <a href="{{ route('admin.verificationRequests') }}" class="btn btn-success mt-3">Kembali</a>
+                <a href="{{ route('admin.verificationRequests') }}" class="btn btn-success text-white mt-3">Kembali</a>
             </div>
         </div>
     </div>
