@@ -67,8 +67,8 @@
                                                     <label for="price" class="form-label">Harga</label>
                                                     <input type="number" name="price" class="form-control" id="price" value="{{ $price->price }}" required>
                                                 </div>
-                                                <button type="submit" class="btn btn-success">Update</button>
-                                                <a href="{{ route('admin.subscriptions.systemPrices') }}" class="btn btn-danger">Batal</a>
+                                                <button type="submit" class="btn btn-success text-white">Update</button>
+                                                <a href="{{ route('admin.subscriptions.systemPrices') }}" class="btn btn-secondary text-white">Batal</a>
                                             </form>
                                             </div>
                                         </div>

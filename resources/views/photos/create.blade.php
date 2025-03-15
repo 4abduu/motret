@@ -21,7 +21,8 @@
                 <div class="card">
                   <div class="card-body">
                     <h4 class="card-title d-flex">Pilih file foto</h4>
-                    <input type="file" name="photo" class="dropify" id="photo" required>
+                    <input type="file" name="photo" class="dropify" id="photo" required onchange="previewImage(event)">
+                    <img id="imagePreview" src="#" alt="Pratinjau Gambar" style="display: none; max-width: 100%; margin-top: 10px;">
                   </div>
                 </div>
               </div>
@@ -68,4 +69,16 @@
             </div>
         </form>
     </div>
+
+     <script>
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function () {
+                var output = document.getElementById('imagePreview');
+                output.src = reader.result;
+                output.style.display = 'block';
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>   
 @endsection

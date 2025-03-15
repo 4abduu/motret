@@ -82,8 +82,8 @@
                                                 <form method="POST" action="{{ route('admin.photos.ban', $report->photo->id) }}">
                                                     @csrf
                                                     @method('PUT')
-                                                    <button type="submit" class="btn btn-danger">Ban</button>
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                                    <button type="submit" class="btn btn-danger text-white">Ban</button>
+                                                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -105,8 +105,8 @@
                                                 <form method="POST" action="{{ route('admin.reports.delete', $report->id) }}">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-danger">Hapus</button>
+                                                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
+                                                    <button type="submit" class="btn btn-danger text-white">Hapus</button>
                                                 </form>
                                             </div>
                                         </div>

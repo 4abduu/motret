@@ -72,8 +72,8 @@
                                                 <form method="POST" action="{{ route('admin.users.delete', $user->id) }}">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">Delete</button>
-                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger text-white">Delete</button>
+                                                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Cancel</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -102,9 +102,6 @@
                 <p><strong>Role:</strong> {{ ucfirst($user->role) }}</p>
                 <p><strong>Subscription Berakhir Pada:</strong> {{ $user->subscription_ends_at ?? 'null' }}</p>
                 <p><strong>Reset Download Pada:</strong> {{ $user->download_reset_at ?? 'null' }}</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -175,8 +172,8 @@
                             <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>User</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-success">Update</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success text-white">Update</button>
+                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
                 </form>
             </div>
         </div>
@@ -198,8 +195,8 @@
                 <form method="POST" action="{{ route('admin.users.deleteProfilePhoto', $user->id) }}">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Hapus</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger text-white">Hapus</button>
+                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
                 </form>
             </div>
         </div>
@@ -246,8 +243,8 @@
                             <option value="user">User</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-success">Tambah User</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-success text-white">Tambah User</button>
+                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
                 </form>
             </div>
         </div>

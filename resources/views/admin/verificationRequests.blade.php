@@ -88,8 +88,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-danger">Tolak</button>
+                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger text-white">Tolak</button>
                 </div>
             </form>
         </div>

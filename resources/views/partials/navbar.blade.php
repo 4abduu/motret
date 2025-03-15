@@ -99,7 +99,7 @@
                 <img src="{{ asset('images/Motret logo.png') }}" class="me-2" alt="logo" />
             </a>
             <a class="navbar-brand brand-logo-mini" href="{{ url('/') }}">
-                <img src="{{ asset('assets/images/logo-mini.svg') }}" alt="logo" />
+                <img src="{{ asset('images/Motret logo kecil.png') }}" alt="logo" />
             </a>
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">

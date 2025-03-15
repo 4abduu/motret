@@ -61,7 +61,7 @@
                                     <div class="mb-3">
                                         <img src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}" class="img-fluid">
                                     </div>
-                                    <form method="POST" action="{{ route('admin.photos.edit', $photo->id) }}">
+                                    <form method="POST" action="{{ route('admin.photos.edit', $photo->id) }}" class="edit-photo-form" data-id="{{ $photo->id }}">
                                         @csrf
                                         @method('PUT')
                                         <div class="mb-3">
@@ -72,7 +72,7 @@
                                             <label for="description" class="form-label">Description</label>
                                             <textarea name="description" class="form-control" id="description" required>{{ $photo->description }}</textarea>
                                         </div>
-                                        <button type="submit" class="btn btn-success">Save changes</button>
+                                        <button type="submit" class="btn btn-success text-white">Save changes</button>
                                     </form>
                                 </div>
                             </div>
@@ -124,11 +124,11 @@
                                     <p>Are you sure you want to delete this photo?</p>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                    <form action="{{ route('admin.photos.delete', $photo->id) }}" method="POST" style="display:inline;">
+                                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Cancel</button>
+                                    <form action="{{ route('admin.photos.delete', $photo->id) }}" class="delete-photo-form" data-id="{{ $photo->id }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                        <button type="submit" class="btn btn-danger text-white">Delete</button>
                                     </form>
                                 </div>
                             </div>
@@ -142,4 +142,55 @@
 </div>
 </div>
 </div>
+
+<script>
+    document.querySelectorAll(".edit-photo-form").forEach(form => {
+        form.addEventListener("submit", function(event) {
+            event.preventDefault(); // Mencegah pengiriman form default
+            
+            let photoId = this.getAttribute("data-id");
+            let modal = bootstrap.Modal.getInstance(document.getElementById(`editPhotoModal${photoId}`));
+            
+            // Tutup modal terlebih dahulu
+            modal.hide();
+
+            // Tunggu sedikit sebelum memunculkan SweetAlert
+            setTimeout(() => {
+                Swal.fire({
+                    title: "Good job!",
+                    text: "Your changes have been saved!",
+                    icon: "success"
+                }).then(() => {
+                    // Kirim form setelah SweetAlert ditutup
+                    form.submit();
+                });
+            }, 500); // Delay 500ms agar modal tertutup dengan mulus
+        });
+    });
+
+    document.querySelectorAll(".delete-photo-form").forEach(form => {
+        form.addEventListener("submit", function(event) {
+            event.preventDefault(); // Mencegah pengiriman form langsung
+            
+            let photoId = this.getAttribute("data-id");
+            let modal = bootstrap.Modal.getInstance(document.getElementById(`confirmDeleteModal${photoId}`));
+
+            // Tutup modal terlebih dahulu
+            modal.hide();
+
+            // Tunggu sedikit sebelum memunculkan SweetAlert
+            setTimeout(() => {
+                Swal.fire({
+                    title: "Deleted!",
+                    text: "Your photo has been deleted.",
+                    icon: "success"
+                }).then(() => {
+                    // Kirim form setelah SweetAlert ditutup
+                    form.submit();
+                });
+            }, 500);
+        });
+    });
+</script>
+
 @endsection
