@@ -18,13 +18,13 @@
     <link rel="stylesheet" href="{{asset ('user/assets/css/theme.css')}}">
 @endpush
 @section('content')
-<div class="container mt-5">
+<div class="container mt-2">
     <div class="row">
         <div class="col-md-12">
-            <h1 id="album-title" class="editable" data-id="{{ $album->id }}">
+            <h2 id="album-title" class="editable" data-id="{{ $album->id }}">
                 {{ $album->name }}
                 <i class="fas fa-pencil-alt edit-icon"></i>
-            </h1>
+            </h2>
             <p id="album-description" class="editable" data-id="{{ $album->id }}">
                 {{ $album->description }}
                 <i class="fas fa-pencil-alt edit-icon"></i>

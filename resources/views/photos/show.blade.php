@@ -404,7 +404,7 @@
 </div>
 
 <div class="my-4">
-    <h3>Jelajahi untuk foto lainnya</h3>
+    <h3 class="card-title mb-4">Jelajahi untuk lainnya</h3>
     <div class="row">
         @if($randomPhotos->isEmpty())
             <div class="col-12 text-center">

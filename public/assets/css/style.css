@@ -22667,7 +22667,7 @@ code {
   content: "";
   top: 0;
   left: 0;
-  border: solid #4B49AC;
+  border: solid #32BD40;
   border-width: 2px;
   width: 20px;
   height: 20px;
@@ -22712,7 +22712,7 @@ code {
   right: 6px;
 }
 .form-check .form-check-label input[type=radio]:checked + .input-helper:before {
-  background: #4B49AC;
+  background: #32BD40;
   border-width: 0;
 }
 .form-check .form-check-label input[type=radio]:checked + .input-helper:after {

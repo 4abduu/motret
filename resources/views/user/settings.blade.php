@@ -31,7 +31,7 @@
                             <label for="username">Username Baru</label>
                             <input type="text" name="username" class="form-control" id="username-input" required oninput="checkUsername()">                            <div id="username-availability" class="mt-2"></div>
                         </div>
-                        <button type="submit" class="btn btn-success mt-3">Ubah Username</button>
+                        <button type="submit" class="btn btn-success text-white mt-3">Ubah Username</button>
                     </form>
                 </div>
                 <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
@@ -50,8 +50,8 @@
                             <label for="new_password_confirmation">Konfirmasi Password Baru</label>
                             <input type="password" name="new_password_confirmation" class="form-control" id="new_password_confirmation" required>
                         </div>
-                        <button type="submit" class="btn btn-success mt-3">Ubah Password</button>
-                        <a href="{{ route('password.request') }}" class="btn btn-danger mt-3">Reset Password</a>
+                        <button type="submit" class="btn btn-success text-white mt-3">Ubah Password</button>
+                        <a href="{{ route('password.request') }}" class="btn btn-danger text-white mt-3">Reset Password</a>
                     </form>
                 </div>
                 <div class="tab-pane fade" id="email" role="tabpanel" aria-labelledby="email-tab">
@@ -61,7 +61,7 @@
                             <label for="current_email">Email Lama</label>
                             <div class="input-group">
                                 <input type="email" name="current_email" class="form-control" id="current_email" required>
-                                <button type="button" class="btn btn-success" onclick="sendVerificationCode()">Send Code</button>
+                                <button type="button" class="btn btn-success text-white" onclick="sendVerificationCode()">Send Code</button>
                             </div>
                             <div id="email-verification-status" class="mt-2"></div>
                         </div>
@@ -74,7 +74,7 @@
                             <input type="email" name="new_email" class="form-control" id="new_email" required oninput="checkEmail()">
                             <div id="email-availability" class="mt-2"></div>
                         </div>
-                        <button type="submit" class="btn btn-success mt-3">Ubah Email</button>
+                        <button type="submit" class="btn btn-success text-white mt-3">Ubah Email</button>
                     </form>
                 </div>
                 @if(!Auth::user()->verified)
@@ -124,7 +124,7 @@
                             <textarea id="reason" name="reason" class="form-control" rows="4" required></textarea>
                         </div>
                         
-                        <button type="submit" class="btn btn-success mt-3">Kirim Pengajuan</button>
+                        <button type="submit" class="btn btn-success text-white mt-3">Kirim Pengajuan</button>
                     </form>
                 </div>    
                 @endif

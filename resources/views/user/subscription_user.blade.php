@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-5">
+<div class="container mt-3">
     <div class="text-center">
         <img src="{{ $user->profile_photo_url }}" class="img-lg rounded-circle mb-2" alt="profile image" />
         <h4>{{ $user->name }}</h4>
         <p class="text-muted mb-0">{{ $user->username }}</p>
     </div>
-    <h2 class="mt-5 text-center">Pilih Paket Langganan</h2>
+    <h3 class="mt-5 mb-3 text-center">Pilih Paket Langganan</h3>
     @if($duration && $endDateFormatted)
         <p>Anda memiliki paket langganan {{ $duration }}, yang akan berakhir pada {{ $endDateFormatted }}.</p>
     @endif
@@ -31,54 +31,54 @@
                                 <h5 class="card-title">1 Bulan</h5>
                                 <p class="card-text">Rp. {{ number_format($subscriptionPrices->price_1_month, 0, ',', '.') }}</p>
                                 @if($existingDuration >= 1)
-                                    <button class="btn btn-primary" disabled>Langganan</button>
+                                    <button class="btn btn-success text-white" disabled>Langganan</button>
                                 @else
-                                    <button class="btn btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_1_month }}', '1_month')">Langganan</button>
+                                    <button class="btn btn-success text-white" onclick="buySubscription('{{ $subscriptionPrices->price_1_month }}', '1_month')">Langganan</button>
                                 @endif
                             </div>
                         </div>
                     </div>
                 @endif
                 @if($subscriptionPrices->price_3_months)
-                    <div class="{{ $colSize }}">
+                    <div class="{{ $colSize }} mb-3">
                         <div class="card">
                             <div class="card-body text-center">
                                 <h5 class="card-title">3 Bulan</h5>
                                 <p class="card-text">Rp. {{ number_format($subscriptionPrices->price_3_months, 0, ',', '.') }}</p>
                                 @if($existingDuration >= 3)
-                                    <button class="btn btn-primary" disabled>Langganan</button>
+                                    <button class="btn btn-success text-white" disabled>Langganan</button>
                                 @else
-                                    <button class="btn btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_3_months }}', '3_months')">Langganan</button>
+                                    <button class="btn btn-success text-white" onclick="buySubscription('{{ $subscriptionPrices->price_3_months }}', '3_months')">Langganan</button>
                                 @endif
                             </div>
                         </div>
                     </div>
                 @endif
                 @if($subscriptionPrices->price_6_months)
-                    <div class="{{ $colSize }}">
+                    <div class="{{ $colSize }} mb-3">
                         <div class="card">
                             <div class="card-body text-center">
                                 <h5 class="card-title">6 Bulan</h5>
                                 <p class="card-text">Rp. {{ number_format($subscriptionPrices->price_6_months, 0, ',', '.') }}</p>
                                 @if($existingDuration >= 6)
-                                    <button class="btn btn-primary" disabled>Langganan</button>
+                                    <button class="btn btn-success text-white" disabled>Langganan</button>
                                 @else
-                                    <button class="btn btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_6_months }}', '6_months')">Langganan</button>
+                                    <button class="btn btn-success text-white" onclick="buySubscription('{{ $subscriptionPrices->price_6_months }}', '6_months')">Langganan</button>
                                 @endif
                             </div>
                         </div>
                     </div>
                 @endif
                 @if($subscriptionPrices->price_1_year)
-                    <div class="{{ $colSize }}">
+                    <div class="{{ $colSize }} mb-2">
                         <div class="card">
                             <div class="card-body text-center">
                                 <h5 class="card-title">1 Tahun</h5>
                                 <p class="card-text">Rp. {{ number_format($subscriptionPrices->price_1_year, 0, ',', '.') }}</p>
                                 @if($existingDuration >= 12)
-                                    <button class="btn btn-primary" disabled>Langganan</button>
+                                    <button class="btn btn-success text-white" disabled>Langganan</button>
                                 @else
-                                    <button class="btn btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_1_year }}', '1_year')">Langganan</button>
+                                    <button class="btn btn-success text-white" onclick="buySubscription('{{ $subscriptionPrices->price_1_year }}', '1_year')">Langganan</button>
                                 @endif
                             </div>
                         </div>
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <h2 class="mt-5 text-center">Pilih Paket Langganan Kombo</h2>
+    <h3 class="mt-5 mb-3 text-center">Pilih Paket Langganan Kombo</h3>
 
     @php
         $countCombo = 0;
@@ -107,15 +107,15 @@
                 @php
                     $comboPrice1Month = $systemPrices->where('duration', '1_month')->first()->price + $subscriptionPrices->price_1_month;
                 @endphp
-                <div class="{{ $colSizeCombo }}">
+                <div class="{{ $colSizeCombo }} mb-3">
                     <div class="card">
                         <div class="card-body text-center">
                             <h5 class="card-title">1 Bulan</h5>
                             <p class="card-text">Rp. {{ number_format($comboPrice1Month, 0, ',', '.') }}</p>
                             @if($existingDuration >= 1)
-                                <button class="btn btn-primary" id="combo_1_month" disabled>Langganan Kombo</button>
+                                <button class="btn btn-success text-white" id="combo_1_month" disabled>Langganan Kombo</button>
                             @else
-                                <button class="btn btn-primary" id="combo_1_month" onclick="buyComboSubscription('{{ $comboPrice1Month }}', '1_month')">Langganan Kombo</button>
+                                <button class="btn btn-success text-white" id="combo_1_month" onclick="buyComboSubscription('{{ $comboPrice1Month }}', '1_month')">Langganan Kombo</button>
                             @endif
                         </div>
                     </div>
@@ -125,15 +125,15 @@
                 @php
                     $comboPrice3Months = $systemPrices->where('duration', '3_months')->first()->price + $subscriptionPrices->price_3_months;
                 @endphp
-                <div class="{{ $colSizeCombo }}">
+                <div class="{{ $colSizeCombo }} mb-3">
                     <div class="card">
                         <div class="card-body text-center">
                             <h5 class="card-title">3 Bulan</h5>
                             <p class="card-text">Rp. {{ number_format($comboPrice3Months, 0, ',', '.') }}</p>
                             @if($existingDuration >= 3)
-                                <button class="btn btn-primary" id="combo_3_months" disabled>Langganan Kombo</button>
+                                <button class="btn btn-success text-white" id="combo_3_months" disabled>Langganan Kombo</button>
                             @else
-                                <button class="btn btn-primary" id="combo_3_months" onclick="buyComboSubscription('{{ $comboPrice3Months }}', '3_months')">Langganan Kombo</button>
+                                <button class="btn btn-success text-white" id="combo_3_months" onclick="buyComboSubscription('{{ $comboPrice3Months }}', '3_months')">Langganan Kombo</button>
                             @endif
                         </div>
                     </div>
@@ -143,15 +143,15 @@
                 @php
                     $comboPrice6Months = $systemPrices->where('duration', '6_months')->first()->price + $subscriptionPrices->price_6_months;
                 @endphp
-                <div class="{{ $colSizeCombo }}">
+                <div class="{{ $colSizeCombo }} mb-3">
                     <div class="card">
                         <div class="card-body text-center">
                             <h5 class="card-title">6 Bulan</h5>
                             <p class="card-text">Rp. {{ number_format($comboPrice6Months, 0, ',', '.') }}</p>
                             @if($existingDuration >= 6)
-                                <button class="btn btn-primary" id="combo_6_months" disabled>Langganan Kombo</button>
+                                <button class="btn btn-success text-white" id="combo_6_months" disabled>Langganan Kombo</button>
                             @else
-                                <button class="btn btn-primary" id="combo_6_months" onclick="buyComboSubscription('{{ $comboPrice6Months }}', '6_months')">Langganan Kombo</button>
+                                <button class="btn btn-success text-white" id="combo_6_months" onclick="buyComboSubscription('{{ $comboPrice6Months }}', '6_months')">Langganan Kombo</button>
                             @endif
                         </div>
                     </div>
@@ -161,15 +161,15 @@
                 @php
                     $comboPrice1Year = $systemPrices->where('duration', '1_year')->first()->price + $subscriptionPrices->price_1_year;
                 @endphp
-                <div class="{{ $colSizeCombo }}">
+                <div class="{{ $colSizeCombo }} mb-3">
                     <div class="card">
                         <div class="card-body text-center">
                             <h5 class="card-title">1 Tahun</h5>
                             <p class="card-text">Rp. {{ number_format($comboPrice1Year, 0, ',', '.') }}</p>
                             @if($existingDuration >= 12)
-                                <button class="btn btn-primary" id="combo_1_year" disabled>Langganan Kombo</button>
+                                <button class="btn btn-success text-white" id="combo_1_year" disabled>Langganan Kombo</button>
                             @else
-                                <button class="btn btn-primary" id="combo_1_year" onclick="buyComboSubscription('{{ $comboPrice1Year }}', '1_year')">Langganan Kombo</button>
+                                <button class="btn btn-success text-white" id="combo_1_year" onclick="buyComboSubscription('{{ $comboPrice1Year }}', '1_year')">Langganan Kombo</button>
                             @endif
                         </div>
                     </div>

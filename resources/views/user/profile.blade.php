@@ -118,7 +118,7 @@
     <div class="tab-content" id="myTabContent">
         <!-- Tab Foto -->
         <div class="tab-pane fade show active" id="photos" role="tabpanel" aria-labelledby="photos-tab">
-            <h2 class="mt-5 mb-4">Foto yang Diunggah</h2>
+            <h3 class="mt-5 mb-4">Foto yang Diunggah</h3>
             <div class="row">
                 @foreach($photos as $photo)
                     @if($photo->banned && $photo->user_id !== Auth::id())
@@ -138,61 +138,64 @@
                                     <img src="{{ asset('storage/' . $photo->path) }}" class="card-img-top" alt="{{ $photo->title }}" style="height: 200px; object-fit: cover;">
                                 </a>
                                 <div class="card-body">
-                                    <h5 class="card-title">{{ $photo->title }}</h5>
-                                    <p class="card-text">{{ $photo->description }}</p>
-                                    <div class="dropdown">
-                                        <button class="btn btn-link p-0" type="button" id="dropdownMenuButton-{{ $photo->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-three-dots-vertical text-dark"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-{{ $photo->id }}">
-                                            @if(Auth::check() && Auth::id() === $photo->user_id)
-                                                <li>
-                                                    <a class="dropdown-item d-flex align-items-center" href="{{ route('photos.edit', $photo->id) }}">
-                                                        <i class="bi bi-pencil me-2" style="color: #32bd40;"></i>Edit Foto
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <button class="dropdown-item d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#deletePhotoModal-{{ $photo->id }}">
-                                                        <i class="bi bi-trash me-2" style="color: #32bd40;"></i>Hapus Foto
-                                                    </button>
-                                                </li>
-                                            @elseif(Auth::check())
-                                                <li>
-                                                    <button class="dropdown-item d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#reportPhotoModal-{{ $photo->id }}">
-                                                        <i class="bi bi-flag me-2" style="color: #32bd40;"></i>Laporkan
-                                                    </button>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item d-flex align-items-center" href="#">
-                                                        <i class="bi bi-share me-2" style="color: #32bd40;"></i>Bagikan
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button">
-                                                        @csrf
-                                                        <button type="submit" class="dropdown-item d-flex align-items-center w-100">
-                                                            <i class="bi bi-download me-2" style="color: #32bd40;"></i>Download
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="card-title mb-2">{{ $photo->title }}</h5>
+                                        <div class="dropdown">
+                                            <button class="btn btn-link p-0" type="button" id="dropdownMenuButton-{{ $photo->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-three-dots-vertical text-dark"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton-{{ $photo->id }}">
+                                                @if(Auth::check() && Auth::id() === $photo->user_id)
+                                                    <li>
+                                                        <a class="dropdown-item d-flex align-items-center" href="{{ route('photos.edit', $photo->id) }}">
+                                                            <i class="bi bi-pencil me-2" style="color: #32bd40;"></i>Edit Foto
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <button class="dropdown-item d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#deletePhotoModal-{{ $photo->id }}">
+                                                            <i class="bi bi-trash me-2" style="color: #32bd40;"></i>Hapus Foto
                                                         </button>
-                                                    </form>
-                                                </li>
-                                            @else
-                                                <li>
-                                                    <a class="dropdown-item d-flex align-items-center" href="#">
-                                                        <i class="bi bi-share me-2" style="color: #32bd40;"></i>Bagikan
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button">
-                                                        @csrf
-                                                        <button type="submit" class="dropdown-item d-flex align-items-center w-100">
-                                                            <i class="bi bi-download me-2" style="color: #32bd40;"></i>Download
+                                                    </li>
+                                                @elseif(Auth::check())
+                                                    <li>
+                                                        <button class="dropdown-item d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#reportPhotoModal-{{ $photo->id }}">
+                                                            <i class="bi bi-flag me-2" style="color: #32bd40;"></i>Laporkan
                                                         </button>
-                                                    </form>
-                                                </li>
-                                            @endif
-                                        </ul>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item d-flex align-items-center" href="#">
+                                                            <i class="bi bi-share me-2" style="color: #32bd40;"></i>Bagikan
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button">
+                                                            @csrf
+                                                            <button type="submit" class="dropdown-item d-flex align-items-center w-100">
+                                                                <i class="bi bi-download me-2" style="color: #32bd40;"></i>Download
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                @else
+                                                    <li>
+                                                        <a class="dropdown-item d-flex align-items-center" href="#">
+                                                            <i class="bi bi-share me-2" style="color: #32bd40;"></i>Bagikan
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button">
+                                                            @csrf
+                                                            <button type="submit" class="dropdown-item d-flex align-items-center w-100">
+                                                                <i class="bi bi-download me-2" style="color: #32bd40;"></i>Download
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </div>
                                     </div>
+                                    <p class="card-text">{{ $photo->description }}</p>
                                 </div>
+                                
                             @endif
                         </div>
                     </div>
@@ -278,9 +281,11 @@
 
         <!-- Tab Album -->
         <div class="tab-pane fade" id="albums" role="tabpanel" aria-labelledby="albums-tab">
-            <h2 class="mt-5">Album</h2>
+            <h3 class="mt-5">Album</h3>
             @if(Auth::id() === $user->id)
-                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createAlbumModal">Buat Album Baru</button>
+                <button type="button" class="btn btn-success btn-icon-text mb-3" style="color: white;" data-bs-toggle="modal" data-bs-target="#createAlbumModal">
+                    <i class="mdi mdi-plus btn-icon-prepend"></i>Buat Album Baru
+                </button>
             @endif
             <div class="row">
                 @foreach($albums as $album)
@@ -340,7 +345,7 @@
                                                 </select>
                                             </div>
                                         @endif
-                                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                        <button type="submit" class="btn btn-success text-white">Simpan Perubahan</button>
                                     </form>
                                 </div>
                             </div>
@@ -376,7 +381,7 @@
         <!-- Tab Langganan -->
         @if(Auth::check() && $user->verified && ($hasSubscriptionPrice || Auth::id() === $user->id))
             <div class="tab-pane fade" id="subscription" role="tabpanel" aria-labelledby="subscription-tab">
-                <h2 class="mt-5 mb-4">Langganan</h2>
+                <h3 class="mt-5 mb-4">Langganan</h3>
                 @if(Auth::id() === $user->id)
                     @if(!$hasSubscriptionPrice)
                         <button class="btn btn-warning mb-4" onclick="window.location.href='{{ route('subscription.manage') }}'">
@@ -393,7 +398,7 @@
                                     <i class="bi bi-people me-2"></i> Lihat Daftar Langganan
                                 </button>
                             </div>
-                            <button class="btn btn-success" onclick="window.location.href='{{ route('photos.create') }}'">
+                            <button class="btn btn-success text-white" onclick="window.location.href='{{ route('photos.create') }}'">
                                 <i class="bi bi-plus me-2"></i> Tambah Foto Anda
                             </button>
                         </div>
@@ -527,8 +532,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-success">Simpan Perubahan</button>
+                    <button type="submit" class="btn btn-success text-white">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
@@ -569,8 +573,8 @@
                         @endif
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-success">Buat Album</button>
+                        <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success text-white">Buat Album</button>
                     </div>
                 </form>
             </div>
@@ -680,7 +684,7 @@
                         <label for="description">Alasan</label>
                         <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-danger">Laporkan</button>
+                    <button type="submit" class="btn btn-danger text-white">Laporkan</button>
                 </form>
             </div>
         </div>
