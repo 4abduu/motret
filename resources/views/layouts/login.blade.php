@@ -17,7 +17,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* Hilangkan scrollbar jika tidak diperlukan */
+            overflow: auto; /* Hilangkan scrollbar jika tidak diperlukan */
         }
     
         /* Container Utama */
@@ -105,13 +105,14 @@
             margin-top: auto; /* Pastikan footer tetap di bawah */
         }
     
-        /* Logo Brand */
         .brand-logo {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
-            margin-right: 0; /* Hapus margin kanan yang tidak diperlukan */
+            margin-right: 0; /* Ganti ini */
+            margin-left: auto; /* Tambahkan ini untuk geser ke kanan */
         }
+
     
         .brand-logo img {
             width: 100%;
@@ -159,19 +160,35 @@
                 margin-top: 10px; /* Kurangi margin atas di layar kecil */
             }
         }
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
     </style>
 </head>
 <body>
     <div class="container-scroller">
         <div class="container-fluid page-body-wrapper full-page-wrapper">
             <div class="content-wrapper d-flex align-items-center auth px-0">
-                <div class="row w-100 mx-0">
-                    <div class="col-lg-6 mx-auto">
+                <div class="row w-100 mx-0 d-flex align-items-center justify-content-between">
+                    <div class="col-lg-6 d-flex justify-content-end">
+                        <div class="brand-logo">
+                            <img src="{{ asset('images/Motret logo.png') }}" alt="logo" style="width: 400px; height: auto;">
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 d-flex justify-content-center">
                         @if ($errors->any())
-                        <div id="error-alert" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <div id="error-alert" class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
                             <ul>
                                 @foreach ($errors->all() as $error)
-                                    <span id="error-countdown" class="float-end"></span>
                                     <li>{{ $error }}</li>
                                 @endforeach
                                 <span id="warning-countdown" class="float-end"></span>
@@ -183,7 +200,7 @@
                     </div>
                 </div>
             </div>
-            <footer class="footer">
+            <footer class="footer ms-4">
                 <div class="d-sm-flex justify-content-center justify-content-sm-between">
                     <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2025 Motret. All rights reserved.</span>
                 </div>
