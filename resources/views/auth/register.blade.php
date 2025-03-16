@@ -3,11 +3,6 @@
 @section('content')
 <div class="container d-flex">
     <div class="row w-100">
-        <div class="col-md-4 d-flex align-items-center justify-content-center">
-            <div class="brand-logo">
-                <img src="{{ asset('images/Motret logo.png') }}" alt="logo" style="width: 400px; height: auto;">
-            </div>
-        </div>
         <div class="col-md-8">
             @if ($errors->any())
                 <div class="alert alert-danger" role="alert">

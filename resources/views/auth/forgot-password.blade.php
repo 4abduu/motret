@@ -1,13 +1,8 @@
 @extends('layouts.login')
 
 @section('content')
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <div class="row w-100 justify-content-center">
-        <div class="col-md-4 d-flex align-items-center justify-content-center">
-            <div class="brand-logo" style="margin-left: -150px;">
-                <img src="{{ asset('images/Motret logo.png') }}" alt="logo" style="width: 350px; height: auto;">
-            </div>
-        </div>
+<div class="container d-flex justify-content-start align-items-center">
+    <div class="row w-100 ">
         <div class="col-md-8">
             <h2 class="text-center mb-4">Forgot Password</h2>
             @if (session('status'))
