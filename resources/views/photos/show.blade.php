@@ -130,7 +130,7 @@
                         <span id="likes-count"></span>
                     @endif
                 </div>
-                
+
                 <div class="dropdown">
                     <button class="btn btn-link p-0" id="bookmark-button" data-bs-toggle="dropdown" aria-expanded="false" {{ Auth::check() ? '' : 'disabled' }}>
                         <i class="bi bi-bookmark text-dark fw-bold fs-5"></i>
@@ -160,10 +160,10 @@
         </div>
         <div class="col-md-6 ">
             <div class="d-flex align-items-center mb-3">
-                <button type="button" class="btn btn-link p-0 me-3">
-                    <i class="bi bi-share text-dark fw-bold fs-5"></i> 
+                <button type="button" class="btn btn-link p-0 me-3" onclick="copyToClipboard()">
+                    <i class="bi bi-share text-dark fw-bold fs-5"></i>
                 </button>
-                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}">
+                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}" {{ Auth::check() ? '' : 'disabled' }}>
                     <i class="bi bi-flag text-dark fw-bold fs-5"></i>
                 </button>
             </div>
@@ -434,17 +434,28 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="album-name" class="form-label">Nama Album</label>
-                        <input type="text" class="form-control" id="album-name" name="name" required>
+                        <label for="name" class="form-label">Nama Album</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
                     </div>
                     <div class="mb-3">
-                        <label for="album-description" class="form-label">Deskripsi Album</label>
-                        <textarea class="form-control" id="album-description" name="description" rows="3" required></textarea>
+                        <label for="description" class="form-label">Deskripsi Album</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                     </div>
+                    @if (Auth::check() && Auth::user()->role === 'pro')
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Visibilitas</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="1">Publik</option>
+                                <option value="0">Privat</option>
+                            </select>
+                        </div>
+                    @else
+                        <input type="hidden" name="status" value="1">
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">Buat Album</button>
+                    <button type="submit" class="btn btn-success">Buat Album</button>
                 </div>
             </form>
         </div>
@@ -507,19 +518,59 @@
 
 @push('scripts')
 <script>
+    function copyToClipboard() {
+        // Dapatkan URL saat ini
+        const url = window.location.href;
+
+        // Copy URL ke clipboard
+        navigator.clipboard.writeText(url).then(() => {
+            // Tampilkan notifikasi
+            showNotification('Link copied to clipboard');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
+
+    function showNotification(message) {
+        // Buat elemen notifikasi
+        const notification = document.createElement('div');
+        notification.innerText = message;
+        notification.style.position = 'fixed';
+        notification.style.top = '50%'; // Posisi vertikal di tengah
+        notification.style.left = '50%'; // Posisi horizontal di tengah
+        notification.style.transform = 'translate(-50%, -50%)'; // Geser ke tengah
+        notification.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        notification.style.color = '#fff';
+        notification.style.padding = '10px 20px';
+        notification.style.borderRadius = '5px';
+        notification.style.zIndex = '1000';
+        notification.style.fontSize = '14px';
+        notification.style.textAlign = 'center'; // Teks di tengah
+
+        // Tambahkan notifikasi ke body
+        document.body.appendChild(notification);
+
+        // Hapus notifikasi setelah 3 detik
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 3000);
+    }
+
 document.addEventListener("DOMContentLoaded", function () {
     const token = '{{ csrf_token() }}';
     const photoId = {{ $photo->id }};
 
-    // Mengatur tampilan input deskripsi alasan lainnya
-    document.querySelectorAll('input[name="reason"]').forEach(radio => {
-        radio.addEventListener("change", function () {
-            const isOther = this.value === "Lainnya";
-            document.getElementById("description-group").style.display = isOther ? "block" : "none";
-            $('#otherReasonGroup').toggle(isOther);
-            $('#other_reason').attr('required', isOther);
+    // Fungsi untuk menampilkan/menyembunyikan input deskripsi alasan lainnya
+    function toggleOtherReasonInput() {
+        document.querySelectorAll('input[name="reason"]').forEach(radio => {
+            radio.addEventListener("change", function () {
+                const isOther = this.value === "Lainnya";
+                document.getElementById("description-group").style.display = isOther ? "block" : "none";
+                $('#otherReasonGroup').toggle(isOther);
+                $('#other_reason').attr('required', isOther);
+            });
         });
-    });
+    }
 
     // Reset form saat modal ditutup
     $('#reportModal').on('hidden.bs.modal', function () {
@@ -528,106 +579,154 @@ document.addEventListener("DOMContentLoaded", function () {
         $('#other_reason').attr('required', false);
     });
 
-    // Event listener untuk like button
-    const likeButton = document.getElementById('like-button');
-    const likesCount = document.getElementById('likes-count');
-    if (likeButton) {
-        likeButton.addEventListener('click', function (event) {
-            event.preventDefault();
-            const liked = likeButton.getAttribute('data-liked') === 'true';
-            const url = liked ? '{{ route('photos.unlike', $photo->id) }}' : '{{ route('photos.like', $photo->id) }}';
+    // Fungsi untuk handle like/unlike foto
+    function handleLikeButton() {
+        const likeButton = document.getElementById('like-button');
+        const likesCount = document.getElementById('likes-count');
 
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
-                body: JSON.stringify({})
-            })
-            .then(response => response.json())
-            .then(data => { 
-                likeButton.innerHTML = `<i class="bi ${data.liked ? 'bi-heart-fill' : 'bi-heart'}" style="color: ${data.liked ? 'red' : 'black'};"></i>`;
-                likeButton.setAttribute('data-liked', data.liked);
-                
-                if (data.likes_count > 0) {
-                    likesCount.textContent = data.likes_count + (data.likes_count === 1 ? ' like' : ' likes');
-                } else {
-                    likesCount.textContent = ''; // Jika tidak ada like, teks dihilangkan
-                }
-            })
+        if (likeButton) {
+            likeButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                const liked = likeButton.getAttribute('data-liked') === 'true';
+                const url = liked ? '{{ route('photos.unlike', $photo->id) }}' : '{{ route('photos.like', $photo->id) }}';
 
-            .catch(console.error);
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    likeButton.innerHTML = `<i class="bi ${data.liked ? 'bi-heart-fill' : 'bi-heart'}" style="color: ${data.liked ? 'red' : 'black'};"></i>`;
+                    likeButton.setAttribute('data-liked', data.liked);
+                    
+                    if (data.likes_count > 0) {
+                        likesCount.textContent = data.likes_count + (data.likes_count === 1 ? ' like' : ' likes');
+                    } else {
+                        likesCount.textContent = ''; // Jika tidak ada like, teks dihilangkan
+                    }
+                })
+                .catch(console.error);
+            });
+        }
+    }
+
+    // Fungsi untuk handle tombol tambah ke album
+    function handleAddToAlbum() {
+        document.addEventListener('click', function (event) {
+            if (event.target.closest('.add-to-album')) {
+                event.preventDefault();
+                const button = event.target.closest('.add-to-album');
+                const albumId = button.getAttribute('data-album-id');
+                const url = button.querySelector('i') ? `/albums/${albumId}/photos/${photoId}/remove` : `/albums/${albumId}/photos/${photoId}/add`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        button.querySelector('i') ? button.querySelector('i').remove() : button.innerHTML += ' <i class="bi bi-check text-success"></i>';
+                    }
+                })
+                .catch(console.error);
+            }
         });
     }
 
-    // Event delegation untuk tombol tambah ke album
-    document.addEventListener('click', function (event) {
-        if (event.target.closest('.add-to-album')) {
-            event.preventDefault();
-            const button = event.target.closest('.add-to-album');
-            const albumId = button.getAttribute('data-album-id');
-            const url = button.querySelector('i') ? `/albums/${albumId}/photos/${photoId}/remove` : `/albums/${albumId}/photos/${photoId}/add`;
+    // Fungsi untuk membuat album baru
+    function handleCreateAlbum() {
+        const createAlbumForm = document.getElementById('createAlbumForm');
 
-            fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
-                body: JSON.stringify({})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    button.querySelector('i') ? button.querySelector('i').remove() : button.innerHTML += ' <i class="bi bi-check text-success"></i>';
-                }
-            })
-            .catch(console.error);
+        if (createAlbumForm) {
+            createAlbumForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const formData = new FormData(createAlbumForm);
+                const submitButton = createAlbumForm.querySelector('button[type="submit"]');
+                submitButton.disabled = true; // Disable submit button to prevent multiple submissions
+
+                fetch('{{ route('albums.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Album berhasil dibuat!',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Tutup modal
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('createAlbumModal'));
+                                modal.hide();
+
+                                // Hapus overlay modal
+                                document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+
+                                // Hapus class 'modal-open' dari body
+                                document.body.classList.remove('modal-open');
+
+                                // Reset form
+                                createAlbumForm.reset();
+
+                                // Tambahkan album baru ke dropdown
+                                const dropdownMenu = document.querySelector('.dropdown-menu');
+                                if (dropdownMenu) {
+                                    const newAlbumItem = document.createElement('li');
+                                    newAlbumItem.innerHTML = `
+                                        <a class="dropdown-item add-to-album" href="#" data-album-id="${data.album.id}">
+                                            ${data.album.name}
+                                        </a>
+                                    `;
+
+                                    // Temukan elemen <li> terakhir sebelum divider
+                                    const lastItemBeforeDivider = dropdownMenu.querySelector('li:last-child');
+                                    dropdownMenu.insertBefore(newAlbumItem, lastItemBeforeDivider);
+                                }
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Gagal membuat album. Silakan coba lagi.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(async (error) => {
+                    console.error('Fetch error:', error);
+                    const responseText = await error.response.text();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi Kesalahan!',
+                        text: 'Terjadi kesalahan: ' + responseText,
+                        confirmButtonText: 'OK'
+                    });
+                })
+                .finally(() => {
+                    submitButton.disabled = false; // Re-enable submit button
+                });
+            });
         }
-    });
+    }
 
-    // Membuat album baru
-    const createAlbumForm = document.getElementById('createAlbumForm');
-
-    createAlbumForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        const formData = new FormData(createAlbumForm);
-        const submitButton = createAlbumForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true; // Disable submit button to prevent multiple submissions
-
-        fetch('{{ route('albums.store') }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json' // Paksa Laravel untuk mengembalikan JSON
-            },
-            body: formData
-        })
-        .then(response => {
-            console.log('Response status:', response.status); // Log response status
-            return response.json();
-        })
-        .then(data => {
-            console.log('Response data:', data); // Log response data
-            if (data.success) {
-                alert('Album berhasil dibuat!');
-                location.reload(); // Reload the page to see the new album
-            } else {
-                alert('Gagal membuat album. Silakan coba lagi.');
-            }
-        })
-        .catch(async (error) => {
-        console.error('Fetch error:', error);
-        
-        // Coba baca response sebagai teks
-        const responseText = await error.response.text();
-        console.log('Response text:', responseText);
-        
-        alert('Terjadi kesalahan: ' + responseText);
-    })
-        .finally(() => {
-            submitButton.disabled = false; // Re-enable submit button
-        });
-    });
-
-    // Event delegation untuk tombol "Balas"
-    document.addEventListener('click', function (event) {
+    // Fungsi untuk handle tombol balas komentar
+    function handleReplyButton() {
+        document.addEventListener('click', function (event) {
             if (event.target.closest('.reply-button')) {
                 const button = event.target.closest('.reply-button');
                 const commentId = button.getAttribute('data-comment-id');
@@ -637,113 +736,100 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         document.body.addEventListener("submit", async function (event) {
-        const form = event.target.closest(".reply-form form");
-        if (!form) return;
+            const form = event.target.closest(".reply-form form");
+            if (!form) return;
 
-        event.preventDefault();
-        event.stopPropagation(); // Mencegah multiple event listener
+            event.preventDefault();
+            event.stopPropagation(); // Mencegah multiple event listener
 
-        const formData = new FormData(form);
-        const commentId = form.closest('.reply-form').id.split('-')[2]; // Ambil ID komentar
-        const url = form.getAttribute('action'); // Ambil URL action dari form
+            const formData = new FormData(form);
+            const commentId = form.closest('.reply-form').id.split('-')[2]; // Ambil ID komentar
+            const url = form.getAttribute('action'); // Ambil URL action dari form
 
-        try {
-            // Kirim request AJAX
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': token, // Kirim CSRF token
-                    'Accept': 'application/json' // Minta response JSON
-                },
-                body: formData
-            });
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
 
-            // Cek jika response tidak OK
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-            // Parse response JSON
-            const data = await response.json();
+                const data = await response.json();
+                if (data.success) {
+                    const replyId = data.reply.id;
+                    const userId = data.reply.user.id;
+                    const currentUserId = data.currentUserId;
+                    const photoUserId = data.photoUserId;
 
-            // Jika reply berhasil dikirim
-            if (data.success) {
-                const replyId = data.reply.id; // ID balasan
-                const userId = data.reply.user.id; // ID user yang melakukan reply
-                const currentUserId = data.currentUserId; // ID user yang sedang login
-                const photoUserId = data.photoUserId; // ID pembuat foto
+                    const isCurrentUser = userId === currentUserId;
+                    const isPhotoOwner = userId === photoUserId;
 
-                const isCurrentUser = userId === currentUserId; // Cek apakah user yang melakukan reply adalah user yang sedang login
-                const isPhotoOwner = userId === photoUserId; // Cek apakah user adalah pembuat foto
+                    const profilePhoto = data.reply.user.profile_photo ?
+                        `<img src="/storage/photo_profile/${data.reply.user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">` :
+                        `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>`;
 
-                // Foto profil user
-                const profilePhoto = data.reply.user.profile_photo ?
-                    `<img src="/storage/photo_profile/${data.reply.user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">` :
-                    `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>`;
+                    const verifiedIcon = data.reply.user.verified ? '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
+                    const proIcon = data.reply.user.role === 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : '';
+                    const photoOwnerBadge = isPhotoOwner ? '<span class="text">• Pembuat</span>' : '';
 
-                // Badge verifikasi
-                const verifiedIcon = data.reply.user.verified ?
-                    '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
-
-                // Badge pro
-                const proIcon = data.reply.user.role === 'pro' ?
-                    '<i class="ti-star" style="color: gold;"></i>' : '';
-
-                // Tanda "• Pembuat" jika user adalah pembuat foto
-                const photoOwnerBadge = isPhotoOwner ?
-                    '<span class="text">• Pembuat</span>' : '';
-
-                // Buat HTML untuk reply baru
-                const replyHtml = `
-                    <div class="ms-4 mt-2" id="reply-${replyId}">
-                        ${profilePhoto}
-                        <strong>
-                            <a href="/${data.reply.user.username}" class="text-dark fw-bold text-decoration-none">
-                                ${data.reply.user.username}
-                            </a>
-                        </strong>
+                    const replyHtml = `
+                        <div class="ms-4 mt-2" id="reply-${replyId}">
+                            ${profilePhoto}
+                            <strong>
+                                <a href="/${data.reply.user.username}" class="text-dark fw-bold text-decoration-none">
+                                    ${data.reply.user.username}
+                                </a>
+                            </strong>
                             ${verifiedIcon}
                             ${proIcon}
-                            ${photoOwnerBadge} <!-- Tanda "• Pembuat" -->
-                        <p>${data.reply.reply}</p>
-                        <small class="text-muted">${data.reply.created_at}</small>
-                        <button class="btn btn-link" type="button" id="dropdownMenuButton-${replyId}" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-three-dots"></i>
-                        </button>
-                        <div class="dropdown">
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${replyId}">
-                                ${isCurrentUser ? `
-                                    <li>
-                                        <button type="button" class="dropdown-item delete-reply" data-reply-id="${replyId}">
-                                            Hapus Balasan
-                                        </button>
-                                    </li>
-                                ` : `
-                                    <li>
-                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-${replyId}">
-                                            Lapor Balasan
-                                        </button>
-                                    </li>
-                                `}
-                            </ul>
+                            ${photoOwnerBadge}
+                            <p>${data.reply.reply}</p>
+                            <small class="text-muted">${data.reply.created_at}</small>
+                            <button class="btn btn-link" type="button" id="dropdownMenuButton-${replyId}" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <div class="dropdown">
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${replyId}">
+                                    ${isCurrentUser ? `
+                                        <li>
+                                            <button type="button" class="dropdown-item delete-reply" data-reply-id="${replyId}">
+                                                Hapus Balasan
+                                            </button>
+                                        </li>
+                                    ` : `
+                                        <li>
+                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-${replyId}">
+                                                Lapor Balasan
+                                            </button>
+                                        </li>
+                                    `}
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
 
-                // Tambahkan reply baru ke DOM
-                document.querySelector(`#reply-form-${commentId}`).insertAdjacentHTML('beforebegin', replyHtml);
-
-                // Reset form dan sembunyikan form reply
-                form.reset();
-                form.closest('.reply-form').style.display = 'none';
+                    document.querySelector(`#reply-form-${commentId}`).insertAdjacentHTML('beforebegin', replyHtml);
+                    form.reset();
+                    form.closest('.reply-form').style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Error submitting reply:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Terjadi kesalahan saat mengirim balasan. Silakan coba lagi.',
+                    confirmButtonText: 'OK'
+                });
             }
-        } catch (error) {
-            console.error("Error submitting reply:", error);
-            alert("Terjadi kesalahan saat mengirim balasan. Silakan coba lagi.");
-        }
-    });
+        });
+    }
 
-        // Event listener untuk menghapus reply
+    // Fungsi untuk handle tombol hapus balasan
+    function handleDeleteReply() {
         document.body.addEventListener("click", async function (event) {
             if (event.target.closest(".delete-reply")) {
                 event.preventDefault();
@@ -760,74 +846,90 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
                     const data = await response.json();
                     if (data.success) {
                         document.getElementById(`reply-${replyId}`).remove();
                     } else {
-                        alert(data.message || "Gagal menghapus reply.");
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || "Gagal menghapus reply.",
+                            confirmButtonText: 'OK'
+                        });
                     }
                 } catch (error) {
                     console.error("Error deleting reply:", error);
                 }
             }
         });
+    }
 
-
-    // Blokir klik kanan
-    document.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-    });
-
-    // Blokir inspect element
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+    // Blokir klik kanan dan inspect element
+    function blockRightClickAndInspect() {
+        document.addEventListener('contextmenu', function (e) {
             e.preventDefault();
-        }
-    });
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+                e.preventDefault();
+            }
+        });
+    }
 
     // Render gambar ke canvas dan tambahkan watermark
-    const canvas = document.getElementById('photoCanvas');
-    const imgSrc = canvas.getAttribute('data-src');
-    const img = new Image();
-    img.src = imgSrc;
-    img.crossOrigin = "anonymous"; // Untuk mencegah CORS error jika dihosting
-    img.onload = function () {
-        // Set canvas size ke ukuran gambar
-        canvas.width = img.width;
-        canvas.height = img.height;
+    function renderImageWithWatermark() {
+        const canvas = document.getElementById('photoCanvas');
+        if (!canvas) return;
 
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const imgSrc = canvas.getAttribute('data-src');
+        const img = new Image();
+        img.src = imgSrc;
+        img.crossOrigin = "anonymous";
 
-        // Tambahkan watermark berulang diagonal
-        const watermarkText = "MOTRET"; // Kata yang diulang
-        const fontSize = 25; // Ukuran font watermark
-        ctx.font = `${fontSize}px Arial`;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.3)"; // Warna semi-transparan
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+        img.onload = function () {
+            canvas.width = img.width;
+            canvas.height = img.height;
 
-        // Atur jarak antar teks watermark
-        const stepX = 150; // Jarak horizontal antar watermark
-        const stepY = 100; // Jarak vertikal antar watermark
-        const angle = -30 * (Math.PI / 180); // Rotasi 30 derajat
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(angle);
-        
-        for (let x = -canvas.width; x < canvas.width; x += stepX) {
-            for (let y = -canvas.height; y < canvas.height; y += stepY) {
-                ctx.fillText(watermarkText, x, y);
+            const watermarkText = "MOTRET";
+            const fontSize = 25;
+            ctx.font = `${fontSize}px Arial`;
+            ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            const stepX = 150;
+            const stepY = 100;
+            const angle = -30 * (Math.PI / 180);
+
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(angle);
+
+            for (let x = -canvas.width; x < canvas.width; x += stepX) {
+                for (let y = -canvas.height; y < canvas.height; y += stepY) {
+                    ctx.fillText(watermarkText, x, y);
+                }
             }
-        }
 
-        ctx.restore();
-    };
+            ctx.restore();
+        };
+    }
+
+    // Panggil semua fungsi
+    toggleOtherReasonInput();
+    handleLikeButton();
+    handleAddToAlbum();
+    handleCreateAlbum();
+    handleReplyButton();
+    handleDeleteReply();
+    blockRightClickAndInspect();
+    renderImageWithWatermark();
 });
 </script>
 @endpush

@@ -13,6 +13,7 @@ class FollowController extends Controller
     {
         $this->middleware('auth');
     }
+
     public function follow($userId)
     {
         $user = User::findOrFail($userId);
@@ -35,10 +36,10 @@ class FollowController extends Controller
         }
 
         return response()->json([
-            'following' => true,
+            'success' => true,
             'followers_count' => $user->followers()->count(),
             'following_count' => $authUser->following()->count(),
-            'username' => $user->username,
+            'current_user' => $authUser
         ]);
     }
 
@@ -59,10 +60,10 @@ class FollowController extends Controller
         }
 
         return response()->json([
-            'following' => false,
+            'success' => true,
             'followers_count' => $user->followers()->count(),
             'following_count' => $authUser->following()->count(),
-            'username' => $user->username,
+            'current_user' => $authUser
         ]);
     }
 }

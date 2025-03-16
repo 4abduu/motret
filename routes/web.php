@@ -134,8 +134,8 @@ Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_a
     Route::post('/user/{id}/report', [UserReportController::class, 'reportUser'])->name('user.report');
     
     // Pengikut
-    Route::post('/users/{user}/follow', [UserFollowController::class, 'follow'])->name('users.follow');
-    Route::post('/users/{user}/unfollow', [UserFollowController::class, 'unfollow'])->name('users.unfollow');
+    Route::post('/users/{id}/follow', [UserFollowController::class, 'follow'])->name('user.follow');
+    Route::post('/users/{id}/unfollow', [UserFollowController::class, 'unfollow'])->name('user.unfollow');
     
     // Album
     Route::post('/albums', [UserAlbumController::class, 'store'])->name('albums.store');
