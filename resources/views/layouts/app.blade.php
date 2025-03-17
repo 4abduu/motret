@@ -54,6 +54,10 @@
         .content-wrapper {
             flex: 1; /* Memastikan bagian ini fleksibel */
         }
+
+        .navbar{
+            z-index: 999;
+        }
     </style>
     @stack('styles')
 </head>

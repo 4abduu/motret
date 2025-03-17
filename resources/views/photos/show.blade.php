@@ -22,6 +22,7 @@
         height: 100%;
         background: rgba(255, 255, 255, 0.5); /* Overlay transparan */
         z-index: 1;
+        pointer-events: none; /* Tidak menghalangi interaksi dengan elemen di bawahnya */
     }
     .btn, .dropdown, #like-section, .download-button {
         position: relative;
@@ -102,12 +103,114 @@
     .btn-link:hover {
         color: #555;
     }
+
+    canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    z-index: 1;
+}
+
+    #photo-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        z-index: 1000;
+    }
+
+    
+#modal-img {
+    max-width: 90%;
+    max-height: 90%;
+    cursor: grab;
+    transition: transform 0.2s ease-out;
+}
+
+#close-modal {
+    position: absolute;
+    top: 10px;
+    left: 30px;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+}
+
+#zoom-controls {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 1001; /* Pastikan tombol di atas gambar */
+    display: flex;
+    gap: 10px; /* Jarak antar tombol */
+}
+
+
+#zoom-controls button {
+    background: none;
+    color: white;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+#zoom-controls button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+    .photo-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .zoom-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+        z-index: 998 !important;
+    }
+
+    .zoom-btn:hover {
+        background: rgba(0, 0, 0, 0.9);
+    }
+
 </style>
 
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6 position-relative">
-            <canvas id="photoCanvas" class="img-fluid" data-src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}"></canvas>
+            <div class="photo-container">
+                <canvas id="photoCanvas" class="img-fluid" data-src="{{ asset('storage/' . $photo->path) }}"></canvas>
+                
+                <button id="open-modal" class="zoom-btn">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+            </div>
             <div class="overlay"></div>
             <div class="d-flex align-items-center mt-3">
                 <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="me-3 download-button">
@@ -514,9 +617,22 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Zoom Foto -->
+<div id="photo-modal">
+    <span id="close-modal">&times;</span>
+    <img id="modal-img" class="img-fluid" alt="{{ $photo->title }}">
+    <div id="zoom-controls">
+        <button id="zoom-in">+</button>
+        <button id="zoom-out">-</button>
+        <button id="reset-zoom">Reset</button> <!-- Tombol reset zoom -->
+    </div>
+</div>
 @endsection
 
 @push('scripts')
+<script src="https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/panzoom/9.4.1/panzoom.min.js"></script>
 <script>
     function copyToClipboard() {
         // Dapatkan URL saat ini
@@ -559,6 +675,81 @@
 document.addEventListener("DOMContentLoaded", function () {
     const token = '{{ csrf_token() }}';
     const photoId = {{ $photo->id }};
+
+    const modal = document.getElementById("photo-modal");
+    const modalImg = document.getElementById("modal-img");
+    const closeModal = document.getElementById("close-modal");
+    const zoomInBtn = document.getElementById("zoom-in");
+    const zoomOutBtn = document.getElementById("zoom-out");
+    const resetZoomBtn = document.getElementById("reset-zoom");
+
+    let panzoomInstance = null;
+
+    // Buka modal saat tombol zoom diklik
+    document.getElementById('open-modal').addEventListener('click', () => {
+        modal.style.display = 'flex';
+
+        // Ambil gambar dari canvas dan tampilkan di modal
+        const photoCanvas = document.getElementById('photoCanvas');
+        modalImg.src = photoCanvas.dataset.src;
+
+        // Inisialisasi Panzoom
+        panzoomInstance = panzoom(modalImg, {
+            maxScale: 4,
+            minScale: 1,
+            contain: 'outside',
+            startScale: 1,
+        });
+
+        // Handle zoom in dengan tombol (+)
+        zoomInBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation(); // Hindari double-click zooming
+            panzoomInstance.smoothZoom(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 1.2);
+        });
+
+        // Handle zoom out dengan tombol (-)
+        zoomOutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation(); // Hindari double-click zooming
+            panzoomInstance.smoothZoom(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 0.8);
+        });
+
+        // Handle reset zoom
+        resetZoomBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation(); // Hindari double-click zooming
+            panzoomInstance.zoomAbs(0, 0, 1); // Reset zoom ke skala 1
+            panzoomInstance.moveTo(0, 0); // Reset posisi ke tengah
+        });
+
+        // Handle close modal
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+            panzoomInstance.reset();
+        });
+
+        // Handle click outside modal to close
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                panzoomInstance.reset();
+            }
+        });
+
+        // Handle touchpad/mouse wheel untuk zoom
+        modalImg.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.ctrlKey) {
+                panzoomInstance.zoomWithWheel(e);
+            } else {
+                panzoomInstance.panWithWheel(e);
+            }
+        });
+    });
 
     // Fungsi untuk menampilkan/menyembunyikan input deskripsi alasan lainnya
     function toggleOtherReasonInput() {
@@ -892,8 +1083,10 @@ document.addEventListener("DOMContentLoaded", function () {
         img.onload = function () {
             canvas.width = img.width;
             canvas.height = img.height;
-
+            canvas.style.position = "relative";
+            canvas.style.zIndex = "1";
             const ctx = canvas.getContext('2d');
+            
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             const watermarkText = "MOTRET";
