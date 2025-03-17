@@ -30,6 +30,9 @@ class SettingController extends Controller
     public function checkUsername(Request $request)
     {
         $username = trim($request->username);
+        if (!preg_match('/^[a-z0-9._]+$/', $username)) {
+            return response()->json(['exists' => true]); // Anggap username tidak valid sebagai sudah ada
+        }
         Log::info('Checking username:', ['username' => $username]); // Log input username
         $exists = User::where('username', 'LIKE', $username)->exists();
         Log::info('Username exists:', ['exists' => $exists]); // Log hasil query
@@ -37,12 +40,15 @@ class SettingController extends Controller
     }
 
     public function checkVerificationUsername(Request $request)
-{
-    $username = $request->input('username');
-    $isValid = $username === Auth::user()->username;
-
-    return response()->json(['isValid' => $isValid]);
-}
+    {
+        $username = $request->input('username');
+        if (!preg_match('/^[a-z0-9._]+$/', $username)) {
+            return response()->json(['isValid' => false]); // Anggap username tidak valid sebagai tidak sesuai
+        }
+        $isValid = $username === Auth::user()->username;
+    
+        return response()->json(['isValid' => $isValid]);
+    }
 
     public function checkEmail(Request $request)
     {
@@ -53,13 +59,19 @@ class SettingController extends Controller
     public function updateUsername(Request $request)
     {
         $validated = $request->validate([
-            'username' => 'required|string|max:20|unique:users,username,' . Auth::id(),
+            'username' => [
+                'required',
+                'string',
+                'max:20',
+                'unique:users,username,' . Auth::id(),
+                'regex:/^[a-z0-9._]+$/', // Hanya huruf kecil, angka, titik, dan underscore
+            ],
         ]);
-
+    
         $user = Auth::user();
         $user->username = $validated['username'];
         $user->save();
-
+    
         return redirect()->route('user.settings')->with('success', 'Username berhasil diperbarui.');
     }
 
@@ -115,7 +127,12 @@ class SettingController extends Controller
     {
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
-            'username' => 'required|string|max:255',
+            'username' => [
+                'required',
+                'string',
+                'max:20',
+                'regex:/^[a-z0-9._]+$/', // Hanya huruf kecil, angka, titik, dan underscore
+            ],
             'ktp' => 'required|file|mimes:jpeg,png,jpg,pdf|max:2048',
             'selfie' => 'required|file|mimes:jpeg,png,jpg|max:2048',
             'portfolio' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:2048',

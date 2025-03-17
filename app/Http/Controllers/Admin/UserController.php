@@ -69,6 +69,7 @@ class UserController extends Controller
             'username.unique' => 'Username sudah digunakan.',
             'username.min' => 'Username minimal harus 4 karakter.',
             'username.max' => 'Username maksimal 20 karakter.',
+            'username.regex' => 'Username hanya boleh mengandung huruf kecil, angka, titik, dan underscore.',
             'email.required' => 'Email harus diisi.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah digunakan.',
@@ -78,10 +79,16 @@ class UserController extends Controller
             'password.letters' => 'Password harus mengandung huruf.',
             'password.numbers' => 'Password harus mengandung angka.',
         ];
-
+    
         $validated = $request->validate([
             'name' => 'required',
-            'username' => 'required|unique:users,username|min:4|max:20',
+            'username' => [
+                'required',
+                'unique:users,username',
+                'min:4',
+                'max:20',
+                'regex:/^[a-z0-9._]+$/', // Hanya huruf kecil, angka, titik, dan underscore
+            ],
             'email' => 'required|email|unique:users,email',
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
             'role' => 'required|in:admin,pro,user',
@@ -89,14 +96,14 @@ class UserController extends Controller
             'website' => 'nullable|url|max:255',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ], $messages);
-
+    
         $user = new User();
         $user->name = $validated['name'];
         $user->username = $validated['username'];
         $user->email = $validated['email'];
         $user->password = Hash::make($validated['password']);
         $user->role = $validated['role'];
-
+    
         if ($request->hasFile('profile_photo')) {
             $profilePhotoPath = $request->file('profile_photo')->storeAs(
                 'public/photo_profile',
@@ -104,9 +111,9 @@ class UserController extends Controller
             );
             $user->profile_photo = basename($profilePhotoPath);
         }
-
+    
         $user->save();
-
+    
         return redirect()->route('admin.users')->with('success', 'User created successfully.');
     }
 
@@ -114,7 +121,13 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required',
-            'username' => 'required|min:4|max:20|unique:users,username,' . $id,
+            'username' => [
+                'required',
+                'min:4',
+                'max:20',
+                'unique:users,username,' . $id,
+                'regex:/^[a-z0-9._]+$/', // Hanya huruf kecil, angka, titik, dan underscore
+            ],
             'email' => 'required|email|unique:users,email,' . $id,
             'password' => ['nullable', 'confirmed', Password::min(8)->letters()->numbers()],
             'role' => 'required|in:admin,pro,user',
@@ -122,7 +135,7 @@ class UserController extends Controller
             'website' => 'nullable|url|max:255',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
-
+    
         try {
             $user = User::findOrFail($id);
             $user->name = $validated['name'];
@@ -134,30 +147,30 @@ class UserController extends Controller
             $user->role = $validated['role'];
             $user->bio = $validated['bio'];
             $user->website = $validated['website'];
-
+    
             if ($request->hasFile('profile_photo')) {
                 // Hapus foto profil lama jika ada
                 if ($user->profile_photo) {
                     Storage::delete('public/photo_profile/' . $user->profile_photo);
                 }
-
+    
                 // Simpan foto profil baru dengan nama acak
                 $profilePhotoPath = $request->file('profile_photo')->storeAs(
                     'public/photo_profile',
                     Str::random(40) . '.' . $request->file('profile_photo')->getClientOriginalExtension()
                 );
-
+    
                 $user->profile_photo = basename($profilePhotoPath);
             }
-
+    
             $user->save();
-
+    
             return redirect()->route('admin.users')->with('success', 'User updated successfully.');
         } catch (\Exception $e) {
             return redirect()->route('admin.users')->with('error', 'Failed to update user. Pesan: ' . $e->getMessage());
         }
     }
-//wes mari
+
     public function deleteProfilePhoto($id)
     {
         try {

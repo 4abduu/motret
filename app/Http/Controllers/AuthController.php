@@ -84,6 +84,7 @@ class AuthController extends Controller
             'username.unique' => 'Username sudah digunakan.',
             'username.min' => 'Username minimal harus 4 karakter.',
             'username.max' => 'Username maksimal 20 karakter.',
+            'username.regex' => 'Username hanya boleh mengandung huruf kecil, angka, titik, dan underscore.',
             'email.required' => 'Email harus diisi.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah digunakan.',
@@ -95,7 +96,7 @@ class AuthController extends Controller
             'profile_photo.image' => 'Foto profil harus berupa gambar.',
             'profile_photo.mimes' => 'Foto profil harus berformat jpeg, png, atau jpg.',
         ];
-
+    
         $profilePhotoPath = null;
         if ($request->hasFile('profile_photo')) {
             $profilePhotoPath = $request->file('profile_photo')->storeAs(
@@ -103,15 +104,21 @@ class AuthController extends Controller
                 Str::random(40) . '.' . $request->file('profile_photo')->getClientOriginalExtension()
             );
         }
-
+    
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|unique:users,username|min:4|max:20',
+            'username' => [
+                'required',
+                'unique:users,username',
+                'min:4',
+                'max:20',
+                'regex:/^[a-z0-9._]+$/', // Hanya huruf kecil, angka, titik, dan underscore
+            ],
             'email' => 'required|email|unique:users,email',
-            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],  // Menggunakan alias PasswordRule
+            'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg',
         ], $messages);
-
+    
         $user = User::create([
             'name' => $validated['name'],
             'username' => $validated['username'],
@@ -119,7 +126,7 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'profile_photo' => $profilePhotoPath ? basename($profilePhotoPath) : null,
         ]);
-
+    
         Auth::login($user);
         return redirect()->route('home');
     }
