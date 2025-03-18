@@ -16,6 +16,7 @@ class Report extends Model
         'reported_user_id',
         'photo_id',
         'comment_id',
+        'reply_id',
         'reason',
         'status',
     ];
@@ -38,5 +39,15 @@ class Report extends Model
     public function comment()
     {
         return $this->belongsTo(Comment::class);
+    }
+
+    public function reply()
+    {
+        return $this->belongsTo(Reply::class);
+    }
+
+    public static function getReportCount()
+    {
+        return Report::count();
     }
 }

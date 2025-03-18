@@ -26,4 +26,9 @@ class VerificationRequest extends Model
     {
         return $this->hasMany(VerificationDocument::class);
     }
+
+    public static function getVerificationCount()
+    {
+        return self::count();
+    }
 }

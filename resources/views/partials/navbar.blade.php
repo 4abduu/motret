@@ -134,7 +134,7 @@
         if (searchInput.value.trim() !== "") {
             document.getElementById('search-form').submit();
         } else {
-            alert('Please enter a search term.');
+
         }
     }
 </script>

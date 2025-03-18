@@ -76,6 +76,7 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
     Route::delete('/admin/comments/{id}', [AdminCommentController::class, 'deleteComment'])->name('admin.comments.delete');
     Route::delete('/admin/replies/{id}', [AdminCommentController::class, 'deleteReply'])->name('admin.replies.delete');
     Route::put('/admin/comments/{id}/ban', [AdminCommentController::class, 'banComment'])->name('admin.comments.ban');
+    Route::put('/admin/replies/{id}/ban', [AdminCommentController::class, 'banReplies'])->name('admin.replies.ban');
     
     // Manage Reports
     Route::get('/admin/reports', [AdminReportController::class, 'index'])->name('admin.manageReports');
@@ -100,6 +101,7 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
     Route::put('/admin/verification-requests/{id}/approve', [AdminVerificationController::class, 'approveVerificationRequest'])->name('admin.verificationRequests.approve');
     Route::put('/admin/verification-requests/{id}/reject', [AdminVerificationController::class, 'rejectVerificationRequest'])->name('admin.verificationRequests.reject');
 
+    // Preview 
     Route::get('/admin/users/{id}/preview', [AdminUserController::class, 'previewProfile'])->name('admin.users.previewProfile');
     Route::get('/admin/users/{id}/photos', [AdminUserController::class, 'previewPhotos'])->name('admin.users.previewPhotos');
     Route::get('/admin/users/{id}/comments', [AdminUserController::class, 'previewComment'])->name('admin.users.previewComments');
@@ -131,6 +133,7 @@ Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_a
     // Pelaporan
     Route::post('/photo/{id}/report', [UserReportController::class, 'reportPhoto'])->name('photo.report');
     Route::post('/comment/{id}/report', [UserReportController::class, 'reportComment'])->name('comment.report');
+    Route::post('/reply/{id}/report', [UserReportController::class, 'reportReply'])->name('reply.report');
     Route::post('/user/{id}/report', [UserReportController::class, 'reportUser'])->name('user.report');
     
     // Pengikut

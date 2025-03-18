@@ -23,7 +23,8 @@ class ReportController extends Controller
     public function reportComments()
     {
         $reportComments = Report::whereNotNull('comment_id')->get();
-        return view('admin.reportComments', compact('reportComments'));
+        $reportReplies = Report::whereNotNull('reply_id')->get();
+        return view('admin.reportComments', compact('reportComments', 'reportReplies'));
     }
 
     public function reportPhotos()

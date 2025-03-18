@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Models\User;
 use App\Models\Photo;
 use App\Models\Comment;
+use App\Models\Transaction;
+use App\Models\Report;
+use App\Models\Reply;
+use App\Models\VerificationRequest;
 use App\Http\Controllers\Controller;
 
 class AdminController extends Controller
@@ -13,7 +17,10 @@ class AdminController extends Controller
     {
         $userCount = User::getUserCount();
         $photoCount = Photo::getPhotoCount();
-        $commentCount = Comment::getCommentCount();
-        return view('admin.dashboard', compact('userCount', 'photoCount', 'commentCount'));
+        $verificationCount = VerificationRequest::getVerificationCount();
+        $commentCount = Comment::getCommentCount() + Reply::getRepliesCount();
+        $reportCount = Report::getReportCount();  
+        $transactionCount = Transaction::getTransactionCount();
+        return view('admin.dashboard', compact('userCount', 'photoCount', 'commentCount', 'transactionCount', 'verificationCount', 'reportCount'));
     }
 }

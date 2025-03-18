@@ -147,82 +147,49 @@
     <script>
         new DataTable('#example');
     </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var successAlert = document.querySelector('.alert-success');
-            var errorAlert = document.querySelector('.alert-danger');
-            var warningAlert = document.querySelector('.alert-warning'); // Tambahkan ini
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Function buat handle countdown dan hapus alert
+        function startCountdown(alertElement, countdownElement) {
+            if (!alertElement || !countdownElement) return;
 
-            if (successAlert) {
-                var successCountdown = document.getElementById('success-countdown');
-                var successTimeLeft = 5;
-                successCountdown.innerText = successTimeLeft;
+            let timeLeft = 5;
+            countdownElement.innerText = timeLeft;
 
-                var successInterval = setInterval(function () {
-                    successTimeLeft--;
-                    successCountdown.innerText = successTimeLeft;
+            let interval = setInterval(function () {
+                timeLeft--;
+                countdownElement.innerText = timeLeft;
 
-                    if (successTimeLeft <= 0) {
-                        clearInterval(successInterval);
-                        successAlert.remove();
-                    }
-                }, 1000);
-            }
-
-            if (errorAlert) {
-                var errorCountdown = document.getElementById('error-countdown');
-                var errorTimeLeft = 5;
-                errorCountdown.innerText = errorTimeLeft;
-
-                var errorInterval = setInterval(function () {
-                    errorTimeLeft--;
-                    errorCountdown.innerText = errorTimeLeft;
-
-                    if (errorTimeLeft <= 0) {
-                        clearInterval(errorInterval);
-                        errorAlert.remove();
-                    }
-                }, 1000);
-            }
-
-            if (warningAlert) { // Logika untuk notifikasi warning
-                var warningCountdown = document.getElementById('warning-countdown');
-                var warningTimeLeft = 5;
-                warningCountdown.innerText = warningTimeLeft;
-
-                var warningInterval = setInterval(function () {
-                    warningTimeLeft--;
-                    warningCountdown.innerText = warningTimeLeft;
-
-                    if (warningTimeLeft <= 0) {
-                        clearInterval(warningInterval);
-                        warningAlert.remove();
-                    }
-                }, 1000);
-            }
-        });
-    </script>
-    <script>
-        // Cek apakah elemen error alert ada
-        var errorAlert = document.getElementById('error-alert');
-        if (errorAlert) {
-            var errorCountdown = document.getElementById('error-countdown');
-            var errorTimeLeft = 5; // 5 detik
-            if (errorCountdown) {
-                errorCountdown.innerText = errorTimeLeft;
-    
-                var errorInterval = setInterval(function () {
-                    errorTimeLeft--;
-                    errorCountdown.innerText = errorTimeLeft;
-    
-                    if (errorTimeLeft <= 0) {
-                        clearInterval(errorInterval);
-                        errorAlert.remove(); // Hapus alert setelah hitung mundur selesai
-                    }
-                }, 1000);
-            }
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    alertElement.remove();
+                }
+            }, 1000);
         }
-    </script>
+
+        // Cek dan mulai countdown untuk setiap alert
+        let successAlert = document.querySelector('.alert-success');
+        let errorAlert = document.querySelector('.alert-danger');
+        let warningAlert = document.querySelector('.alert-warning');
+
+        startCountdown(successAlert, document.getElementById('success-countdown'));
+        startCountdown(errorAlert, document.getElementById('error-countdown'));
+        startCountdown(warningAlert, document.getElementById('warning-countdown'));
+
+        // Hapus notifikasi dari sessionStorage setelah ditampilkan
+        sessionStorage.removeItem('success');
+        sessionStorage.removeItem('error');
+        sessionStorage.removeItem('warning');
+
+        // Hapus notifikasi jika user menekan tombol back (fix browser cache issue)
+        if (performance.navigation.type === 2) { // 2 = Back button ditekan
+            if (successAlert) successAlert.remove();
+            if (errorAlert) errorAlert.remove();
+            if (warningAlert) warningAlert.remove();
+        }
+    });
+</script>
+
     
     @stack('scripts')
 </body>

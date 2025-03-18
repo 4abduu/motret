@@ -22,4 +22,12 @@ class Reply extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function photo(){
+        return $this->comment->photo();
+    }
+
+    public static function getRepliesCount(){
+        return Reply::count();
+    }
 }

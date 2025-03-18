@@ -57,6 +57,34 @@ class CommentController extends Controller
             return redirect()->route('admin.reports.comments')->with('error', 'Komentar gagal dibanned: ' . $e->getMessage());
         }
     }
+
+    public function banReplies(Request $request, $id)
+    {
+        try {
+            $reply = Reply::findOrFail($id);
+
+            if ($reply->banned) {
+                return redirect()->route('admin.reports.comments')->with('warning', 'Balasan ini telah dibanned.');
+            }
+
+            // Ambil alasan ban dari laporan terkait
+            $report = Report::where('reply_id', $id)->first();
+            if (!$report) {
+                return redirect()->route('admin.reports.comments')->with('error', 'Laporan tidak ditemukan.');
+            }
+
+            $reply->banned = true;
+            $reply->ban_expires_at = Carbon::now()->addDays(7);
+            $reply->save();
+
+            // Update semua laporan terkait dengan status banned
+            Report::where('reply_id', $id)->update(['status' => true]);
+
+            return redirect()->route('admin.reports.comments')->with('success', 'Komentar berhasil dibanned.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.reports.comments')->with('error', 'Komentar gagal dibanned: ' . $e->getMessage());
+        }
+    }
     
     public function deleteComment($id)
     {

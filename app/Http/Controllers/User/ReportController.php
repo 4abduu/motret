@@ -50,6 +50,24 @@ class ReportController extends Controller
         return redirect()->back()->with('success', 'Komentar berhasil dilaporkan.');
     }
 
+    public function reportReply(Request $request, $replyId)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:255',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $reason = $validated['reason'] === 'Lainnya' ? $validated['description'] : $validated['reason'];
+
+        Report::create([
+            'user_id' => Auth::id(),
+            'reply_id' => $replyId,
+            'reason' => $reason,
+        ]);
+
+        return redirect()->back()->with('success', 'Balasan berhasil dilaporkan.');
+    }
+
     public function reportUser(Request $request, $userId)
     {
         $validated = $request->validate([
