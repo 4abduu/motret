@@ -677,79 +677,103 @@ document.addEventListener("DOMContentLoaded", function () {
     const photoId = {{ $photo->id }};
 
     const modal = document.getElementById("photo-modal");
-    const modalImg = document.getElementById("modal-img");
-    const closeModal = document.getElementById("close-modal");
-    const zoomInBtn = document.getElementById("zoom-in");
-    const zoomOutBtn = document.getElementById("zoom-out");
-    const resetZoomBtn = document.getElementById("reset-zoom");
+const modalImg = document.getElementById("modal-img");
+const closeModal = document.getElementById("close-modal");
+const zoomInBtn = document.getElementById("zoom-in");
+const zoomOutBtn = document.getElementById("zoom-out");
+const resetZoomBtn = document.getElementById("reset-zoom");
 
-    let panzoomInstance = null;
+let panzoomInstance = null;
 
-    // Buka modal saat tombol zoom diklik
-    document.getElementById('open-modal').addEventListener('click', () => {
-        modal.style.display = 'flex';
+// Buka modal saat tombol zoom diklik
+document.getElementById('open-modal').addEventListener('click', () => {
+    modal.style.display = 'flex';
 
-        // Ambil gambar dari canvas dan tampilkan di modal
-        const photoCanvas = document.getElementById('photoCanvas');
-        modalImg.src = photoCanvas.dataset.src;
+    // Ambil gambar dari canvas dan tampilkan di modal
+    const photoCanvas = document.getElementById('photoCanvas');
+    modalImg.src = photoCanvas.dataset.src;
 
-        // Inisialisasi Panzoom
-        panzoomInstance = panzoom(modalImg, {
-            maxScale: 4,
-            minScale: 1,
-            contain: 'outside',
-            startScale: 1,
-        });
+    // Hapus instance lama biar gak ngebug
+    if (panzoomInstance) {
+        panzoomInstance.dispose();
+    }
 
-        // Handle zoom in dengan tombol (+)
-        zoomInBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation(); // Hindari double-click zooming
-            panzoomInstance.smoothZoom(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 1.2);
-        });
+    // Inisialisasi Panzoom
+    panzoomInstance = panzoom(modalImg, {
+        maxScale: 4,
+        minScale: 1,
+        contain: 'outside',
+        startScale: 1,
+        smoothScroll: false,  // Biar gak zoom sembarangan pas scroll
+    });
 
-        // Handle zoom out dengan tombol (-)
-        zoomOutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation(); // Hindari double-click zooming
-            panzoomInstance.smoothZoom(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 0.8);
-        });
+    // Enable geser (pan) selain zoom
+    panzoomInstance.on('transform', () => {
+        modalImg.style.cursor = "grab";
+    });
 
-        // Handle reset zoom
-        resetZoomBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation(); // Hindari double-click zooming
-            panzoomInstance.zoomAbs(0, 0, 1); // Reset zoom ke skala 1
-            panzoomInstance.moveTo(0, 0); // Reset posisi ke tengah
-        });
+    // Handle zoom in dengan tombol (+)
+    zoomInBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        panzoomInstance.smoothZoom(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 1.2);
+    });
 
-        // Handle close modal
-        closeModal.addEventListener('click', () => {
+    // Handle zoom out dengan tombol (-)
+    zoomOutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        panzoomInstance.smoothZoom(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 0.8);
+    });
+
+    // Handle reset zoom
+    resetZoomBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        panzoomInstance.zoomAbs(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 1);
+        panzoomInstance.moveTo(0, 0);
+    });
+
+    // Handle close modal
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+        panzoomInstance.reset();
+    });
+
+    // Handle click outside modal to close
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
             modal.style.display = 'none';
             panzoomInstance.reset();
-        });
-
-        // Handle click outside modal to close
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-                panzoomInstance.reset();
-            }
-        });
-
-        // Handle touchpad/mouse wheel untuk zoom
-        modalImg.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if (e.ctrlKey) {
-                panzoomInstance.zoomWithWheel(e);
-            } else {
-                panzoomInstance.panWithWheel(e);
-            }
-        });
+        }
     });
+
+    // Fix geser touchpad/mouse wheel biar bisa pan (bukan cuma zoom)
+    modalImg.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (e.ctrlKey) {
+            // Zoom in/out ke arah posisi kursor
+            const rect = modalImg.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const scale = e.deltaY < 0 ? 1.2 : 0.8;
+            panzoomInstance.smoothZoom(x, y, scale);
+        } else {
+            // Geser (pan) dengan scroll biasa
+            panzoomInstance.moveBy(-e.deltaX, -e.deltaY, true);
+        }
+    });
+
+    // Fix pinch zoom di touchpad
+    modalImg.addEventListener("gesturestart", (e) => e.preventDefault());
+    modalImg.addEventListener("gesturechange", (e) => {
+        e.preventDefault();
+        const rect = modalImg.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        panzoomInstance.smoothZoom(x, y, e.scale);
+    });
+});
 
     // Fungsi untuk menampilkan/menyembunyikan input deskripsi alasan lainnya
     function toggleOtherReasonInput() {
