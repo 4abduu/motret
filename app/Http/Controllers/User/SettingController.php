@@ -81,9 +81,13 @@ class SettingController extends Controller
             'current_password' => 'required|string',
             'new_password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
         ]);
-
+    
         $user = Auth::user();
         if (Hash::check($request->current_password, $user->password)) {
+            if (Hash::check($request->new_password, $user->password)) {
+                return back()->withErrors(['new_password' => 'Password baru tidak boleh sama dengan password lama.']);
+            }
+    
             $user->password = Hash::make($validated['new_password']);
             $user->save();
             return redirect()->route('user.settings')->with('success', 'Password berhasil diperbarui.');

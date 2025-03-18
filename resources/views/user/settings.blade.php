@@ -45,6 +45,9 @@
                         <div class="form-group mt-3">
                             <label for="new_password">Password Baru</label>
                             <input type="password" name="new_password" class="form-control" id="new_password" required>
+                            @error('new_password')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
                         <div class="form-group mt-3">
                             <label for="new_password_confirmation">Konfirmasi Password Baru</label>
