@@ -61,7 +61,7 @@
                         </select>
                       </div>
                       @endif
-                      <button type="submit" class="btn btn-success me-2">Upload</button>
+                      <button type="submit" class="btn btn-success text-white me-2">Upload</button>
                     </form>
                   </div>
                 </div>

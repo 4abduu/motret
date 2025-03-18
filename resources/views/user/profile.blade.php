@@ -256,11 +256,11 @@
                                     Apakah Anda yakin ingin menghapus foto ini?
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                                    <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
                                     <form method="POST" action="{{ route('photos.destroy', $photo->id) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Hapus</button>
+                                        <button type="submit" class="btn btn-danger text-white">Hapus</button>
                                     </form>
                                 </div>
                             </div>
@@ -414,11 +414,11 @@
                             Apakah Anda yakin ingin menghapus album ini?
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
                             <form method="POST" action="{{ route('albums.destroy', $album->id) }}">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger">Hapus</button>
+                                <button type="submit" class="btn btn-danger text-white">Hapus</button>
                             </form>
                         </div>
                     </div>
