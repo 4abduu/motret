@@ -266,9 +266,12 @@
                 <button type="button" class="btn btn-link p-0 me-3" onclick="copyToClipboard()">
                     <i class="bi bi-share text-dark fw-bold fs-5"></i>
                 </button>
+                @if (!Auth::check() || Auth::id() !== $photo->user_id)
                 <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}" {{ Auth::check() ? '' : 'disabled' }}>
                     <i class="bi bi-flag text-dark fw-bold fs-5"></i>
                 </button>
+                @endif
+                
             </div>
             <div class="mt-4 text-start comment-container">
                 <h3 class="mb-4 text-start">{{ $photo->title }}</h3>

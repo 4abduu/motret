@@ -13,9 +13,17 @@ class CommentController extends Controller
 {
     public function index()
     {
-        $commentCount = Comment::count();
-        $replyCount = Comment::count();
-        return view('admin.manageComments', compact('commentCount', 'replyCount'));
+        $commentCount = Comment::getCommentCount();
+        $replyCount = Reply::getRepliesCount();
+        $recentComments = Comment::with('user')->latest()->take(5)->get();
+        $recentReplies = Reply::with('user')->latest()->take(5)->get();
+
+        return view('admin.manageComments', compact(
+            'commentCount',
+            'replyCount',
+            'recentComments',
+            'recentReplies'
+        ));
     }
 
     public function comments()
