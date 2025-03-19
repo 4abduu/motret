@@ -5,7 +5,7 @@
     <div style="width: 100%; max-width: 1600px; margin: 0 auto;">
         <!-- Header Notifikasi -->
         <div style="background: linear-gradient(90deg, #32bd40, #2a9d36); color: #fff; padding: 20px; border-radius: 10px 10px 0 0;">
-            <span style="font-size: 24px; font-weight: bold;">
+            <span style="font-size: 20px; font-weight: bold;">
                 <i class="fas fa-bell" style="margin-right: 10px;"></i> Notifikasi
             </span>
         </div>
@@ -19,22 +19,22 @@
                     <div style="margin-right: 20px;">
                         @switch($notification->type)
                             @case('follow')
-                                <i class="fas fa-user-plus" style="font-size: 40px; color: black;"></i>
+                                <i class="fas fa-user-plus" style="font-size: 20px; color: black;"></i>
                                 @break
                             @case('like')
-                                <i class="fas fa-heart" style="font-size: 40px; color: red;"></i>
+                                <i class="fas fa-heart" style="font-size: 20px; color: red;"></i>
                                 @break
                             @case('comment')
-                                <i class="fas fa-comment" style="font-size: 40px; color: blue;"></i>
+                                <i class="fas fa-comment" style="font-size: 20px; color: blue;"></i>
                                 @break
                             @case('reply')
-                                <i class="fas fa-reply" style="font-size: 40px; color: green;"></i>
+                                <i class="fas fa-reply" style="font-size: 20px; color: green;"></i>
                                 @break
                             @case('system')
-                                <i class="fas fa-info-circle" style="font-size: 40px; color: gray;"></i>
+                                <i class="fas fa-info-circle" style="font-size: 20px; color: gray;"></i>
                                 @break
                             @default
-                                <i class="fas fa-info-circle" style="font-size: 40px; color: gray;"></i>
+                                <i class="fas fa-info-circle" style="font-size: 20px; color: gray;"></i>
                         @endswitch
                     </div>
 

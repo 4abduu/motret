@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{{ asset('../../../assets/vendors/jquery-file-upload/uploadfile.css') }}" />
     <link rel="stylesheet" href="{{ asset('../../../assets/vendors/jquery-tags-input/jquery.tagsinput.min.css') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     @stack('link')
     <!-- Tambahan CSS -->
@@ -27,7 +28,7 @@
             margin: 0;
             flex-direction: column;
             overflow-x: hidden;
-            overflow: hidden;
+            overflow: auto;
         }
 
         .container-scroller {
@@ -37,29 +38,115 @@
         }
 
         .page-body-wrapper {
+            overflow: visible;
             flex: 1;
             display: flex;
-            flex-direction: row; /* Menyusun sidebar dan konten utama secara horizontal */
-            overflow: hidden; /* Memastikan elemen ini tidak ter-scroll */
+            flex-direction: row;
         }
 
         .main-panel {
+            overflow: auto;
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* Hanya konten utama yang bisa di-scroll secara vertikal */
-            height: 100vh; /* Pastikan tinggi penuh untuk memungkinkan scroll */
         }
 
         .content-wrapper {
-            flex: 1; /* Memastikan bagian ini fleksibel */
+            flex: 1;
+            min-height: calc(100vh - 120px);
         }
 
-        .navbar{
+        .navbar {
             z-index: 999;
         }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            max-width: 1350px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-logo {
+            flex: 1;
+            min-width: 200px;
+            margin: 1rem 0;
+            text-align: left;
+        }
+
+        .footer-logo img {
+            width: 100px; /* Sesuaikan ukuran logo */
+            margin-bottom: 10px; /* Jarak antara logo dan teks */
+        }
+
+        .footer-logo p {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .footer-section {
+            flex: 1;
+            min-width: 200px;
+            margin: 1rem 0;
+            text-align: left
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .footer-section a {
+            display: block;
+            color: #333;
+            text-decoration: none;
+            margin: 0.5rem 0;
+        }
+
+        .footer-section a:hover {
+            color: #32bd40;
+        }
+
+        .footer-bottom {
+            margin-top: 2rem;
+            border-top: 1px solid #ddd;
+            padding-top: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .footer-bottom a {
+            color: #666;
+            text-decoration: none;
+            margin: 0 0.5rem;
+        }
+
+        .footer-bottom a:hover {
+            color: #32bd40;
+        }
+        .social-icons a {
+    color: #333; /* Warna ikon default */
+    text-decoration: none; /* Menghapus underline */
+    transition: color 0.3s ease; /* Efek transisi warna */
+}
+
+.social-icons a:hover {
+    color: #32bd40; /* Warna ikon saat dihover */
+}
+.social-icons i {
+        font-size: 20px; /* Sesuaikan ukuran ikon */
+    }
     </style>
-    @stack('styles')
 </head>
 <body>
     @php
@@ -109,15 +196,71 @@
                     @endif
 
                     @yield('content')
-                    <!-- Footer -->
-                    <footer class="footer bg-light">
-                        <span class="text-muted">Copyright © 2025 Motret. All rights reserved.</span>
-                    </footer>
                 </div>
-
+                <footer class="footer">
+                    <div class="footer-container">
+                        <!-- Logo dan Teks -->
+                        <div class="footer-logo">
+                            <img src="{{ asset('images/Motret logo.png') }}" class="me-2" alt="logo" />
+                            <!-- Ikon Email, WhatsApp, dan Facebook -->
+                            <div class="social-icons mt-2">
+                                <a href="#" class="me-3">
+                                    <i class="bi bi-envelope"></i> <!-- Ikon Email -->
+                                </a>
+                                <a href="#" class="me-3">
+                                    <i class="bi bi-whatsapp"></i> <!-- Ikon WhatsApp -->
+                                </a>
+                                <a href="#" class="me-3">
+                                    <i class="bi bi-facebook"></i> <!-- Ikon Facebook -->
+                                </a>
+                                <a href="#">
+                                    <i class="bi bi-instagram"></i> <!-- Ikon Facebook -->
+                                </a>
+                            </div>
+                        </div>
+                        <!-- Bagian Lainnya -->
+                        <div class="footer-section">
+                            <h4>Products</h4>
+                            <a href="#">Product</a>
+                            <a href="#">Policy</a>
+                            <a href="#">Log In</a>
+                            <a href="#">Request Asset</a>
+                            <a href="#">Paramahipu</a>
+                        </div>
+                        <div class="footer-section">
+                            <h4>About us</h4>
+                            <a href="#">About India</a>
+                            <a href="#">Contact us</a>
+                            <a href="#">Fastwrist</a>
+                            <a href="#">Consent</a>
+                        </div>
+                        <div class="footer-section">
+                            <h4>Resources</h4>
+                            <a href="#">Help center</a>
+                            <a href="#">Book & demo</a>
+                            <a href="#">Server status</a>
+                            <a href="#">Blog</a>
+                        </div>
+                        <div class="footer-section">
+                            <h4>Contact Us</h4>
+                            <a href="#" class="me-3 text-decoration-none d-flex align-items-center mb-3">
+                                <i class="bi bi-whatsapp" style="font-size: 22px; color: #32bd40;"></i> <!-- Ikon WhatsApp -->
+                                <span class="ms-2">+62 123 4567 890</span> <!-- Nomor Telepon -->
+                            </a>
+                            <a href="#" class="me-3 text-decoration-none d-flex align-items-center">
+                                <i class="bi bi-envelope" style="font-size: 22px; color: #32bd40;"></i> <!-- Ikon WhatsApp -->
+                                <span class="ms-2">motret.kreatif4@gmail.com</span> <!-- Nomor Telepon -->
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-bottom">
+                        <span>Copyright © 2025 Motret. All rights reserved.</span>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Privacy Policy</a>
+                    </div>
+                </footer>
             </div>
         </div>
-
     </div>
 
     <!-- Scripts -->

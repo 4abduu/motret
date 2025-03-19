@@ -199,9 +199,28 @@
         background: rgba(0, 0, 0, 0.9);
     }
 
+.overlay-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.card-pin:hover .overlay-img {
+  opacity: 1;
+}
+
 </style>
 
-<div class="container mt-5">
+<div class="container mt-4 mb-5">
     <div class="row">
         <div class="col-md-6 position-relative">
             <div class="photo-container shadow-sm rounded">
@@ -276,7 +295,7 @@
             </div>            <div class="mt-4 text-start comment-container">
                 <h3 class="mb-4 text-start">{{ $photo->title }}</h3>
                 <h5 class="text-start">{{ $photo->description }}</h5>
-                <div class="most-searched-container">
+                <div class="most-searched-container mb-2">
                     <h4 class="most-searched-title">Hashtags:</h4>
                     <div class="most-searched-keywords">
                         @foreach(json_decode($photo->hashtags) as $hashtag)
@@ -286,20 +305,23 @@
                         @endforeach
                     </div>
                 </div>
-                <p class="text-start d-flex align-items-center">
+                <p class="text-start d-flex align-items-center mb-3">
                     @if($photo->user->profile_photo)
                         <img src="{{ asset('storage/photo_profile/' . $photo->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40">
                     @else
                         <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40"/>
                     @endif
-
-                    <a href="{{ route('user.showProfile', $photo->user->username) }}" class="fw-bold">{{ $photo->user->username }}</a>
+                
+                    <a href="{{ route('user.showProfile', $photo->user->username) }}" class="fw-bold me-2">{{ $photo->user->username }}</a>
                     @if($photo->user->verified)
-                        <i class="ti-medall-alt" style="color: gold;"></i>
+                        <i class="ti-medall-alt me-2" style="color: gold;"></i>
                     @endif 
                     @if($photo->user->role === 'pro')
-                        <i class="ti-star" style="color: gold;"></i>
+                        <i class="ti-star me-2" style="color: gold;"></i>
                     @endif
+                
+                    <!-- Tombol Follow -->
+                    <button class="btn btn-sm btn-success ms-3">Follow</button>
                 </p>
                 
                 <h6 class="text-start">Komentar</h6>
@@ -336,12 +358,14 @@
                                     @endif
                                 </div>
                                 <p class="mb-1 ms-4">{{ $comment->comment }}</p>
-                                <small class="text-muted" style="font-size: 13px; margin-top: -2px; padding-left: 16px;">
-                                    {{ $comment->created_at->diffForHumans() }}
-                                </small>
-                                @if(Auth::check())
-                                    <div class="d-flex align-items-center ms-4 mt-1">
-                                        <button class="btn btn-link p-0 reply-button" data-comment-id="{{ $comment->id }}">Balas</button>
+                                <div class="d-flex align-items-center ms-4 mt-1">
+                                    <small class="text-muted me-2" style="font-size: 13px;">
+                                        {{ $comment->created_at->diffForHumans() }}
+                                    </small>
+                                    @if(Auth::check())
+                                    <button class="btn btn-link p-0 reply-button" data-comment-id="{{ $comment->id }}">
+                                        <i class="bi bi-reply"></i>
+                                    </button>                                    
                                         <div class="dropdown ms-2">
                                             <button class="btn btn-link p-0" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="bi bi-three-dots"></i>
@@ -364,7 +388,9 @@
                                                 @endif
                                             </ul>
                                         </div>
-                                    </div>
+                                    @endif
+                                </div>
+                                @if(Auth::check())
                                     <div class="reply-form" id="reply-form-{{ $comment->id }}" style="display: none;">
                                         <form method="POST" action="{{ route('comments.reply', $comment->id) }}">
                                             @csrf
@@ -453,43 +479,49 @@
             </div>  
             
             <!-- Form tambah komentar -->
-            @if(Auth::check())
             <div class="card-footer mt-auto p-2">
-                <form method="POST" action="{{ route('photos.comments.store', $photo->id) }}" class="text-start">
-                    @csrf
-                    <div class="mb-3 d-flex">
-                        <textarea class="form-control" name="comment" rows="1" placeholder="Tambahkan komentar..." required></textarea>
-                        <button type="submit" class="btn btn-link p-0 ms-2">
-                            <i class="bi bi-send text-dark fw-bold fs-5"></i>
-                        </button>
-                    </div>
-                </form>
+                @if(Auth::check())
+                    <form method="POST" action="{{ route('photos.comments.store', $photo->id) }}" class="text-start">
+                        @csrf
+                        <div class="mb-3 d-flex">
+                            <textarea class="form-control rounded-5" name="comment" rows="1" placeholder="Tambahkan komentar..." required></textarea>
+                            <button type="submit" class="btn btn-link p-0 ms-2">
+                                <i class="bi bi-send text-dark fw-bold fs-5"></i>
+                            </button>
+                        </div>
+                    </form>
+                @else
+                    <p class="text-start">Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
+                @endif
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <h3 class="card-title mb-3">Jelajahi untuk lainnya</h3>
+    <div class="row">
+        <div class="card-columns">
+            @if($randomPhotos->isEmpty())
+                <div class="col-12 text-center">
+                    <p class="text-muted">Tidak ada foto yang tersedia saat ini.</p>
+                </div>
             @else
-                <p class="text-start">Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
+                @foreach($randomPhotos as $randomPhoto)
+                    <div class="card card-pin">
+                        <a href="{{ route('photos.show', $randomPhoto->id) }}">
+                            <img src="{{ asset('storage/' . $randomPhoto->path) }}" class="card-img" alt="{{ $randomPhoto->title }}">
+                            <div class="overlay-img"></div>
+                        </a>
+                    </div>
+                @endforeach
             @endif
         </div>
     </div>
 </div>
 
-<div class="my-4">
-    <h3 class="card-title mb-4">Jelajahi untuk lainnya</h3>
-    <div class="row">
-        @if($randomPhotos->isEmpty())
-            <div class="col-12 text-center">
-                <p class="text-muted">Tidak ada foto yang tersedia saat ini.</p>
-            </div>
-        @else
-            @foreach($randomPhotos as $randomPhoto)
-                <div class="col-md-3 mb-4">
-                    <a href="{{ route('photos.show', $randomPhoto->id) }}">
-                        <img src="{{ asset('storage/' . $randomPhoto->path) }}" class="img-fluid rounded" alt="{{ $randomPhoto->title }}">
-                    </a>
-                </div>
-            @endforeach
-        @endif
-    </div>
-</div>
+
+
 
 <!-- Modal Buat Album -->
 <div class="modal fade" id="createAlbumModal" tabindex="-1" role="dialog" aria-labelledby="createAlbumModalLabel" aria-hidden="true">

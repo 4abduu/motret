@@ -2,7 +2,7 @@
 
 @section('title', 'Homepage')
 
-@push('link')
+{{-- @push('link')
 <script type="text/javascript">
     (function() {
         var css = document.createElement('link');
@@ -14,13 +14,100 @@
 </script>
 <link rel="stylesheet" href="{{ asset('user/assets/css/app.css') }}">
 <link rel="stylesheet" href="{{ asset('user/assets/css/theme.css') }}">
-@endpush
+@endpush --}}
+<style>
+    
+    .most-searched-container {
+        display: flex;
+        flex-direction: column; /* Mengatur tata letak vertikal */
+        gap: 10px; /* Jarak antara judul dan daftar kata kunci */
+        margin-bottom: 2rem;
+    }
+
+
+.most-searched-title {
+        font-size: 1.25rem;
+        margin: 0; /* Menghapus margin default */
+        font-weight: bold; /* Tebalkan judul */
+        text-align: center; /* Judul di sebelah kiri */
+    }
+
+.most-searched-keywords {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.keyword-item {
+  background-color: #f0f0f0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.keyword-item:hover {
+  background-color: #32bd40;
+  color: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ====================== */
+/* Responsive Adjustments */
+/* ====================== */
+@media (max-width: 768px) {
+  .most-searched-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .most-searched-title {
+    font-size: 1rem;
+  }
+
+  .keyword-item {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+  .card-title {
+    font-size: 1rem;
+  }
+}
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.card-pin:hover .overlay {
+  opacity: 1;
+}
+
+</style>
 
 @section('content')
 
+
 <div class="container mb-4">
     <div class="most-searched-container">
-        <h4 class="most-searched-title">Kata kunci yang sering dicari: </h4>
+        <h4 class="most-searched-title mb-2">Kata kunci yang sering dicari: </h4>
         <div class="most-searched-keywords">
             @foreach($mostSearchedKeywords as $search)
                 <a href="{{ route('search', ['query' => $search->keyword]) }}" class="keyword-item">
@@ -147,17 +234,17 @@
             });
         @endif
 
-        // Blokir klik kanan
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-        });
+        // // Blokir klik kanan
+        // document.addEventListener('contextmenu', function (e) {
+        //     e.preventDefault();
+        // });
 
-        // Blokir inspect element
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-                e.preventDefault();
-            }
-        });
+        // // Blokir inspect element
+        // document.addEventListener('keydown', function (e) {
+        //     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+        //         e.preventDefault();
+        //     }
+        // });
     });
 </script>
 @endpush

@@ -37,7 +37,7 @@
                 <img src="{{ asset('images/Motret logo.png') }}" class="me-2" alt="logo" />
             </a>
             <a class="navbar-brand brand-logo-mini" href="{{ url('/') }}">
-                <img src="{{ asset('assets/images/Motret logo.png') }}" alt="logo" />
+                <img src="{{ asset('assets/images/Motret logo kecil.png') }}" alt="logo" />
             </a>
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
@@ -55,8 +55,8 @@
             </ul>
             <ul class="navbar-nav navbar-nav-right">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('photos.create') }}">
-                        <i class="ti-upload text-success"></i> Unggah
+                    <a class="nav-link text-dark fw-semibold" href="{{ route('photos.create') }}">
+                        <i class="ti-upload text-success me-1"></i> Unggah
                     </a>
                 </li>
                 <li class="nav-item">
