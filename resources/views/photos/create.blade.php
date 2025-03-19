@@ -2,6 +2,52 @@
 
 @section('title', 'Upload Photo')
 
+@push('styles')
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/css/dropify.min.css">
+  <style>
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+    margin-top: -5vh;
+}
+
+.card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+  </style>
+@endpush
 @section('content')
     <div class="container">
         <h3 class="my-4">Unggah Foto</h3>
@@ -22,7 +68,6 @@
                   <div class="card-body">
                     <h4 class="card-title d-flex">Pilih file foto</h4>
                     <input type="file" name="photo" class="dropify" id="photo" required onchange="previewImage(event)">
-                    <img id="imagePreview" src="#" alt="Pratinjau Gambar" style="display: none; max-width: 100%; margin-top: 10px;">
                   </div>
                 </div>
               </div>
@@ -69,16 +114,29 @@
             </div>
         </form>
     </div>
+@endsection
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/js/dropify.min.js"></script>
 
      <script>
-        function previewImage(event) {
-            var reader = new FileReader();
-            reader.onload = function () {
-                var output = document.getElementById('imagePreview');
-                output.src = reader.result;
-                output.style.display = 'block';
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
+        $(document).ready(function() {
+          $('.dropify').dropify({
+              messages: {
+                  'default': 'Seret dan lepas file di sini atau klik',
+                  'replace': 'Seret dan lepas file di sini atau klik untuk mengganti',
+                  'remove':  'Hapus',
+                  'error':   'Oops, terjadi kesalahan.'
+              },
+              error: {
+                  'fileSize': 'Ukuran file terlalu besar (maksimal 2MB).',
+                  'imageFormat': 'Format file tidak didukung (hanya jpeg, png, jpg).'
+              }
+          });
+      });
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var submitButton = document.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerText = 'Uploading...';
+        });
     </script>   
-@endsection
+@endpush

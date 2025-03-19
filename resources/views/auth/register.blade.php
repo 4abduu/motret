@@ -37,10 +37,10 @@
                     <input type="password" name="password_confirmation" class="form-control" id="password_confirmation" placeholder="Konfirmasi kata sandi Anda" required>
                     <span toggle="#password_confirmation" class="fa fa-eye-slash toggle-password"></span>
                 </div>
-                <div class="form-group">
+                {{-- <div class="form-group">
                     <label for="profile_photo" class="custom-label">Foto Profil</label>
                     <input type="file" name="profile_photo" class="form-control" id="profile_photo" accept="image/*">
-                </div>
+                </div> --}}
                 <button type="submit" class="btn btn-success me-2">Daftar</button>
             </form>
 

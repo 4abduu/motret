@@ -49,7 +49,7 @@
                   <div class="card-body">
                       <p class="mb-2"><i class="fas fa-users"></i> Users</p>
                       <p class="fs-24 mb-2">{{ $userCount }}</p>
-                      <small class="text-white">Last 7 days: {{ $userPercentage > 0 ? '+' : '' }}{{ $userPercentage }}%</small>
+                      <small class="text-white">Last 7 days: {{ $userPercentage > 0 ? '+' : '' }}{{ $userPercentage }}</small>
                   </div>
               </div>
           </div>
@@ -59,7 +59,7 @@
                   <div class="card-body">
                       <p class="mb-2"><i class="fas fa-image"></i> Photos</p>
                       <p class="fs-24 mb-2">{{ $photoCount }}</p>
-                      <small class="text-white">Last 7 days: {{ $photoPercentage > 0 ? '+' : '' }}{{ $photoPercentage }}%</small>
+                      <small class="text-white">Last 7 days: {{ $photoPercentage > 0 ? '+' : '' }}{{ $photoPercentage }}</small>
                   </div>
               </div>
           </div>
@@ -69,7 +69,7 @@
                   <div class="card-body">
                       <p class="mb-2"><i class="fas fa-comment"></i> Comments</p>
                       <p class="fs-24 mb-2">{{ $commentCount }}</p>
-                      <small class="text-white">Last 7 days: {{ $commentPercentage > 0 ? '+' : '' }}{{ $commentPercentage }}%</small>
+                      <small class="text-white">Last 7 days: {{ $commentPercentage > 0 ? '+' : '' }}{{ $commentPercentage }}</small>
                   </div>
               </div>
           </div>
@@ -79,7 +79,7 @@
                   <div class="card-body">
                       <p class="mb-2"><i class="fas fa-flag"></i> Reports</p>
                       <p class="fs-24 mb-2">{{ $reportCount }}</p>
-                      <small class="text-white">Last 7 days: {{ $reportPercentage > 0 ? '+' : '' }}{{ $reportPercentage }}%</small>
+                      <small class="text-white">Last 7 days: {{ $reportPercentage > 0 ? '+' : '' }}{{ $reportPercentage }}</small>
                   </div>
               </div>
           </div>
@@ -89,7 +89,7 @@
                   <div class="card-body">
                       <p class="mb-2"><i class="fas fa-dollar-sign"></i> Transactions</p>
                       <p class="fs-24 mb-2">{{ $transactionCount }}</p>
-                      <small class="text-white">Last 7 days: {{ $transactionPercentage > 0 ? '+' : '' }}{{ $transactionPercentage }}%</small>
+                      <small class="text-white">Last 7 days: {{ $transactionPercentage > 0 ? '+' : '' }}{{ $transactionPercentage }}</small>
                   </div>
               </div>
           </div>
@@ -99,7 +99,7 @@
                   <div class="card-body">
                       <p class="mb-2"><i class="fas fa-check-circle"></i> Verifications</p>
                       <p class="fs-24 mb-2">{{ $verificationCount }}</p>
-                      <small class="text-white">Last 7 days: {{ $verificationPercentage > 0 ? '+' : '' }}{{ $verificationPercentage }}%</small>
+                      <small class="text-white">Last 7 days: {{ $verificationPercentage > 0 ? '+' : '' }}{{ $verificationPercentage }}</small>
                   </div>
               </div>
           </div>
@@ -166,32 +166,32 @@
                 <h5 class="card-title">Quick Actions</h5>
                 <div class="row">
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.users') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.users') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-users"></i> Manage Users
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.photos') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.photos') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-image"></i> Manage Photos
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.manageComments') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.manageComments') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-comments"></i> Manage Comments
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.subscriptions') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.subscriptions') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-dollar-sign"></i> Manage Subscriptions
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.manageReports') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.manageReports') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-flag"></i> Manage Reports
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.verificationRequests') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.verificationRequests') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-check-circle"></i> Manage Verifications
                         </a>
                     </div>

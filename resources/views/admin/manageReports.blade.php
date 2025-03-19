@@ -1,5 +1,25 @@
 @extends('layouts.app')
 
+@push('styles')
+  <style>
+    .card-hover:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success {
+    background-color: #32bd40;
+    border-color: #32bd40;
+}
+
+.btn-success:hover {
+    background-color: #2aa835;
+    border-color: #2aa835;
+}
+  </style>
+@endpush
+
 @section('content')
 <div class="row">
     <div class="col-md-12 grid-margin">
@@ -27,7 +47,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-user-times"></i> Report User</p>
                         <p class="fs-24 mb-2">{{ $reportUserCount }}</p>
-                        <small class="text-white">Last 7 days: +5%</small>
+                        <small class="text-white">Last 7 days: {{ $reportUserPercentage > 0 ? '+' : '' }}{{ $reportUserPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -37,7 +57,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-comment-slash"></i> Report Comment</p>
                         <p class="fs-24 mb-2">{{ $reportCommentCount }}</p>
-                        <small class="text-white">Last 7 days: +8%</small>
+                        <small class="text-white">Last 7 days: {{ $reportCommentPercentage > 0 ? '+' : '' }}{{ $reportCommentPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -47,7 +67,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-reply"></i> Report Reply</p>
                         <p class="fs-24 mb-2">{{ $reportReplyCount }}</p>
-                        <small class="text-white">Last 7 days: +3%</small>
+                        <small class="text-white">Last 7 days: {{ $reportReplyPercentage > 0 ? '+' : '' }}{{ $reportReplyPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -57,7 +77,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-image"></i> Report Photo</p>
                         <p class="fs-24 mb-2">{{ $reportPhotoCount }}</p>
-                        <small class="text-white">Last 7 days: +12%</small>
+                        <small class="text-white">Last 7 days: {{ $reportPhotoPercentage > 0 ? '+' : '' }}{{ $reportPhotoPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -100,17 +120,17 @@
                 <h5 class="card-title">Quick Actions</h5>
                 <div class="row">
                     <div class="col-md-3 mb-2">
-                        <a href="{{ route('admin.reports.users') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.reports.users') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-users"></i> Manage User Reports
                         </a>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <a href="{{ route('admin.reports.comments') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.reports.comments') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-comments"></i> Manage Comment Reports
                         </a>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <a href="{{ route('admin.reports.photos') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.reports.photos') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-image"></i> Manage Photo Reports
                         </a>
                     </div>

@@ -1034,113 +1034,313 @@
 
             // Event listener untuk form create album
             const createAlbumForm = document.getElementById('createAlbumForm');
-            if (createAlbumForm) {
-                createAlbumForm.addEventListener('submit', async function (event) {
-                    event.preventDefault();
+if (createAlbumForm) {
+    createAlbumForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
 
-                    const formData = new FormData(createAlbumForm);
-                    const submitButton = createAlbumForm.querySelector('button[type="submit"]');
-                    submitButton.disabled = true;
+        const formData = new FormData(createAlbumForm);
+        const submitButton = createAlbumForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
 
-                    try {
-                        const response = await fetch('{{ route('albums.store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            },
-                            body: formData
-                        });
+        try {
+            const response = await fetch('{{ route('albums.store') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
 
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
-                        }
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
 
-                        const data = await response.json();
+            const data = await response.json();
 
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: 'Album berhasil dibuat!',
-                                confirmButtonText: 'OK'
-                            });
+            // Debugging: Periksa nilai user_id dan current_user_id
+            console.log('Album User ID:', data.album.user_id);
+            console.log('Current User ID:', data.current_user_id);
+            console.log('Condition:', data.album.user_id === data.current_user_id);
 
-                            // Buat elemen HTML untuk album baru
-                            const newAlbumHtml = `
-                                <div class="col-md-4 mb-4">
-                                    <div class="card">
-                                        <a href="/albums/${data.album.id}">
-                                            <div class="album-cover">
-                                                <!-- Jika ada foto, tambahkan di sini -->
-                                            </div>
-                                        </a>
-                                        <div class="card-body">
-                                            <h5 class="card-title">${data.album.name}</h5>
-                                            <p class="card-text">${data.album.description}</p>
-                                            ${data.album.user_id === data.current_user_id ? `
-                                                <div class="dropdown">
-                                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-${data.album.id}" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i class="bi bi-bookmarks-fill"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${data.album.id}">
-                                                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editAlbumModal-${data.album.id}">Edit</a></li>
-                                                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deleteAlbumModal-${data.album.id}">Hapus</a></li>
-                                                    </ul>
-                                                </div>
-                                            ` : ''}
-                                        </div>
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Album berhasil dibuat!',
+                    confirmButtonText: 'OK'
+                });
+
+                // Buat elemen HTML untuk album baru
+                const newAlbumHtml = `
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                <a href="/albums/${data.album.id}">
+                                    <div class="album-cover">
+                                        <!-- Jika ada foto, tambahkan di sini -->
                                     </div>
+                                </a>
+                                <div class="card-body">
+                                    <h5 class="card-title">${data.album.name}</h5>
+                                    <p class="card-text">${data.album.description}</p>
+                                    ${data.album.user_id === data.current_user_id ? `
+                                        <div class="dropdown">
+                                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton-${data.album.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="bi bi-bookmarks-fill"></i>
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${data.album.id}">
+                                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editAlbumModal-${data.album.id}">Edit</a></li>
+                                                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deleteAlbumModal-${data.album.id}">Hapus</a></li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- Modal Edit Album -->
+                                        <div class="modal fade" id="editAlbumModal-${data.album.id}" tabindex="-1" aria-labelledby="editAlbumModalLabel-${data.album.id}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editAlbumModalLabel-${data.album.id}">Edit Album</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form id="editAlbumForm-${data.album.id}" method="POST" action="/albums/${data.album.id}">
+                                                            <input type="hidden" name="_method" value="PUT">
+                                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                            <div class="form-group">
+                                                                <label for="albumName">Nama Album</label>
+                                                                <input type="text" class="form-control" name="name" value="${data.album.name}" required>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="albumDescription">Deskripsi</label>
+                                                                <textarea class="form-control" name="description" rows="3">${data.album.description}</textarea>
+                                                            </div>
+                                                            ${data.current_user_role === 'pro' ? `
+                                                                <div class="form-group">
+                                                                    <label for="status" class="form-label">Visibilitas</label>
+                                                                    <select class="form-select" id="status" name="status" required>
+                                                                        <option value="1" ${data.album.status === '1' ? 'selected' : ''}>Publik</option>
+                                                                        <option value="0" ${data.album.status === '0' ? 'selected' : ''}>Privat</option>
+                                                                    </select>
+                                                                </div>
+                                                            ` : ''}
+                                                            <button type="submit" class="btn btn-success text-white">Simpan Perubahan</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Modal Hapus Album -->
+                                        <div class="modal fade" id="deleteAlbumModal-${data.album.id}" tabindex="-1" aria-labelledby="deleteAlbumModalLabel-${data.album.id}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="deleteAlbumModalLabel-${data.album.id}">Hapus Album</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        Apakah Anda yakin ingin menghapus album ini?
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
+                                                        <form id="deleteAlbumForm-${data.album.id}" method="POST" action="/albums/${data.album.id}">
+                                                            <input type="hidden" name="_method" value="DELETE">
+                                                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                            <button type="submit" class="btn btn-danger text-white">Hapus</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
                                 </div>
-                            `;
+                            </div>
+                        </div>
+                    `;
 
-                            // Tambahkan album baru ke tab panel
-                            const albumsRow = document.querySelector('#albums .row');
-                            if (albumsRow) {
-                                albumsRow.insertAdjacentHTML('beforeend', newAlbumHtml);
-                            }
+                // Tambahkan album baru ke tab panel
+                const albumsRow = document.querySelector('#albums .row');
+                if (albumsRow) {
+                    albumsRow.insertAdjacentHTML('beforeend', newAlbumHtml);
+                    initializeDropdowns(); // Inisialisasi ulang dropdown
+                }
 
-                            // Inisialisasi ulang dropdown setelah menambahkan album baru
-                            initializeDropdowns();
+                // Tutup modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('createAlbumModal'));
+                modal.hide();
 
-                            // Tutup modal
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('createAlbumModal'));
-                            modal.hide();
+                // Hapus overlay modal
+                document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                    backdrop.remove();
+                });
 
-                            // Hapus overlay modal
-                            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-                                backdrop.remove();
-                            });
+                // Hapus class 'modal-open' dari body
+                document.body.classList.remove('modal-open');
 
-                            // Hapus class 'modal-open' dari body
-                            document.body.classList.remove('modal-open');
-
-                            // Inisialisasi ulang modal
-                            new bootstrap.Modal(document.getElementById('createAlbumModal'));
-
-                            // Reset form
-                            createAlbumForm.reset();
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal!',
-                                text: 'Gagal membuat album. Silakan coba lagi.',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error creating album:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Terjadi Kesalahan!',
-                            text: 'Terjadi kesalahan saat membuat album. Silakan coba lagi.',
-                            confirmButtonText: 'OK'
-                        });
-                    } finally {
-                        submitButton.disabled = false;
-                    }
+                // Reset form
+                createAlbumForm.reset();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: 'Gagal membuat album. Silakan coba lagi.',
+                    confirmButtonText: 'OK'
                 });
             }
+        } catch (error) {
+            console.error('Error creating album:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan!',
+                text: 'Terjadi kesalahan saat membuat album. Silakan coba lagi.',
+                confirmButtonText: 'OK'
+            });
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+}
+
+// Fungsi untuk menginisialisasi dropdown
+function initializeDropdowns() {
+    const dropdowns = document.querySelectorAll('.dropdown-toggle');
+    dropdowns.forEach(dropdown => {
+        new bootstrap.Dropdown(dropdown);
+    });
+}
+// Fungsi untuk menangani form edit album
+function handleEditAlbumForm(albumId) {
+    const editForm = document.getElementById(`editAlbumForm-${albumId}`);
+    if (editForm) {
+        editForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(editForm);
+            const submitButton = editForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch(editForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Album berhasil diperbarui!',
+                        confirmButtonText: 'OK'
+                    });
+
+                    // Perbarui informasi album di DOM
+                    const albumTitle = document.querySelector(`#dropdownMenuButton-${albumId}`).closest('.card').querySelector('.card-title');
+                    const albumDescription = document.querySelector(`#dropdownMenuButton-${albumId}`).closest('.card').querySelector('.card-text');
+
+                    if (albumTitle) albumTitle.textContent = data.album.name;
+                    if (albumDescription) albumDescription.textContent = data.album.description;
+
+                    // Tutup modal edit
+                    const editModal = bootstrap.Modal.getInstance(document.getElementById(`editAlbumModal-${albumId}`));
+                    editModal.hide();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: 'Gagal memperbarui album. Silakan coba lagi.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating album:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan!',
+                    text: 'Terjadi kesalahan saat memperbarui album. Silakan coba lagi.',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+    }
+}
+
+// Fungsi untuk menangani form hapus album
+function handleDeleteAlbumForm(albumId) {
+    const deleteForm = document.getElementById(`deleteAlbumForm-${albumId}`);
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const submitButton = deleteForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch(deleteForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new FormData(deleteForm)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Album berhasil dihapus!',
+                        confirmButtonText: 'OK'
+                    });
+
+                    // Hapus elemen album dari DOM
+                    const albumCard = document.querySelector(`#dropdownMenuButton-${albumId}`).closest('.col-md-4');
+                    if (albumCard) albumCard.remove();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: 'Gagal menghapus album. Silakan coba lagi.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                console.error('Error deleting album:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi Kesalahan!',
+                    text: 'Terjadi kesalahan saat menghapus album. Silakan coba lagi.',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+    }
+}
+
+// Panggil fungsi handleEditAlbumForm dan handleDeleteAlbumForm setelah menambahkan album baru
+handleEditAlbumForm(data.album.id);
+handleDeleteAlbumForm(data.album.id);
         });
     </script>
     @endpush

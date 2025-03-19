@@ -13,17 +13,51 @@ class CommentController extends Controller
 {
     public function index()
     {
+        // Jumlah data 
         $commentCount = Comment::getCommentCount();
         $replyCount = Reply::getRepliesCount();
         $recentComments = Comment::with('user')->latest()->take(5)->get();
         $recentReplies = Reply::with('user')->latest()->take(5)->get();
 
+        // Hitung persentase
+        $commentPercentage = $this->calculatePercentageChange(Comment::class);
+        $replyPercentage = $this->calculatePercentageChange(Reply::class);
+
         return view('admin.manageComments', compact(
             'commentCount',
             'replyCount',
             'recentComments',
-            'recentReplies'
+            'recentReplies',
+            'commentPercentage',
+            'replyPercentage'
         ));
+    }
+
+    private function calculatePercentageChange($model)
+    {
+        // Hitung jumlah data 7 hari terakhir
+        $last7DaysCount = $model::where('created_at', '>=', Carbon::now()->subDays(7))->count();
+    
+        // Hitung jumlah data 7 hari sebelumnya (8-14 hari yang lalu)
+        $previous7DaysCount = $model::whereBetween('created_at', [Carbon::now()->subDays(14), Carbon::now()->subDays(7)])->count();
+    
+        // Jika periode sebelumnya 0 dan sekarang ada data, maka 100% kenaikan
+        if ($previous7DaysCount == 0) {
+            return $last7DaysCount > 0 ? "+100%" : "0%";
+        }
+    
+        // Hitung persentase perubahan
+        $percentageChange = (($last7DaysCount - $previous7DaysCount) / $previous7DaysCount) * 100;
+    
+        // Tambahkan tanda "+" jika ada kenaikan
+        $formattedPercentage = round($percentageChange, 2);
+        if ($formattedPercentage > 0) {
+            return "+" . $formattedPercentage . "%";
+        } elseif ($formattedPercentage < 0) {
+            return $formattedPercentage . "%"; // Tanda minus otomatis sudah ada
+        } else {
+            return "0%";
+        }
     }
 
     public function comments()

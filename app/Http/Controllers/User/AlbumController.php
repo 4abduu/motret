@@ -67,7 +67,9 @@ class AlbumController extends Controller
                         'name' => $album->name,
                         'description' => $album->description,
                         'user_id' => $album->user_id,
-                    ]
+                    ],
+                    'current_user_id' => Auth::id(), // Tambahkan current_user_id ke respons
+                    'current_user_role' => Auth::user()->role // Role user yang sedang login
                 ]);
             }
     

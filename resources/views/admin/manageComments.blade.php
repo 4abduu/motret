@@ -1,5 +1,25 @@
 @extends('layouts.app')
 
+@push('styles')
+  <style>
+    .card-hover:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success {
+    background-color: #32bd40;
+    border-color: #32bd40;
+}
+
+.btn-success:hover {
+    background-color: #2aa835;
+    border-color: #2aa835;
+}
+  </style>
+@endpush
+
 @section('content')
 <div class="row">
     <div class="col-md-12 grid-margin">
@@ -26,7 +46,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-comment"></i> Comments</p>
                         <p class="fs-24 mb-2">{{ $commentCount }}</p>
-                        <small class="text-white">Last 7 days: +8%</small>
+                        <small class="text-white">Last 7 days: {{ $commentPercentage > 0 ? '+' : '' }}{{ $commentPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -36,7 +56,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-reply"></i> Replies</p>
                         <p class="fs-24 mb-2">{{ $replyCount }}</p>
-                        <small class="text-white">Last 7 days: +5%</small>
+                        <small class="text-white">Last 7 days: {{ $replyPercentage > 0 ? '+' : '' }}{{ $replyPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -86,12 +106,12 @@
                 <h5 class="card-title">Quick Actions</h5>
                 <div class="row">
                     <div class="col-md-3 mb-2">
-                        <a href="{{ route('admin.comments') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.comments') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-comments"></i> Manage Comments
                         </a>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <a href="{{ route('admin.replies') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.replies') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-reply"></i> Manage Replies
                         </a>
                     </div>

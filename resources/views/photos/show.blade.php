@@ -204,12 +204,14 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6 position-relative">
-            <div class="photo-container">
-                <canvas id="photoCanvas" class="img-fluid" data-src="{{ asset('storage/' . $photo->path) }}"></canvas>
-                
-                <button id="open-modal" class="zoom-btn">
-                    <i class="fas fa-search-plus"></i>
-                </button>
+            <div class="photo-container shadow-sm rounded">
+            <canvas id="photoCanvas" class="img-fluid rounded" data-src="{{ asset('storage/' . $photo->path) }}"></canvas>
+                @if(Auth::check())
+                    <button id="open-modal" class="zoom-btn btn btn-light rounded-circle p-2">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                @endif
+
             </div>
             <div class="overlay"></div>
             <div class="d-flex align-items-center mt-3">
@@ -261,7 +263,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6 ">
+        <div class="col-md-6">
             <div class="d-flex align-items-center mb-3">
                 <button type="button" class="btn btn-link p-0 me-3" onclick="copyToClipboard()">
                     <i class="bi bi-share text-dark fw-bold fs-5"></i>
@@ -271,21 +273,19 @@
                     <i class="bi bi-flag text-dark fw-bold fs-5"></i>
                 </button>
                 @endif
-                
-            </div>
-            <div class="mt-4 text-start comment-container">
+            </div>            <div class="mt-4 text-start comment-container">
                 <h3 class="mb-4 text-start">{{ $photo->title }}</h3>
                 <h5 class="text-start">{{ $photo->description }}</h5>
-                    <div class="most-searched-container">
-                        <h4 class="most-searched-title">Hashtags:</h4>
-                        <div class="most-searched-keywords">
-                            @foreach(json_decode($photo->hashtags) as $hashtag)
-                                <a href="{{ route('search', ['query' => $hashtag]) }}" class="keyword-item">
-                                    {{ $hashtag }}
-                                </a>
-                            @endforeach
-                        </div>
+                <div class="most-searched-container">
+                    <h4 class="most-searched-title">Hashtags:</h4>
+                    <div class="most-searched-keywords">
+                        @foreach(json_decode($photo->hashtags) as $hashtag)
+                            <a href="{{ route('search', ['query' => $hashtag]) }}" class="keyword-item badge bg-secondary text-decoration-none me-1">
+                                {{ $hashtag }}
+                            </a>
+                        @endforeach
                     </div>
+                </div>
                 <p class="text-start d-flex align-items-center">
                     @if($photo->user->profile_photo)
                         <img src="{{ asset('storage/photo_profile/' . $photo->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40">
@@ -298,7 +298,7 @@
                         <i class="ti-medall-alt" style="color: gold;"></i>
                     @endif 
                     @if($photo->user->role === 'pro')
-                        <i class="ti-star" style="color: gold;"></i> <!-- Tambahkan ini --> 
+                        <i class="ti-star" style="color: gold;"></i>
                     @endif
                 </p>
                 
@@ -312,39 +312,38 @@
                     @endphp
 
                     @if(!$hideComment)
-                        <div class="mb-2">
-                            @if($comment->user->profile_photo)
-                                <img src="{{ asset('storage/photo_profile/' . $comment->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">
-                            @else
-                                <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>
-                            @endif
-                            <strong>
-                                <a href="{{ route('user.showProfile', $comment->user->username) }}" class="text-dark fw-bold text-decoration-none">
-                                    {{ $comment->user->username }}
-                                </a>
-                            </strong>
-                            @if($comment->user->verified)
-                                <i class="ti-medall-alt" style="color: gold;"></i>
-                            @endif 
-                            @if($comment->user->role === 'pro')
-                                <i class="ti-star" style="color: gold;"></i>
-                            @endif
-                            @if($comment->user_id === $photo->user_id)
-                                <span class="text">• Pembuat</span>
-                            @endif
-                            @if($comment->banned)
-                                @if($isOwner)
-                                    <p><em class="text-muted">Komentar anda telah dibanned: {{ $report->reason }}</em></p>
-                                @endif
-                            @else
-                                <p>{{ $comment->comment }}</p>
-                                <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
-
+                        <div class="card mb-2">
+                            <div class="card-body p-2">
+                                <div class="d-flex align-items-center mb-1">
+                                    @if($comment->user->profile_photo)
+                                        <img src="{{ asset('storage/photo_profile/' . $comment->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">
+                                    @else
+                                        <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>
+                                    @endif
+                                    <strong>
+                                        <a href="{{ route('user.showProfile', $comment->user->username) }}" class="text-dark fw-bold text-decoration-none">
+                                            {{ $comment->user->username }}
+                                        </a>
+                                    </strong>
+                                    @if($comment->user->verified)
+                                        <i class="ti-medall-alt" style="color: gold;"></i>
+                                    @endif 
+                                    @if($comment->user->role === 'pro')
+                                        <i class="ti-star" style="color: gold;"></i>
+                                    @endif
+                                    @if($comment->user_id === $photo->user_id)
+                                        <span class="text">• Pembuat</span>
+                                    @endif
+                                </div>
+                                <p class="mb-1 ms-4">{{ $comment->comment }}</p>
+                                <small class="text-muted" style="font-size: 13px; margin-top: -2px; padding-left: 16px;">
+                                    {{ $comment->created_at->diffForHumans() }}
+                                </small>
                                 @if(Auth::check())
-                                    <div class="d-flex align-items-center">
-                                        <button class="btn btn-link reply-button" data-comment-id="{{ $comment->id }}">Balas</button>
+                                    <div class="d-flex align-items-center ms-4 mt-1">
+                                        <button class="btn btn-link p-0 reply-button" data-comment-id="{{ $comment->id }}">Balas</button>
                                         <div class="dropdown ms-2">
-                                            <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <button class="btn btn-link p-0" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="bi bi-three-dots"></i>
                                             </button>
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $comment->id }}">
@@ -369,7 +368,7 @@
                                     <div class="reply-form" id="reply-form-{{ $comment->id }}" style="display: none;">
                                         <form method="POST" action="{{ route('comments.reply', $comment->id) }}">
                                             @csrf
-                                            <div class="input-group mb-3">
+                                            <div class="input-group mb-3 ms-4">
                                                 <input type="text" class="form-control" name="reply" placeholder="Tambahkan balasan..." required>
                                                 <button class="btn btn-outline-secondary" type="submit">
                                                     <i class="bi bi-send-fill text-dark fw-bold fs-5 rotate-90"></i>
@@ -378,162 +377,84 @@
                                         </form>
                                     </div>
                                 @endif
-                            @endif
-                            @foreach($comment->replies as $reply)
+                            </div>
+                        </div>
+
+                        <!-- Replies -->
+                        @foreach($comment->replies as $reply)
                             @php
                                 $hideReply = $comment->banned || (!$isOwner && $reply->banned);
                             @endphp
 
-                                @if(!$hideReply)
-                                    <div class="ms-4 mt-2" id="reply-{{ $reply->id }}">
-                                        @if($reply->user->profile_photo)
-                                            <img src="{{ asset('storage/photo_profile/' . $reply->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">
-                                        @else
-                                            <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>
-                                        @endif
-                                        <strong>
-                                            <a href="{{ route('user.showProfile', $reply->user->username) }}" class="text-dark fw-bold text-decoration-none">
-                                                {{ $reply->user->username }}
-                                            </a>
-                                        </strong>
-                                        @if($reply->user->verified)
-                                            <i class="ti-medall-alt" style="color: gold;"></i>
-                                        @endif 
-                                        @if($reply->user->role === 'pro')
-                                            <i class="ti-star" style="color: gold;"></i>
-                                        @endif
-                                        @if($reply->user_id === $photo->user_id)
-                                            <span class="text">• Pembuat</span>
-                                        @endif
-                                        <p>{{ $reply->reply }}</p>
-                                        <small class="text-muted">{{ $reply->created_at->diffForHumans() }}</small>
-                                        <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $reply->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="bi bi-three-dots"></i>
-                                        </button>
-                                        @if(Auth::check())
-                                            <div class="dropdown">
-                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $reply->id }}">
-                                                    @if($reply->user_id === Auth::id())
-                                                        <li>
-                                                            <button type="button" class="dropdown-item delete-reply" data-reply-id="{{ $reply->id }}">
-                                                                Hapus Balasan
-                                                            </button>
-                                                        </li>
-                                                    @else
-                                                        <li>
-                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportReplyModal-{{ $reply->id }}">
-                                                                Lapor Balasan
-                                                            </button>
-                                                        </li>
+                            @if(!$hideReply)
+                                <div class="ms-4 mt-1">
+                                    <div class="card">
+                                        <div class="card-body p-2">
+                                            <div class="d-flex align-items-center mb-1">
+                                                @if($reply->user->profile_photo)
+                                                    <img src="{{ asset('storage/photo_profile/' . $reply->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">
+                                                @else
+                                                    <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>
+                                                @endif
+                                                <strong>
+                                                    <a href="{{ route('user.showProfile', $reply->user->username) }}" class="text-dark fw-bold text-decoration-none">
+                                                        {{ $reply->user->username }}
+                                                    </a>
+                                                </strong>
+                                                @if($reply->user->verified)
+                                                    <i class="ti-medall-alt" style="color: gold;"></i>
+                                                @endif 
+                                                @if($reply->user->role === 'pro')
+                                                    <i class="ti-star" style="color: gold;"></i>
+                                                @endif
+                                                @if($reply->user_id === $photo->user_id)
+                                                    <span class="text">• Pembuat</span>
+                                                @endif
+                                            </div>
+                                            <p class="mb-1 ms-4">{{ $reply->reply }}</p>
+                                            <div class="d-flex align-items-center ms-4 mt-1">
+                                                <small class="text-muted" style="font-size: 12px; margin-top: -2px;">
+                                                    {{ $reply->created_at->diffForHumans() }}
+                                                </small>
+                                            
+                                                <!-- Dropdown harus membungkus button -->
+                                                <div class="dropdown ms-2" style="margin-top: -15px;">
+                                                    @if (Auth::check())
+                                                        <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $reply->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            <i class="bi bi-three-dots"></i>
+                                                        </button>
+                                                        
                                                     @endif
-                                                </ul>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <!-- Modal Report Reply -->
-                                    <div class="modal fade" id="reportReplyModal-{{ $reply->id }}" tabindex="-1" role="dialog" aria-labelledby="reportReplyModalLabel-{{ $reply->id }}" aria-hidden="true">
-                                        <div class="modal-dialog" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="reportReplyModalLabel-{{ $reply->id }}">Laporkan Balasan</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <form id="reportReplyForm-{{ $reply->id }}" method="POST" action="{{ route('reply.report', $reply->id) }}">
-                                                        @csrf
-                                                        <div class="form-group">
-                                                            <label for="reason">Alasan Melaporkan</label>
-                                                            <div class="form-check">
-                                                                <label class="form-check-label">
-                                                                    <input type="radio" class="form-check-input" name="reason" id="reason1" value="Konten tidak pantas">
-                                                                    Konten tidak pantas
-                                                                </label>
-                                                            </div>
-                                                            <div class="form-check">
-                                                                <label class="form-check-label">
-                                                                    <input type="radio" class="form-check-input" name="reason" id="reason2" value="Spam">
-                                                                    Spam
-                                                                </label>
-                                                            </div>
-                                                            <div class="form-check">
-                                                                <label class="form-check-label">
-                                                                    <input type="radio" class="form-check-input" name="reason" id="reason3" value="Pelanggaran hak cipta">
-                                                                    Pelanggaran hak cipta
-                                                                </label>
-                                                            </div>
-                                                            <div class="form-check">
-                                                                <label class="form-check-label">
-                                                                    <input type="radio" class="form-check-input" name="reason" id="reason4" value="Lainnya">
-                                                                    Lainnya
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-group" id="description-group-{{ $reply->id }}" style="display: none;">
-                                                            <label for="description">Alasan</label>
-                                                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                                                        </div>
-                                                        <button type="submit" class="btn btn-danger">Laporkan</button>
-                                                    </form>
+                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $reply->id }}">
+                                                        @if($reply->user_id === Auth::id())
+                                                            <li>
+                                                                <button type="button" class="dropdown-item delete-reply" data-reply-id="{{ $reply->id }}">
+                                                                    Hapus Balasan
+                                                                </button>
+                                                            </li>
+                                                        @elseif (Auth::check())
+                                                            <li>
+                                                                <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportReplyModal-{{ $reply->id }}">
+                                                                    Lapor Balasan
+                                                                </button>
+                                                            </li>
+                                                        @endif
+                                                    </ul>
                                                 </div>
                                             </div>
+                                            
                                         </div>
                                     </div>
-                                @endif
-                            @endforeach
-                        </div>
-                        <div class="modal fade" id="reportCommentModal-{{ $comment->id }}" tabindex="-1" role="dialog" aria-labelledby="reportCommentModalLabel-{{ $comment->id }}" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="reportCommentModalLabel-{{ $comment->id }}">Laporkan Komentar</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form id="reportCommentForm-{{ $comment->id }}" method="POST" action="{{ route('comment.report', $comment->id) }}">
-                                            @csrf
-                                            <div class="form-group">
-                                                <label for="reason">Alasan Melaporkan</label>
-                                                <div class="form-check">
-                                                    <label class="form-check-label">
-                                                        <input type="radio" class="form-check-input" name="reason" id="reason1" value="Konten tidak pantas">
-                                                        Konten tidak pantas
-                                                    </label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <label class="form-check-label">
-                                                        <input type="radio" class="form-check-input" name="reason" id="reason2" value="Spam">
-                                                        Spam
-                                                    </label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <label class="form-check-label">
-                                                        <input type="radio" class="form-check-input" name="reason" id="reason3" value="Pelanggaran hak cipta">
-                                                        Pelanggaran hak cipta
-                                                    </label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <label class="form-check-label">
-                                                        <input type="radio" class="form-check-input" name="reason" id="reason4" value="Lainnya">
-                                                        Lainnya
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="form-group" id="description-group-{{ $comment->id }}" style="display: none;">
-                                                <label for="description">Alasan</label>
-                                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                                            </div>
-                                            <button type="submit" class="btn btn-danger">Laporkan</button>
-                                        </form>
-                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            @endif
+                        @endforeach
                     @endif
                 @endforeach
             </div>  
+            
+            <!-- Form tambah komentar -->
             @if(Auth::check())
-            <div class="card-footer mt-auto">
+            <div class="card-footer mt-auto p-2">
                 <form method="POST" action="{{ route('photos.comments.store', $photo->id) }}" class="text-start">
                     @csrf
                     <div class="mb-3 d-flex">
@@ -543,13 +464,10 @@
                         </button>
                     </div>
                 </form>
-                @else
-                    <p class="text-start">Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
-                @endif
-                {{-- PENTING PENTING PENTING !!!!!!!!!! --}}
-                @if(Auth::check())
-            </div> 
-            @endif                 
+            </div>
+            @else
+                <p class="text-start">Silakan <a href="{{ route('login') }}">login</a> untuk menambahkan komentar.</p>
+            @endif
         </div>
     </div>
 </div>
@@ -734,6 +652,7 @@ const resetZoomBtn = document.getElementById("reset-zoom");
 let panzoomInstance = null;
 
 // Buka modal saat tombol zoom diklik
+@if (Auth::check())
 document.getElementById('open-modal').addEventListener('click', () => {
     modal.style.display = 'flex';
 
@@ -822,6 +741,7 @@ document.getElementById('open-modal').addEventListener('click', () => {
         panzoomInstance.smoothZoom(x, y, e.scale);
     });
 });
+@endif
 
     // Fungsi untuk menampilkan/menyembunyikan input deskripsi alasan lainnya
     function toggleOtherReasonInput() {

@@ -1,5 +1,25 @@
 @extends('layouts.app')
 
+@push('styles')
+  <style>
+    .card-hover:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success {
+    background-color: #32bd40;
+    border-color: #32bd40;
+}
+
+.btn-success:hover {
+    background-color: #2aa835;
+    border-color: #2aa835;
+}
+  </style>
+@endpush
+
 @section('content')
 <div class="row">
     <div class="col-md-12 grid-margin">
@@ -30,6 +50,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-dollar-sign"></i> Transactions</p>
                         <p class="fs-24 mb-2">{{ $transactionCount }}</p>
+                        <small class="text-white">Last 7 days: {{ $transactionPercentage > 0 ? '+' : '' }}{{ $transactionPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -39,6 +60,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-tag"></i> User Prices</p>
                         <p class="fs-24 mb-2">{{ $userPriceCount }}</p>
+                        <small class="text-white">Last 7 days: {{ $userPricePercentage > 0 ? '+' : '' }}{{ $userPricePercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -48,6 +70,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-tags"></i> System Prices</p>
                         <p class="fs-24 mb-2">{{ $systemPriceCount }}</p>
+                        <small class="text-white">Last 7 days: {{ $systemPricePercentage > 0 ? '+' : '' }}{{ $systemPricePercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -57,6 +80,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-users"></i> User Subs</p>
                         <p class="fs-24 mb-2">{{ $userSubscriptionCount }}</p>
+                        <small class="text-white">Last 7 days: {{ $userSubscriptionPercentage > 0 ? '+' : '' }}{{ $userSubscriptionPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -66,6 +90,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-server"></i> System Subs</p>
                         <p class="fs-24 mb-2">{{ $systemSubscriptionCount }}</p>
+                        <small class="text-white">Last 7 days: {{ $systemSubscriptionPercentage > 0 ? '+' : '' }}{{ $systemSubscriptionPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -75,6 +100,7 @@
                     <div class="card-body">
                         <p class="mb-2"><i class="fas fa-box"></i> Combo Subs</p>
                         <p class="fs-24 mb-2">{{ $comboSubscriptionCount }}</p>
+                        <small class="text-white">Last 7 days: {{ $comboSubscriptionPercentage > 0 ? '+' : '' }}{{ $comboSubscriptionPercentage }}</small>
                     </div>
                 </div>
             </div>
@@ -119,32 +145,32 @@
                 <h5 class="card-title">Quick Actions</h5>
                 <div class="row">
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.subscriptions.transactions') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.subscriptions.transactions') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-list"></i> View All Transactions
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.subscriptions.systemPrices') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.subscriptions.systemPrices') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-tags"></i> System Prices
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.subscriptions.userPrices') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.subscriptions.userPrices') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-tag"></i> User Prices
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.subscriptions.userSubscriptions') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.subscriptions.userSubscriptions') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-users"></i> User Subs
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.subscriptions.systemSubscriptions') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.subscriptions.systemSubscriptions') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-server"></i> System Subs
                         </a>
                     </div>
                     <div class="col-md-2 mb-2">
-                        <a href="{{ route('admin.subscriptions.comboSubscriptions') }}" class="btn btn-success btn-block">
+                        <a href="{{ route('admin.subscriptions.comboSubscriptions') }}" class="btn btn-success btn-block" style="color: white;">
                             <i class="fas fa-box"></i> Combo Subs
                         </a>
                     </div>

@@ -83,6 +83,16 @@ class PhotoController extends Controller
             'premium' => 'boolean',
             'status' => 'in:1,0',
         ]);
+
+            // Cek apakah foto dengan judul yang sama sudah diupload oleh user yang sama dalam waktu 5 menit terakhir
+                $recentPhoto = Photo::where('user_id', Auth::id())
+                ->where('title', $validated['title'])
+                ->where('created_at', '>=', now()->subMinutes(5))
+                ->first();
+
+            if ($recentPhoto) {
+            return redirect()->back()->with('error', 'Anda sudah mengupload foto dengan judul yang sama dalam 5 menit terakhir.');
+            }
     
         $path = $request->file('photo')->store('photos', 'public');
     
