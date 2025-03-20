@@ -693,7 +693,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="reportUserModalLabel">Laporkan Pengguna</h5>
+                <h5 class="modal-title" id="reportUserModalLabel">Laporkan Pengguna 1</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -730,9 +730,9 @@
                             </label>
                         </div>
                     </div>
-                    <div class="form-group" id="description-group" style="display: none;">
-                        <label for="description">Alasan</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    <div class="form-group" id="description-group-user" style="display: none;">
+                        <label for="description-user">Alasan</label>
+                        <textarea class="form-control" id="description-user" name="description" rows="3"></textarea>
                     </div>
                     <button type="submit" class="btn btn-danger text-white">Laporkan</button>
                 </form>
@@ -839,75 +839,27 @@
             </div>
         </div>
     </div>
-    
-    <!-- Modal Report User -->
-    <div class="modal fade" id="reportUserModal" tabindex="-1" role="dialog" aria-labelledby="reportUserModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="reportUserModalLabel">Laporkan Pengguna</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="reportUserForm" method="POST" action="{{ route('user.report', $user->id) }}">
-                        @csrf
-                        <div class="form-group">
-                            <label for="reason">Alasan Melaporkan</label>
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                  <input type="radio" class="form-check-input"name="reason" id="reason1"
-                                    value="Konten tidak pantas">
-                                    Konten tidak pantas
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                  <input type="radio" class="form-check-input" name="reason" id="reason2" 
-                                    value="Spam">
-                                    Spam
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                  <input type="radio" class="form-check-input"name="reason" id="reason3" 
-                                    value="Pelanggaran hak cipta">
-                                    Pelanggaran hak cipta
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <label class="form-check-label">
-                                  <input type="radio" class="form-check-input" name="reason" id="reason4"
-                                    value="Lainnya">
-                                    Lainnya
-                                </label>
-                            </div>
-                            
-                        </div>
-                        <div class="form-group" id="description-group" style="display: none;">
-                            <label for="description">Alasan</label>
-                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-danger">Laporkan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
     @endsection
     
     @push('scripts')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const token = '{{ csrf_token() }}';
-            const reason4 = document.getElementById('reason4');
-            const descriptionGroup = document.getElementById('description-group');
+            const userReasonRadios = document.querySelectorAll('#reportUserModal input[name="reason"]');
+            const userDescriptionGroup = document.getElementById('description-group-user');
+            const userDescriptionInput = document.getElementById('description-user');
 
-            reason4.addEventListener('change', function() {
-                if (reason4.checked) {
-                    descriptionGroup.style.display = 'block';
-                } else {
-                    descriptionGroup.style.display = 'none';
-                }
+
+            userReasonRadios.forEach(radio => {
+                radio.addEventListener("change", function () {
+                    if (this.value === "Lainnya") {
+                        userDescriptionGroup.style.display = "block";
+                        userDescriptionInput.required = true;
+                    } else {
+                        userDescriptionGroup.style.display = "none";
+                        userDescriptionInput.required = false;
+                    }
+                });
             });
 
             // Fungsi untuk follow/unfollow
