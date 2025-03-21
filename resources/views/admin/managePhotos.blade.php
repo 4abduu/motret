@@ -43,9 +43,9 @@
                             @endif
                         </td>
                         <td>
-                            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editPhotoModal{{ $photo->id }}"><i class="ti-pencil-alt" style="color: white;"></i></button>
-                            <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#detailPhotoModal{{ $photo->id }}"><i class="ti-info-alt" style="color: white;"></i></button>
-                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $photo->id }}"><i class="ti-trash" style="color: white;"></i></button>
+                            <button class="btn btn-warning btn-icon" data-bs-toggle="modal" data-bs-target="#editPhotoModal{{ $photo->id }}"><i class="ti-pencil-alt" style="color: white;"></i></button>
+                            <button class="btn btn-info btn-icon" data-bs-toggle="modal" data-bs-target="#detailPhotoModal{{ $photo->id }}"><i class="ti-info-alt" style="color: white;"></i></button>
+                            <button class="btn btn-danger btn-icon" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal{{ $photo->id }}"><i class="ti-trash" style="color: white;"></i></button>
                         </td>
                     </tr>
 

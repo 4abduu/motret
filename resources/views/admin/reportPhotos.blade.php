@@ -4,10 +4,10 @@
 
 @section('content')
 <div class="row">
-    <h3>Manage Reports</h3>
+    <h3>Manage Reports Photo</h3>
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-success">Dashboard</a></li>
-        <li class="breadcrumb-item active">Manage Reports</li>
+        <li class="breadcrumb-item active">Manage Reports Photo</li>
     </ol>
 </div>
 
@@ -48,9 +48,9 @@
                                     </td>
                                     <td>
                                         <!-- Button "preview" -->
-                                        <a href="{{ route('admin.users.previewPhotos', $report->photo->id) }}" class="btn btn-info btn-icon">
+                                        <button onclick="window.location.href='{{ route('admin.users.previewPhotos', $report->photo->id) }}'" class="btn btn-info btn-icon">
                                             <i class="ti-eye" style="color: white;"></i>
-                                        </a>
+                                        </button>
                                         <!-- Button "ban" -->
                                         <button type="button" class="btn btn-warning btn-icon" data-bs-toggle="modal" data-bs-target="#banPhotoModal{{ $report->id }}">
                                             <i class="icon-ban" style="color: white;"></i>
