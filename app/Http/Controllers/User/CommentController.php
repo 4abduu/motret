@@ -16,76 +16,89 @@ class CommentController extends Controller
     {
         $this->middleware('auth');
     }
+
     public function store($id, Request $request)
     {
-        // Ambil username pengguna yang sedang login
-        $user = Auth::user()->username;
+        $request->validate([
+            'comment' => 'required|string|max:500'
+        ]);
     
-        // Temukan foto berdasarkan ID
-        $photo = Photo::find($id);
+        $photo = Photo::findOrFail($id);
+        $user = Auth::user();
     
-        // Pastikan foto ditemukan sebelum melanjutkan
-        if (!$photo) {
-            return redirect()->back()->with('error', 'Foto tidak ditemukan.');
-        }
-    
-        // Menambahkan komentar ke database
         $comment = Comment::create([
             'comment' => $request->comment,
-            'user_id' => auth()->user()->id,
+            'user_id' => $user->id,
             'photo_id' => $id
         ]);
     
-        // Menambahkan notifikasi
+        // Buat notifikasi
         Notif::create([
-            'notify_for' => $photo->user_id, // Pengguna yang mendapatkan notifikasi
-            'notify_from' => auth()->user()->id, // Pengguna yang mengirim notifikasi
-            'target_id' => $photo->id, // ID dari foto yang dikomentari, pastikan ini sesuai dengan apa yang diinginkan
-            'type' => 'comment', // Tipe notifikasi
-            'message' => 'mengomentari foto Anda.', // Pesan notifikasi
+            'notify_for' => $photo->user_id,
+            'notify_from' => $user->id,
+            'target_id' => $photo->id,
+            'type' => 'comment',
+            'message' => 'mengomentari foto Anda.',
         ]);
     
-        // Kembali ke halaman sebelumnya dengan pesan sukses
-        return redirect()->back()->with('success', "Anda telah menambah komentar.");
+        $response = ([
+            'success' => true,
+            'comment' => [
+                'id' => $comment->id,
+                'comment' => $comment->comment,
+                'created_at' => $comment->created_at->diffForHumans(),
+                'user' => [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'profile_photo' => $user->profile_photo,
+                    'verified' => $user->verified,
+                    'role' => $user->role,
+                ],
+                'replies' => []
+            ]
+        ]);
+
+        Log::info('Reply created:', $response);
+
+        return response()->json($response);
+
     }
     
-
     public function destroy($id)
     {
         $comment = Comment::findOrFail($id);
-
+    
         if ($comment->user_id !== Auth::id()) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menghapus komentar ini.');
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
-
+    
         $comment->delete();
-
-        return redirect()->back()->with('success', "Anda telah menghapus komentar.");
+    
+        return response()->json(['success' => true]);
     }
 
 
     public function storeReply($commentId, Request $request)
     {
         $comment = Comment::findOrFail($commentId);
-        $user = Auth::user(); // Ambil objek user yang sedang login
+        $user = Auth::user();
         $photo = Photo::findOrFail($comment->photo_id);
     
         $reply = Reply::create([
-            'reply' => $request->reply,
-            'user_id' => $user->id, // Gunakan ID user yang login
+            'reply' => $request->input('reply'), // Gunakan input() untuk lebih aman
+            'user_id' => $user->id,
             'comment_id' => $commentId,
         ]);
     
         Notif::create([
             'notify_for' => $comment->user_id,
-            'notify_from' => $user->id, // Pastikan mengambil user_id yang benar
-            'target_id' => $comment->photo_id, // Menggunakan ID postingan sebagai target_id
+            'notify_from' => $user->id,
+            'target_id' => $comment->photo_id,
             'type' => 'reply',
             'message' => 'membalas komentar Anda.',
         ]);
     
-        // Format JSON response yang mau di-log
-        return response()->json([
+        $response = [
             'success' => true,
             'reply' => [
                 'id' => $reply->id,
@@ -99,12 +112,11 @@ class CommentController extends Controller
                     'role' => $reply->user->role,
                 ],
             ],
-            'photoUserId' => $photo->user_id, // ID pembuat foto
-        ]);
+            'photoUserId' => $photo->user_id,
+        ];
     
-        // Simpan log ke storage/logs/laravel.log
-        Log::info(json_encode($response));
-    
+        Log::info('Reply created:', $response);
+        
         return response()->json($response);
     }
 

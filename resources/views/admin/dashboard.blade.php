@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@push('styles')
+@push('link')
   <style>
     .card-hover:hover {
     transform: translateY(-5px);

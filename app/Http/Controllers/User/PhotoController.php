@@ -123,43 +123,85 @@ class PhotoController extends Controller
     {
         $photo = Photo::findOrFail($id);
         $user = Auth::user();
-        $guestDownloadCount = session('guest_download_count', 0);
-
-        // Cek role
+    
+        // Ambil fingerprint dari cookie tanpa hashing
+        $guestId = $request->cookie('guest_id') ?? null;
+        $isGuest = !$user;
+    
+        if (!$guestId && $isGuest) {
+            Log::error('Guest ID tidak ditemukan di cookie.', ['cookies' => $request->cookies->all()]);
+            return back()->with('error', 'Fingerprint tidak ditemukan, silakan refresh halaman.');
+        }
+    
+        Log::info('Guest ID diterima:', ['guest_id' => $guestId]);
+    
         if ($user) {
+            // === User Pro: Bisa download unlimited ===
             if ($user->role === 'pro') {
-                Download::create(['user_id' => $user->id, 'photo_id' => $photo->id, 'resolution' => 'original']);
-                return $this->processDownload($photo, 'original');
-            } elseif ($user->role === 'user') {
-                // Cek apakah perlu reset download count
-                if ($user->download_reset_at === null || Carbon::now()->greaterThan($user->download_reset_at)) {
-                    $user->download_reset_at = Carbon::now()->addWeek();
-                    $user->save();
-
-                    Download::where('user_id', $user->id)->delete();
-                }
-
-                $downloadCount = Download::where('user_id', $user->id)
-                                        ->where('created_at', '>=', now()->startOfWeek())
-                                        ->count();
-
-                if ($downloadCount < 5) {
-                    Download::create(['user_id' => $user->id, 'photo_id' => $photo->id, 'resolution' => 'original']);
-                    return $this->processDownload($photo, 'original');
+                // Cek apakah sudah ada record download untuk user dan foto ini
+                $download = Download::where('user_id', $user->id)
+                                    ->where('photo_id', $photo->id)
+                                    ->first();
+                
+                if ($download) {
+                    // Jika sudah ada, increment count_downloads
+                    $download->increment('count_downloads');
                 } else {
+                    // Jika belum ada, buat record baru
+                    Download::create([
+                        'user_id' => $user->id,
+                        'photo_id' => $photo->id,
+                        'resolution' => 'original',
+                        'count_downloads' => 1
+                    ]);
+                }
+                
+                return $this->processDownload($photo, 'original');
+            }
+            // === User Biasa: Terbatas 5x per minggu ===
+            elseif ($user->role === 'user') {
+                // Hitung total download user dalam 7 hari terakhir
+                $weeklyDownloads = Download::where('user_id', $user->id)
+                    ->where('created_at', '>=', Carbon::now()->subDays(7))
+                    ->sum('count_downloads');
+                
+                if ($weeklyDownloads >= 5) {
                     return back()->with('error', 'Anda telah mencapai batas download minggu ini.');
                 }
+                
+                // Buat atau update record download untuk foto ini
+                $download = Download::firstOrNew([
+                    'user_id' => $user->id,
+                    'photo_id' => $photo->id
+                ]);
+                
+                $download->resolution = 'original';
+                $download->count_downloads = $download->exists ? $download->count_downloads + 1 : 1;
+                $download->save();
+                
+                return $this->processDownload($photo, 'original');
             }
-        } else {
-            if ($guestDownloadCount < 5) {
-                session(['guest_download_count' => $guestDownloadCount + 1]);
-                Download::create(['user_id' => null, 'photo_id' => $photo->id, 'resolution' => 'low']);
+        } 
+        else {
+            // === Guest Download: Mentok 5x, tidak reset ===
+            $download = Download::where('guest_id', $guestId)->first();
+            
+            if (!$download) {
+                Download::create([
+                    'guest_id' => $guestId,
+                    'photo_id' => $photo->id,
+                    'resolution' => 'low',
+                    'count_downloads' => 1
+                ]);
+                return $this->processDownload($photo, 'low');
+            } elseif ($download->count_downloads < 5) {
+                $download->increment('count_downloads');
                 return $this->processDownload($photo, 'low');
             } else {
                 return back()->with('error', 'Anda telah mencapai batas download sebagai tamu.');
             }
         }
-    }
+    }    
 
     private function processDownload($photo, $resolution)
     {

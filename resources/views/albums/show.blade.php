@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@push('styles')
+@push('link')
     <style>
         /* Styling untuk header album */
 .album-header {

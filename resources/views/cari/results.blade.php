@@ -2,7 +2,7 @@
 
 @section('title', 'Search Results')
 
-@push('styles')
+@push('link')
     <style>
             html, body{
                 margin: 0; /* Reset margin */

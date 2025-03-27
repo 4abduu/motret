@@ -1,4 +1,3 @@
-<!-- filepath: /c:/xampp/htdocs/motret/resources/views/user/subscription.blade.php -->
 @extends('layouts.app')
 
 @section('content')

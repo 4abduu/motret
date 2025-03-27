@@ -25,9 +25,9 @@ class PhotoController extends Controller
         try {
             $photo = Photo::findOrFail($id);
             $photo->update($validated);
-            return redirect()->route('admin.photos')->with('success', 'Photo updated successfully.');
+            return response()->json(['success' => true, 'message' => 'Foto berhasil diperbarui.']);
         } catch (\Exception $e) {
-            return redirect()->route('admin.photos')->with('error', 'Failed to update photo.');
+            return response()->json(['success' => false, 'error' => 'Gagal memperbarui foto.']);
         }
     }
 
@@ -35,37 +35,35 @@ class PhotoController extends Controller
     {
         try {
             Photo::findOrFail($id)->delete();
-            return redirect()->route('admin.photos')->with('success', 'Photo deleted successfully.');
+            return response()->json(['success' => true, 'message' => 'Foto berhasil dihapus.']);
         } catch (\Exception $e) {
-            return redirect()->route('admin.photos')->with('error', 'Failed to delete photo.');
+            return response()->json(['success' => false, 'error' => 'Gagal menghapus foto.']);
         }
     }
 
-    public function banPhoto(Request $request, $id)
-    {
-        try {
-            $photo = Photo::findOrFail($id);
+public function banPhoto(Request $request, $id)
+{
+    try {
+        $photo = Photo::findOrFail($id);
 
-            if ($photo->banned) {
-                return redirect()->route('admin.reports.photos')->with('warning', 'Postingan ini telah dibanned.');
-            }
-
-            // Ambil alasan ban dari laporan terkait
-            $report = Report::where('photo_id', $id)->first();
-            if (!$report) {
-                return redirect()->route('admin.reports.photos')->with('error', 'Laporan tidak ditemukan.');
-            }
-
-            $photo->banned = true;
-            $photo->ban_expires_at = Carbon::now()->addDays(7);
-            $photo->save();
-
-            // Update semua laporan terkait dengan status banned
-            Report::where('photo_id', $id)->update(['status' => true]);
-
-            return redirect()->route('admin.reports.photos')->with('success', 'Foto berhasil dibanned.');
-        } catch (\Exception $e) {
-            return redirect()->route('admin.reports.photos')->with('error', 'Foto gagal dibanned: ' . $e->getMessage());
+        if ($photo->banned) {
+            return response()->json(['message' => 'Postingan ini telah dibanned.'], 400);
         }
+
+        $report = Report::where('photo_id', $id)->first();
+        if (!$report) {
+            return response()->json(['message' => 'Laporan tidak ditemukan.'], 404);
+        }
+
+        $photo->banned = true;
+        $photo->ban_expires_at = Carbon::now()->addDays(7);
+        $photo->save();
+
+        Report::where('photo_id', $id)->update(['status' => true]);
+
+        return response()->json(['message' => 'Foto berhasil dibanned.']);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Foto gagal dibanned: ' . $e->getMessage()], 500);
     }
+}
 }

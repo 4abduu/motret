@@ -1,4 +1,12 @@
 @extends('layouts.app')
+@push('link')
+    <style>
+                .dt-length {
+            margin-left: 20px;
+            padding-bottom: 10px;
+        }
+    </style>
+@endpush
 
 @section('content')
 

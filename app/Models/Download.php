@@ -10,7 +10,9 @@ class Download extends Model
     use HasFactory;
 
     protected $fillable =  ['photo_id', 
-                            'user_id', 
+                            'user_id',
+                            'guest_id',
+                            'count_downloads', 
                             'resolution',];
 
     public function photo()

@@ -20,29 +20,54 @@ class NotifController extends Controller
 
     public function index()
     {
-        $notifications = Notif::where('notify_for', Auth::id())
-            ->orderBy('id', 'desc')
-            ->get();
-
-        // Log data notifikasi sebelum filter diterapkan
-        Log::info('Notifications before filter:', $notifications->toArray());
-
-        $notifications = $notifications->filter(function ($notification) {
-            if ($notification->type === 'comment' || $notification->type === 'reply') {
-                return Photo::find($notification->target_id) !== null;
-            }
-            if ($notification->type === 'like') {
-                return Photo::find($notification->target_id) !== null;
-            }
-            if ($notification->type === 'follow') {
-                return User::find($notification->target_id) !== null;
-            }
-            return true;
+        // Get base notifications query with eager loading
+        $query = Notif::with(['sender', 'photo', 'comment'])
+            ->where('notify_for', Auth::id())
+            ->orderBy('created_at', 'desc');
+    
+        // Apply filters directly in the query for better performance
+        $query->where(function($q) {
+            $q->where(function($sub) {
+                // Notifications that require photo to exist
+                $sub->whereIn('type', ['comment', 'reply', 'like'])
+                    ->whereHas('photo', function($photoQuery) {
+                        $photoQuery->whereNotNull('id');
+                    });
+            })->orWhere(function($sub) {
+                // Follow notifications that require user to exist
+                $sub->where('type', 'follow')
+                    ->whereHas('sender', function($userQuery) {
+                        $userQuery->whereNotNull('id');
+                    });
+            })->orWhere('type', 'system')
+              ->orWhere(function($sub) {
+                  // Comment notifications
+                  $sub->whereIn('type', ['comment', 'reply'])
+                      ->whereHas('comment', function($commentQuery) {
+                          $commentQuery->whereNotNull('id');
+                      });
+              });
         });
-
-        // Log data notifikasi setelah filter diterapkan
-        Log::info('Notifications after filter:', $notifications->toArray());
-
+    
+        // Paginate the results (15 items per page by default)
+        $notifications = $query->paginate(15);
+    
+        // Transform the collection to include proper target data
+        $notifications->getCollection()->transform(function($notification) {
+            // For follow notifications, set the target user
+            if ($notification->type === 'follow') {
+                $notification->target = User::find($notification->target_id);
+            }
+            return $notification;
+        });
+    
+        // Log the paginated results
+        Log::info('Paginated notifications:', [
+            'total' => $notifications->total(),
+            'current_page' => $notifications->currentPage(),
+            'data_sample' => $notifications->items()[0] ?? null
+        ]);
+    
         return view('user.notifications', compact('notifications'));
     }
 

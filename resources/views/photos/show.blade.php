@@ -3,8 +3,24 @@
 @section('content')
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 </head>
 <style>
+    #photo-modal {
+        overflow: hidden;
+        touch-action: none;
+    }
+
+    #modal-img {
+        transform-origin: 0 0;
+        touch-action: none;
+        user-select: none;
+        cursor: grab;
+    }
+
+    #modal-img:active {
+        cursor: grabbing;
+    }
     .container {
         width: 80%;
         max-width: 1000px;
@@ -123,6 +139,7 @@
         align-items: center;
         overflow: hidden;
         z-index: 1000;
+        touch-action: none; /* Penting untuk zoom di mobile */
     }
 
     
@@ -131,6 +148,7 @@
     max-height: 90%;
     cursor: grab;
     transition: transform 0.2s ease-out;
+    touch-action: none; /* Penting untuk zoom di mobile */
 }
 
 #close-modal {
@@ -140,35 +158,163 @@
     font-size: 30px;
     color: white;
     cursor: pointer;
+    z-index: 1002; /* Pastikan di atas semua elemen */
 }
 
 #zoom-controls {
-    position: absolute;
-    bottom: 10px;
+    position: fixed; /* Ubah dari absolute ke fixed untuk mobile */
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.5);
-    padding: 5px 10px;
-    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 15px;
+    border-radius: 20px;
     z-index: 1001; /* Pastikan tombol di atas gambar */
     display: flex;
-    gap: 10px; /* Jarak antar tombol */
+    gap: 15px; /* Lebih besar untuk mobile */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
+    /* Modal and Zoom Styles */
+    #photo-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        z-index: 1000;
+        touch-action: none;
+    }
+    
+    #modal-img {
+        max-width: 90%;
+        max-height: 90%;
+        cursor: grab;
+        transition: transform 0.2s ease-out;
+        touch-action: none;
+        transform-origin: 0 0;
+        user-select: none;
+    }
+    
+    #modal-img:active {
+        cursor: grabbing;
+    }
+    
+    #close-modal {
+        position: absolute;
+        top: 10px;
+        left: 30px;
+        font-size: 30px;
+        color: white;
+        cursor: pointer;
+        z-index: 1002;
+    }
+    
+    #zoom-controls {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        padding: 8px 15px;
+        border-radius: 20px;
+        z-index: 1001;
+        display: flex;
+        gap: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    #zoom-controls button {
+        background: none;
+        color: white;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px 15px;
+        border-radius: 5px;
+        transition: background 0.3s;
+        touch-action: manipulation;
+    }
+    
+    #zoom-controls button:active {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Other UI Elements */
+    .photo-container {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .zoom-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+        z-index: 998 !important;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        #zoom-controls {
+            bottom: 10px;
+            padding: 6px 12px;
+        }
+        
+        #zoom-controls button {
+            font-size: 20px;
+            padding: 3px 10px;
+        }
+        
+        #close-modal {
+            left: 15px;
+            font-size: 25px;
+        }
+    }
+    
+    /* Prevent scrolling when modal is open */
+    body.modal-open {
+        overflow: hidden;
+    }
 
 #zoom-controls button {
     background: none;
     color: white;
     border: none;
-    font-size: 20px;
+    font-size: 24px; /* Lebih besar untuk mobile */
     cursor: pointer;
-    padding: 5px 10px;
+    padding: 5px 15px;
     border-radius: 5px;
     transition: background 0.3s;
+    touch-action: manipulation; /* Mencegah delay tap di mobile */
+}
+
+#zoom-controls button:active {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 #zoom-controls button:hover {
     background: rgba(255, 255, 255, 0.2);
+}
+
+body.modal-open {
+    overflow: hidden;
 }
 
     .photo-container {
@@ -217,6 +363,25 @@
 .card-pin:hover .overlay-img {
   opacity: 1;
 }
+
+/* Style untuk mobile */
+@media (max-width: 768px) {
+    #zoom-controls {
+        bottom: 10px;
+        padding: 6px 12px;
+    }
+    
+    #zoom-controls button {
+        font-size: 20px;
+        padding: 3px 10px;
+    }
+    
+    #close-modal {
+        left: 15px;
+        font-size: 25px;
+    }
+}
+
 
 </style>
 
@@ -292,7 +457,8 @@
                     <i class="bi bi-flag text-dark fw-bold fs-5"></i>
                 </button>
                 @endif
-            </div>            <div class="mt-4 text-start comment-container">
+            </div>            
+            <div class="mt-4 text-start comment-container">
                 <h3 class="mb-4 text-start">{{ $photo->title }}</h3>
                 <h5 class="text-start">{{ $photo->description }}</h5>
                 <div class="most-searched-container mb-2">
@@ -321,7 +487,19 @@
                     @endif
                 
                     <!-- Tombol Follow -->
-                    <button class="btn btn-sm btn-success ms-3">Follow</button>
+                    @if(Auth::check())
+                        @if(Auth::id() !== $photo->user->id)
+                            <button class="btn btn-sm {{ Auth::user()->isFollowing($photo->user) ? 'btn-dark' : 'btn-success' }} ms-3 follow-button" 
+                                    data-user-id="{{ $photo->user->id }}"
+                                    data-following="{{ Auth::user()->isFollowing($photo->user) ? 'true' : 'false' }}">
+                                {{ Auth::user()->isFollowing($photo->user) ? 'Unfollow' : 'Follow' }}
+                            </button>
+                        @endif
+                    @else
+                        <button class="btn btn-sm btn-success ms-3" onclick="window.location.href='{{ route('login') }}'">
+                            Follow
+                        </button>
+                    @endif
                 </p>
                 
                 <h6 class="text-start">Komentar</h6>
@@ -365,7 +543,7 @@
                                     @if(Auth::check())
                                     <button class="btn btn-link p-0 reply-button" data-comment-id="{{ $comment->id }}">
                                         <i class="bi bi-reply"></i>
-                                    </button>                                    
+                                    </button>
                                         <div class="dropdown ms-2">
                                             <button class="btn btn-link p-0" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="bi bi-three-dots"></i>
@@ -373,11 +551,9 @@
                                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $comment->id }}">
                                                 @if($isOwner)
                                                     <li>
-                                                        <form method="POST" action="{{ route('comments.destroy', $comment->id) }}">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="dropdown-item">Hapus Komentar</button>
-                                                        </form>
+                                                        <button class="dropdown-item delete-comment" data-comment-id="{{ $comment->id }}">
+                                                            Hapus Komentar
+                                                        </button>
                                                     </li>
                                                 @else
                                                     <li>
@@ -481,10 +657,10 @@
             <!-- Form tambah komentar -->
             <div class="card-footer mt-auto p-2">
                 @if(Auth::check())
-                    <form method="POST" action="{{ route('photos.comments.store', $photo->id) }}" class="text-start">
+                    <form id="commentForm" method="POST" action="{{ route('photos.comments.store', $photo->id) }}" class="text-start">
                         @csrf
                         <div class="mb-3 d-flex">
-                            <textarea class="form-control rounded-5" name="comment" rows="1" placeholder="Tambahkan komentar..." required></textarea>
+                            <textarea class="form-control rounded-5" name="comment" id="commentText" rows="1" placeholder="Tambahkan komentar..." required></textarea>
                             <button type="submit" class="btn btn-link p-0 ms-2">
                                 <i class="bi bi-send text-dark fw-bold fs-5"></i>
                             </button>
@@ -510,8 +686,12 @@
                 @foreach($randomPhotos as $randomPhoto)
                     <div class="card card-pin">
                         <a href="{{ route('photos.show', $randomPhoto->id) }}">
-                            <img src="{{ asset('storage/' . $randomPhoto->path) }}" class="card-img" alt="{{ $randomPhoto->title }}">
-                            <div class="overlay-img"></div>
+                            @if(Auth::check() && (Auth::user()->role === 'user' || Auth::user()->role === 'pro'))
+                                <img src="{{ asset('storage/' . $randomPhoto->path) }}" class="card-img" alt="{{ $randomPhoto->title }}">
+                            @else
+                                <canvas class="card-img" data-src="{{ asset('storage/' . $randomPhoto->path) }}" alt="{{ $randomPhoto->title }}"></canvas>
+                            @endif                            
+                        <div class="overlay-img"></div>
                         </a>
                     </div>
                 @endforeach
@@ -519,9 +699,6 @@
         </div>
     </div>
 </div>
-
-
-
 
 <!-- Modal Buat Album -->
 <div class="modal fade" id="createAlbumModal" tabindex="-1" role="dialog" aria-labelledby="createAlbumModalLabel" aria-hidden="true">
@@ -616,6 +793,117 @@
     </div>
 </div>
 
+@foreach($photo->comments as $comment)
+<!-- Modal Report Komentar-->
+<div class="modal fade" id="reportCommentModal-{{ $comment->id }}" tabindex="-1" role="dialog" aria-labelledby="reportCommentModalLabel-{{ $comment->id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportCommentModalLabel-{{ $comment->id }}">Laporkan Komentar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm" method="POST" action="{{ route('comment.report', $comment->id) }}">
+                    @csrf
+                    <div class="form-group">
+                        <label for="reason">Alasan Melaporkan</label>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input"name="reason" id="reason1"
+                                value="Konten tidak pantas">
+                                Konten tidak pantas
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input" name="reason" id="reason2" 
+                                value="Spam">
+                                Spam
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input"name="reason" id="reason3" 
+                                value="Pelanggaran hak cipta">
+                                Pelanggaran hak cipta
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input" name="reason" id="reason4"
+                                value="Lainnya">
+                                Lainnya
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="description-group" style="display: none;">
+                        <label for="description">Alasan</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Laporkan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach($comment->replies as $reply)
+
+<!-- Modal Report Replies-->
+<div class="modal fade" id="reportReplyModal-{{ $reply->id }}" tabindex="-1" role="dialog" aria-labelledby="reportReplyModalLabel-{{ $reply->id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportReplyModalLabel-{{ $reply->id }}">Laporkan Balasan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm" method="POST" action="{{ route('reply.report', $reply->id) }}">
+                    @csrf
+                    <div class="form-group">
+                        <label for="reason">Alasan Melaporkan</label>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input"name="reason" id="reason1"
+                                value="Konten tidak pantas">
+                                Konten tidak pantas
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input" name="reason" id="reason2" 
+                                value="Spam">
+                                Spam
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input"name="reason" id="reason3" 
+                                value="Pelanggaran hak cipta">
+                                Pelanggaran hak cipta
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                              <input type="radio" class="form-check-input" name="reason" id="reason4"
+                                value="Lainnya">
+                                Lainnya
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group" id="description-group" style="display: none;">
+                        <label for="description">Alasan</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Laporkan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+@endforeach
+
 <!-- Modal Zoom Foto -->
 <div id="photo-modal">
     <span id="close-modal">&times;</span>
@@ -632,167 +920,722 @@
 <script src="https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/panzoom/9.4.1/panzoom.min.js"></script>
 <script>
-    function copyToClipboard() {
-        // Dapatkan URL saat ini
-        const url = window.location.href;
+// Fungsi untuk menyalin URL ke clipboard
+function copyToClipboard() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Link berhasil disalin',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            background: '#32bd40',
+            iconColor: '#fff',
+            color: '#fff',
+            timerProgressBar: true
+        });
+    }).catch(err => {
+        console.error('Gagal menyalin:', err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: 'Gagal menyalin link',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000
+        });
+    });
+}
 
-        // Copy URL ke clipboard
-        navigator.clipboard.writeText(url).then(() => {
-            // Tampilkan notifikasi
-            showNotification('Link copied to clipboard');
-        }).catch(err => {
-            console.error('Failed to copy: ', err);
+document.addEventListener("DOMContentLoaded", function () {
+
+
+    // Variabel global
+    const token = '{{ csrf_token() }}';
+    const photoId = {{ $photo->id }};
+    const currentUserId = {{ Auth::id() ?? 'null' }};
+    const photoUserId = {{ $photo->user_id }};
+
+    // ==================== FUNGSI UTAMA ====================
+
+    // Fungsi untuk menampilkan SweetAlert
+    function showAlert(icon, title, text) {
+        Swal.fire({
+            icon: icon,
+            title: title,
+            text: text,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            background: icon === 'success' ? '#32bd40' : '#d9534f',
+            iconColor: '#fff',
+            color: '#fff',
+            timerProgressBar: true
         });
     }
 
-    function showNotification(message) {
-        // Buat elemen notifikasi
-        const notification = document.createElement('div');
-        notification.innerText = message;
-        notification.style.position = 'fixed';
-        notification.style.top = '50%'; // Posisi vertikal di tengah
-        notification.style.left = '50%'; // Posisi horizontal di tengah
-        notification.style.transform = 'translate(-50%, -50%)'; // Geser ke tengah
-        notification.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        notification.style.color = '#fff';
-        notification.style.padding = '10px 20px';
-        notification.style.borderRadius = '5px';
-        notification.style.zIndex = '1000';
-        notification.style.fontSize = '14px';
-        notification.style.textAlign = 'center'; // Teks di tengah
+    // ==================== FITUR ZOOM GAMBAR ====================
 
-        // Tambahkan notifikasi ke body
-        document.body.appendChild(notification);
-
-        // Hapus notifikasi setelah 3 detik
-        setTimeout(() => {
-            document.body.removeChild(notification);
-        }, 3000);
-    }
-
-document.addEventListener("DOMContentLoaded", function () {
-    const token = '{{ csrf_token() }}';
-    const photoId = {{ $photo->id }};
-
+    // Inisialisasi modal zoom gambar
     const modal = document.getElementById("photo-modal");
-const modalImg = document.getElementById("modal-img");
-const closeModal = document.getElementById("close-modal");
-const zoomInBtn = document.getElementById("zoom-in");
-const zoomOutBtn = document.getElementById("zoom-out");
-const resetZoomBtn = document.getElementById("reset-zoom");
+    const modalImg = document.getElementById("modal-img");
+    const closeModal = document.getElementById("close-modal");
+    const zoomInBtn = document.getElementById("zoom-in");
+    const zoomOutBtn = document.getElementById("zoom-out");
+    const resetZoomBtn = document.getElementById("reset-zoom");
 
-let panzoomInstance = null;
+    // State zoom
+    let currentScale = 1;
+    let posX = 0;
+    let posY = 0;
+    const MIN_SCALE = 0.5;
+    const MAX_SCALE = 4;
+    let isDragging = false;
+    let startX, startY;
+    let hammer;
 
-// Buka modal saat tombol zoom diklik
-@if (Auth::check())
-document.getElementById('open-modal').addEventListener('click', () => {
-    modal.style.display = 'flex';
-
-    // Ambil gambar dari canvas dan tampilkan di modal
-    const photoCanvas = document.getElementById('photoCanvas');
-    modalImg.src = photoCanvas.dataset.src;
-
-    // Hapus instance lama biar gak ngebug
-    if (panzoomInstance) {
-        panzoomInstance.dispose();
+    // Fungsi untuk update transform gambar
+    function updateTransform() {
+        modalImg.style.transform = `translate(${posX}px, ${posY}px) scale(${currentScale})`;
     }
 
-    // Inisialisasi Panzoom
-    panzoomInstance = panzoom(modalImg, {
-        maxScale: 4,
-        minScale: 1,
-        contain: 'outside',
-        startScale: 1,
-        smoothScroll: false,  // Biar gak zoom sembarangan pas scroll
-    });
+    // Fungsi untuk membatasi skala zoom
+    function clampScale(scale) {
+        return Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale));
+    }
 
-    // Enable geser (pan) selain zoom
-    panzoomInstance.on('transform', () => {
-        modalImg.style.cursor = "grab";
-    });
+    // Inisialisasi Hammer.js untuk gesture touch
+    function initHammer() {
+        if (hammer) hammer.destroy();
+        
+        hammer = new Hammer(modalImg, {
+            recognizers: [
+                [Hammer.Pan, { direction: Hammer.DIRECTION_ALL }],
+                [Hammer.Pinch],
+                [Hammer.Tap, { event: 'doubletap', taps: 2 }]
+            ]
+        });
 
-    // Handle zoom in dengan tombol (+)
-    zoomInBtn.addEventListener('click', (e) => {
+        let initialScale, initialPosX, initialPosY;
+
+        // Gesture pan (geser)
+        hammer.on('panstart', function() {
+            if (currentScale > 1) {
+                initialPosX = posX;
+                initialPosY = posY;
+            }
+        });
+
+        hammer.on('pan', function(e) {
+            if (currentScale > 1) {
+                posX = initialPosX + e.deltaX;
+                posY = initialPosY + e.deltaY;
+                updateTransform();
+            }
+        });
+
+        // Gesture pinch zoom
+        hammer.on('pinchstart', function() {
+            initialScale = currentScale;
+        });
+
+        hammer.on('pinch', function(e) {
+            const newScale = clampScale(initialScale * e.scale);
+            if (newScale !== currentScale) {
+                currentScale = newScale;
+                
+                const rect = modalImg.getBoundingClientRect();
+                const centerX = (e.center.x - rect.left - posX) / currentScale;
+                const centerY = (e.center.y - rect.top - posY) / currentScale;
+                
+                posX = e.center.x - rect.left - centerX * currentScale;
+                posY = e.center.y - rect.top - centerY * currentScale;
+                
+                updateTransform();
+            }
+        });
+
+        // Double tap untuk zoom in/out
+        hammer.on('doubletap', function(e) {
+            const rect = modalImg.getBoundingClientRect();
+            const tapX = e.center.x - rect.left;
+            const tapY = e.center.y - rect.top;
+            
+            if (currentScale > 1) {
+                // Reset zoom
+                currentScale = 1;
+                posX = 0;
+                posY = 0;
+            } else {
+                // Zoom in 2x pada posisi tap
+                currentScale = 2;
+                posX = -(tapX * (currentScale - 1));
+                posY = -(tapY * (currentScale - 1));
+            }
+            updateTransform();
+        });
+    }
+
+    // Event listener untuk mouse wheel zoom
+    function handleWheel(e) {
         e.preventDefault();
         e.stopPropagation();
-        panzoomInstance.smoothZoom(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 1.2);
-    });
-
-    // Handle zoom out dengan tombol (-)
-    zoomOutBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        panzoomInstance.smoothZoom(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 0.8);
-    });
-
-    // Handle reset zoom
-    resetZoomBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        panzoomInstance.zoomAbs(modalImg.clientWidth / 2, modalImg.clientHeight / 2, 1);
-        panzoomInstance.moveTo(0, 0);
-    });
-
-    // Handle close modal
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
-        panzoomInstance.reset();
-    });
-
-    // Handle click outside modal to close
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-            panzoomInstance.reset();
-        }
-    });
-
-    // Fix geser touchpad/mouse wheel biar bisa pan (bukan cuma zoom)
-    modalImg.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        if (e.ctrlKey) {
-            // Zoom in/out ke arah posisi kursor
+        
+        const delta = e.deltaY < 0 ? 1.1 : 0.9;
+        const newScale = clampScale(currentScale * delta);
+        
+        if (newScale !== currentScale) {
             const rect = modalImg.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            const scale = e.deltaY < 0 ? 1.2 : 0.8;
-            panzoomInstance.smoothZoom(x, y, scale);
-        } else {
-            // Geser (pan) dengan scroll biasa
-            panzoomInstance.moveBy(-e.deltaX, -e.deltaY, true);
+            
+            posX = x - (x - posX) * (newScale / currentScale);
+            posY = y - (y - posY) * (newScale / currentScale);
+            currentScale = newScale;
+            
+            updateTransform();
+        }
+    }
+
+    // Event listener untuk mouse down (drag)
+    function handleMouseDown(e) {
+        if (e.button === 0 && currentScale > 1) {
+            isDragging = true;
+            startX = e.clientX - posX;
+            startY = e.clientY - posY;
+            modalImg.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    }
+
+    // Event listener untuk mouse move (drag)
+    function handleMouseMove(e) {
+        if (isDragging) {
+            posX = e.clientX - startX;
+            posY = e.clientY - startY;
+            updateTransform();
+        }
+    }
+
+    // Event listener untuk mouse up (drag)
+    function handleMouseUp(e) {
+        if (e.button === 0) {
+            isDragging = false;
+            modalImg.style.cursor = currentScale > 1 ? 'grab' : 'default';
+        }
+    }
+
+    // Blokir klik kanan pada gambar
+    modalImg.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    // Buka modal zoom
+    @if (Auth::check())
+    document.getElementById('open-modal').addEventListener('click', () => {
+        modal.style.display = 'flex';
+        const photoCanvas = document.getElementById('photoCanvas');
+        modalImg.src = photoCanvas.dataset.src;
+        
+        // Reset transform
+        currentScale = 1;
+        posX = 0;
+        posY = 0;
+        updateTransform();
+        
+        // Tambahkan event listeners
+        modalImg.addEventListener('wheel', handleWheel, { passive: false });
+        modalImg.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        
+        // Inisialisasi gesture touch
+        initHammer();
+        
+        // Cegah scrolling body
+        document.body.classList.add('modal-open');
+    });
+    @endif
+
+    // Tutup modal zoom
+    closeModal.addEventListener('click', function() {
+        modal.style.display = 'none';
+        // Hapus event listeners
+        modalImg.removeEventListener('wheel', handleWheel);
+        modalImg.removeEventListener('mousedown', handleMouseDown);
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        
+        // Aktifkan kembali scrolling body
+        document.body.classList.remove('modal-open');
+    });
+
+    // Klik di luar gambar untuk tutup modal
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
         }
     });
 
-    // Fix pinch zoom di touchpad
-    modalImg.addEventListener("gesturestart", (e) => e.preventDefault());
-    modalImg.addEventListener("gesturechange", (e) => {
-        e.preventDefault();
-        const rect = modalImg.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        panzoomInstance.smoothZoom(x, y, e.scale);
+    // Tombol zoom in
+    zoomInBtn.addEventListener('click', function() {
+        const newScale = clampScale(currentScale * 1.2);
+        if (newScale !== currentScale) {
+            const rect = modalImg.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            posX = -(centerX * (newScale - currentScale)) + posX * (newScale / currentScale);
+            posY = -(centerY * (newScale - currentScale)) + posY * (newScale / currentScale);
+            currentScale = newScale;
+            
+            updateTransform();
+        }
     });
+
+    // Tombol zoom out
+    zoomOutBtn.addEventListener('click', function() {
+        const newScale = clampScale(currentScale * 0.8);
+        if (newScale !== currentScale) {
+            const rect = modalImg.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            posX = (centerX * (currentScale - newScale) + posX * (newScale / currentScale));
+            posY = (centerY * (currentScale - newScale) + posY * (newScale / currentScale));
+            currentScale = newScale;
+            
+            updateTransform();
+        }
+    });
+
+    // Tombol reset zoom
+    resetZoomBtn.addEventListener('click', function() {
+        currentScale = 1;
+        posX = 0;
+        posY = 0;
+        updateTransform();
+    });
+
+    // ==================== SISTEM KOMENTAR ====================
+
+    // Fungsi untuk membuat elemen komentar baru
+    function createCommentElement(comment, user, isCurrentUser) {
+    const isPhotoOwner = user.id === {{ $photo->user_id }};
+    const profilePhoto = user.profile_photo 
+        ? `<img src="/storage/photo_profile/${user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">`
+        : `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>`;
+    
+    const verifiedIcon = user.verified ? '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
+    const proIcon = user.role === 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : '';
+    const photoOwnerBadge = isPhotoOwner ? '<span class="text">• Pembuat</span>' : '';
+    
+    return `
+        <div class="card mb-2" data-comment-id="${comment.id}">
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center mb-1">
+                    ${profilePhoto}
+                    <strong>
+                        <a href="/${user.username}" class="text-dark fw-bold text-decoration-none">
+                            ${user.username}
+                        </a>
+                    </strong>
+                    ${verifiedIcon}
+                    ${proIcon}
+                    ${photoOwnerBadge}
+                </div>
+                <p class="mb-1 ms-4">${comment.comment}</p>
+                <div class="d-flex align-items-center ms-4 mt-1">
+                    <small class="text-muted me-2" style="font-size: 13px;">
+                        Baru saja
+                    </small>
+                    <button class="btn btn-link p-0 reply-button" data-comment-id="${comment.id}">
+                        <i class="bi bi-reply"></i>
+                    </button>
+                    ${isCurrentUser ? `
+                    <div class="dropdown ms-2">
+                        <button class="btn btn-link p-0" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button class="dropdown-item delete-comment" data-comment-id="${comment.id}">
+                                    Hapus Komentar
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    ` : ''}
+                </div>
+                <!-- Form reply untuk komentar baru -->
+                <div class="reply-form" id="reply-form-${comment.id}" style="display: none;">
+                    <form method="POST" action="/comments/${comment.id}/reply">
+                        @csrf
+                        <div class="input-group mb-3 ms-4">
+                            <input type="text" class="form-control" name="reply" placeholder="Tambahkan balasan..." required>
+                                <button class="btn btn-outline-secondary" type="submit">
+                                    <i class="bi bi-send-fill text-dark fw-bold fs-5 rotate-90"></i>
+                                </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+    // Fungsi untuk membuat elemen balasan baru
+    function createReplyElement(reply, user, isCurrentUser, photoUserId) {
+    const isPhotoOwner = user.id === photoUserId;
+    const profilePhoto = user.profile_photo
+        ? `<img src="/storage/photo_profile/${user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">`
+        : `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>`;
+
+    const verifiedIcon = user.verified ? '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
+    const proIcon = user.role === 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : '';
+    const photoOwnerBadge = isPhotoOwner ? '<span class="text">• Pembuat</span>' : '';
+
+    return `
+    <div class="ms-4 mt-1" data-reply-id="${reply.id}">
+        <div class="card">
+            <div class="card-body p-2">
+                <div class="d-flex align-items-center mb-1">
+                    ${profilePhoto}
+                    <strong>
+                        <a href="/${user.username}" class="text-dark fw-bold text-decoration-none">
+                            ${user.username}
+                        </a>
+                    </strong>
+                    ${verifiedIcon} ${proIcon}
+                    ${isPhotoOwner ? '<span class="text">• Pembuat</span>' : ''}
+                </div>
+                <p class="mb-1 ms-4">${reply.reply}</p>
+                <div class="d-flex align-items-center ms-4 mt-1">
+                    <small class="text-muted" style="font-size: 12px; margin-top: -2px;">
+                        Baru saja
+                    </small>
+                    ${isCurrentUser ? `
+                    <div class="dropdown ms-2" style="margin-top: -15px;">
+                        <button class="btn btn-link" type="button" id="dropdownMenuButton-${reply.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${reply.id}">
+                            <li>
+                                <button type="button" class="dropdown-item delete-reply" data-reply-id="${reply.id}">
+                                    Hapus Balasan
+                                </button>
+                            </li>
+                        </ul>
+                    </div>` : `
+                    <div class="dropdown ms-2" style="margin-top: -15px;">
+                        <button class="btn btn-link" type="button" id="dropdownMenuButton-${reply.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${reply.id}">
+                            <li>
+                                <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportReplyModal-${reply.id}">
+                                    Lapor Balasan
+                                </button>
+                            </li>
+                        </ul>
+                    </div>`}
+                </div>
+            </div>
+        </div>
+    </div>
+`;
+}
+
+    // ==================== EVENT LISTENERS ====================
+
+    // Form komentar utama
+const commentForm = document.getElementById('commentForm');
+if (commentForm) {
+    commentForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(commentForm);
+        const commentText = formData.get('comment');
+        
+        try {
+            const response = await fetch(commentForm.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+            
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Reset form
+                commentForm.reset();
+                
+                // Buat dan tambahkan komentar baru
+                const commentContainer = document.querySelector('.comment-container');
+                const newComment = createCommentElement(data.comment, data.comment.user, true);
+                commentContainer.insertAdjacentHTML('beforeend', newComment);
+                
+                // SweetAlert sukses
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Komentar berhasil ditambahkan',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    background: '#32bd40',
+                    iconColor: '#fff',
+                    color: '#fff',
+                    timerProgressBar: true
+                });
+            }
+        } catch (error) {
+            console.error('Error submitting comment:', error);
+            // SweetAlert error
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: 'Gagal menambahkan komentar. Silakan coba lagi.',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+    });
+}
+
+// Fungsi untuk handle reply button (delegasi event)
+document.addEventListener('click', function(e) {
+    // Handle tombol reply
+    if (e.target.closest('.reply-button')) {
+        e.preventDefault();
+        const button = e.target.closest('.reply-button');
+        const commentId = button.getAttribute('data-comment-id');
+        const replyForm = document.getElementById(`reply-form-${commentId}`);
+        
+        // Tutup semua form reply lain
+        document.querySelectorAll('.reply-form').forEach(form => {
+            if (form.id !== `reply-form-${commentId}`) {
+                form.style.display = 'none';
+            }
+        });
+        
+        // Toggle form yang dipilih
+        if (replyForm.style.display === 'none' || !replyForm.style.display) {
+            replyForm.style.display = 'block';
+            replyForm.querySelector('input').focus(); // Auto focus ke input
+        } else {
+            replyForm.style.display = 'none';
+        }
+    }
+
+    // Handle submit reply
+    if (e.target.closest('.reply-form form')) {
+        e.preventDefault();
+        const form = e.target.closest('form');
+        submitReplyForm(form);
+    }
 });
-@endif
+
+async function submitReplyForm(form) {
+    try {
+        const replyText = form.querySelector('[name="reply"]').value.trim();
+        if (!replyText) return;
+
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+
+        const response = await fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json'
+            },
+            body: new FormData(form)
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
+        
+        if (data.success) {
+            form.reset();
+            form.closest('.reply-form').style.display = 'none';
+            
+            // Tambahkan reply baru ke DOM
+            const replyContainer = form.closest('.card-body');
+            const newReply = createReplyElement(
+                data.reply, 
+                data.reply.user, 
+                data.reply.user.id === {{ Auth::id() ?? 'null' }},
+                data.photoUserId
+            );
+            
+            replyContainer.insertAdjacentHTML('beforeend', newReply);
+            
+            // Notifikasi sukses
+            showSuccessAlert('Balasan berhasil ditambahkan');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showErrorAlert('Gagal menambahkan balasan');
+    } finally {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = false;
+    }
+}
+
+// Fungsi bantuan untuk alert
+function showSuccessAlert(message) {
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: message,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        background: '#32bd40',
+        iconColor: '#fff',
+        color: '#fff',
+        timerProgressBar: true
+    });
+}
+
+function showErrorAlert(message) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: message,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000
+    });
+}
+
+    // Hapus komentar
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.delete-comment')) {
+            e.preventDefault();
+            const button = e.target.closest('.delete-comment');
+            const commentId = button.getAttribute('data-comment-id');
+            
+            // Dialog konfirmasi
+            Swal.fire({
+                title: 'Hapus Komentar?',
+                text: "Anda yakin ingin menghapus komentar ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/comments/${commentId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            // Hapus elemen komentar dari DOM
+                            const commentElement = button.closest('.card');
+                            if (commentElement) {
+                                commentElement.remove();
+                                showAlert('success', 'Berhasil!', 'Komentar berhasil dihapus.');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error deleting comment:', error);
+                        showAlert('error', 'Gagal!', 'Gagal menghapus komentar. Silakan coba lagi.');
+                    }
+                }
+            });
+        }
+    });
+
+    // Hapus balasan
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.delete-reply')) {
+            e.preventDefault();
+            const button = e.target.closest('.delete-reply');
+            const replyId = button.getAttribute('data-reply-id');
+            
+            // Dialog konfirmasi
+            Swal.fire({
+                title: 'Hapus Balasan?',
+                text: "Anda yakin ingin menghapus balasan ini?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/replies/${replyId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': token,
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            // Hapus elemen balasan dari DOM
+                            const replyElement = button.closest('.card');
+                            if (replyElement) {
+                                replyElement.remove();
+                                showAlert('success', 'Berhasil!', 'Balasan berhasil dihapus.');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error deleting reply:', error);
+                        showAlert('error', 'Gagal!', 'Gagal menghapus balasan. Silakan coba lagi.');
+                    }
+                }
+            });
+        }
+    });
+
+    // ==================== FITUR LAINNYA ====================
 
     // Fungsi untuk menampilkan/menyembunyikan input deskripsi alasan lainnya
     function toggleOtherReasonInput() {
         document.querySelectorAll('input[name="reason"]').forEach(radio => {
-            radio.addEventListener("change", function () {
+            radio.addEventListener("change", function() {
                 const isOther = this.value === "Lainnya";
                 document.getElementById("description-group").style.display = isOther ? "block" : "none";
-                $('#otherReasonGroup').toggle(isOther);
-                $('#other_reason').attr('required', isOther);
             });
         });
     }
-
-    // Reset form saat modal ditutup
-    $('#reportModal').on('hidden.bs.modal', function () {
-        $('#reportForm')[0].reset();
-        $('#otherReasonGroup').hide();
-        $('#other_reason').attr('required', false);
-    });
 
     // Fungsi untuk handle like/unlike foto
     function handleLikeButton() {
@@ -800,7 +1643,7 @@ document.getElementById('open-modal').addEventListener('click', () => {
         const likesCount = document.getElementById('likes-count');
 
         if (likeButton) {
-            likeButton.addEventListener('click', function (event) {
+            likeButton.addEventListener('click', function(event) {
                 event.preventDefault();
                 const liked = likeButton.getAttribute('data-liked') === 'true';
                 const url = liked ? '{{ route('photos.unlike', $photo->id) }}' : '{{ route('photos.like', $photo->id) }}';
@@ -818,7 +1661,7 @@ document.getElementById('open-modal').addEventListener('click', () => {
                     if (data.likes_count > 0) {
                         likesCount.textContent = data.likes_count + (data.likes_count === 1 ? ' like' : ' likes');
                     } else {
-                        likesCount.textContent = ''; // Jika tidak ada like, teks dihilangkan
+                        likesCount.textContent = '';
                     }
                 })
                 .catch(console.error);
@@ -828,7 +1671,7 @@ document.getElementById('open-modal').addEventListener('click', () => {
 
     // Fungsi untuk handle tombol tambah ke album
     function handleAddToAlbum() {
-        document.addEventListener('click', function (event) {
+        document.addEventListener('click', function(event) {
             if (event.target.closest('.add-to-album')) {
                 event.preventDefault();
                 const button = event.target.closest('.add-to-album');
@@ -856,12 +1699,12 @@ document.getElementById('open-modal').addEventListener('click', () => {
         const createAlbumForm = document.getElementById('createAlbumForm');
 
         if (createAlbumForm) {
-            createAlbumForm.addEventListener('submit', function (event) {
+            createAlbumForm.addEventListener('submit', function(event) {
                 event.preventDefault();
 
                 const formData = new FormData(createAlbumForm);
                 const submitButton = createAlbumForm.querySelector('button[type="submit"]');
-                submitButton.disabled = true; // Disable submit button to prevent multiple submissions
+                submitButton.disabled = true;
 
                 fetch('{{ route('albums.store') }}', {
                     method: 'POST',
@@ -884,17 +1727,9 @@ document.getElementById('open-modal').addEventListener('click', () => {
                             confirmButtonText: 'OK'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                // Tutup modal
+                                // Tutup modal dan reset form
                                 const modal = bootstrap.Modal.getInstance(document.getElementById('createAlbumModal'));
                                 modal.hide();
-
-                                // Hapus overlay modal
-                                document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-
-                                // Hapus class 'modal-open' dari body
-                                document.body.classList.remove('modal-open');
-
-                                // Reset form
                                 createAlbumForm.reset();
 
                                 // Tambahkan album baru ke dropdown
@@ -907,194 +1742,34 @@ document.getElementById('open-modal').addEventListener('click', () => {
                                         </a>
                                     `;
 
-                                    // Temukan elemen <li> terakhir sebelum divider
                                     const lastItemBeforeDivider = dropdownMenu.querySelector('li:last-child');
                                     dropdownMenu.insertBefore(newAlbumItem, lastItemBeforeDivider);
                                 }
                             }
                         });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal!',
-                            text: 'Gagal membuat album. Silakan coba lagi.',
-                            confirmButtonText: 'OK'
-                        });
                     }
                 })
-                .catch(async (error) => {
-                    console.error('Fetch error:', error);
-                    const responseText = await error.response.text();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Terjadi Kesalahan!',
-                        text: 'Terjadi kesalahan: ' + responseText,
-                        confirmButtonText: 'OK'
-                    });
-                })
                 .finally(() => {
-                    submitButton.disabled = false; // Re-enable submit button
+                    submitButton.disabled = false;
                 });
             });
         }
     }
 
-    // Fungsi untuk handle tombol balas komentar
-    function handleReplyButton() {
-        document.addEventListener('click', function (event) {
-            if (event.target.closest('.reply-button')) {
-                const button = event.target.closest('.reply-button');
-                const commentId = button.getAttribute('data-comment-id');
-                const replyForm = document.getElementById(`reply-form-${commentId}`);
-                replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
-            }
-        });
-
-        document.body.addEventListener("submit", async function (event) {
-            const form = event.target.closest(".reply-form form");
-            if (!form) return;
-
-            event.preventDefault();
-            event.stopPropagation(); // Mencegah multiple event listener
-
-            const formData = new FormData(form);
-            const commentId = form.closest('.reply-form').id.split('-')[2]; // Ambil ID komentar
-            const url = form.getAttribute('action'); // Ambil URL action dari form
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': token,
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                const data = await response.json();
-                if (data.success) {
-                    const replyId = data.reply.id;
-                    const userId = data.reply.user.id;
-                    const currentUserId = data.currentUserId;
-                    const photoUserId = data.photoUserId;
-
-                    const isCurrentUser = userId === currentUserId;
-                    const isPhotoOwner = userId === photoUserId;
-
-                    const profilePhoto = data.reply.user.profile_photo ?
-                        `<img src="/storage/photo_profile/${data.reply.user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">` :
-                        `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>`;
-
-                    const verifiedIcon = data.reply.user.verified ? '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
-                    const proIcon = data.reply.user.role === 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : '';
-                    const photoOwnerBadge = isPhotoOwner ? '<span class="text">• Pembuat</span>' : '';
-
-                    const replyHtml = `
-                        <div class="ms-4 mt-2" id="reply-${replyId}">
-                            ${profilePhoto}
-                            <strong>
-                                <a href="/${data.reply.user.username}" class="text-dark fw-bold text-decoration-none">
-                                    ${data.reply.user.username}
-                                </a>
-                            </strong>
-                            ${verifiedIcon}
-                            ${proIcon}
-                            ${photoOwnerBadge}
-                            <p>${data.reply.reply}</p>
-                            <small class="text-muted">${data.reply.created_at}</small>
-                            <button class="btn btn-link" type="button" id="dropdownMenuButton-${replyId}" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <div class="dropdown">
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${replyId}">
-                                    ${isCurrentUser ? `
-                                        <li>
-                                            <button type="button" class="dropdown-item delete-reply" data-reply-id="${replyId}">
-                                                Hapus Balasan
-                                            </button>
-                                        </li>
-                                    ` : `
-                                        <li>
-                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-${replyId}">
-                                                Lapor Balasan
-                                            </button>
-                                        </li>
-                                    `}
-                                </ul>
-                            </div>
-                        </div>
-                    `;
-
-                    document.querySelector(`#reply-form-${commentId}`).insertAdjacentHTML('beforebegin', replyHtml);
-                    form.reset();
-                    form.closest('.reply-form').style.display = 'none';
-                }
-            } catch (error) {
-                console.error("Error submitting reply:", error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Terjadi kesalahan saat mengirim balasan. Silakan coba lagi.',
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
-    }
-
-    // Fungsi untuk handle tombol hapus balasan
-    function handleDeleteReply() {
-        document.body.addEventListener("click", async function (event) {
-            if (event.target.closest(".delete-reply")) {
-                event.preventDefault();
-                const button = event.target.closest(".delete-reply");
-                const replyId = button.getAttribute("data-reply-id");
-                const url = `/replies/${replyId}`;
-
-                try {
-                    const response = await fetch(url, {
-                        method: "DELETE",
-                        headers: {
-                            "X-CSRF-TOKEN": token,
-                            "Content-Type": "application/json"
-                        }
-                    });
-
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-                    const data = await response.json();
-                    if (data.success) {
-                        document.getElementById(`reply-${replyId}`).remove();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message || "Gagal menghapus reply.",
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error deleting reply:", error);
-                }
-            }
-        });
-    }
-
     // Blokir klik kanan dan inspect element
     function blockRightClickAndInspect() {
-        document.addEventListener('contextmenu', function (e) {
+        document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
         });
 
-        document.addEventListener('keydown', function (e) {
+        document.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
                 e.preventDefault();
             }
         });
     }
 
-    // Render gambar ke canvas dan tambahkan watermark
+    // Render gambar ke canvas dengan watermark
     function renderImageWithWatermark() {
         const canvas = document.getElementById('photoCanvas');
         if (!canvas) return;
@@ -1104,15 +1779,14 @@ document.getElementById('open-modal').addEventListener('click', () => {
         img.src = imgSrc;
         img.crossOrigin = "anonymous";
 
-        img.onload = function () {
+        img.onload = function() {
             canvas.width = img.width;
             canvas.height = img.height;
-            canvas.style.position = "relative";
-            canvas.style.zIndex = "1";
             const ctx = canvas.getContext('2d');
             
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
+            // Tambahkan watermark
             const watermarkText = "MOTRET";
             const fontSize = 25;
             ctx.font = `${fontSize}px Arial`;
@@ -1138,15 +1812,100 @@ document.getElementById('open-modal').addEventListener('click', () => {
         };
     }
 
-    // Panggil semua fungsi
+            
+        // Handle follow buttons in the photo list
+        document.querySelectorAll('.follow-button').forEach(button => {
+            button.addEventListener('click', function() {
+                handleFollowUnfollow(this);
+            });
+        });
+
+        // Function to update follow button appearance
+        function updateFollowButton(button, following) {
+            if (following) {
+                button.textContent = 'Unfollow';
+                button.classList.remove('btn-success');
+                button.classList.add('btn-dark');
+            } else {
+                button.textContent = 'Follow';
+                button.classList.remove('btn-dark');
+                button.classList.add('btn-success');
+            }
+            button.setAttribute('data-following', following);
+        }
+
+        // Function to handle follow/unfollow action
+        function handleFollowUnfollow(button) {
+            const userId = button.getAttribute('data-user-id');
+            const isFollowing = button.getAttribute('data-following') === 'true';
+            const url = isFollowing ? `/users/${userId}/unfollow` : `/users/${userId}/follow`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    updateFollowButton(button, !isFollowing);
+                    
+                    // You can add additional updates here if needed
+                    // For example, update follower counts if they're displayed
+                } else {
+                    throw new Error(data.message || 'Failed to process request.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // You can add SweetAlert or other error handling here
+            });
+        }
+
+    @if(!Auth::check() || (Auth::check() && (Auth::user()->role !== 'user' && Auth::user()->role !== 'pro')))
+        function renderCanvasImgGuest() {  
+            document.querySelectorAll('canvas.card-img').forEach(function (canvas) {
+                var imgSrc = canvas.getAttribute('data-src');
+                var img = new Image();
+                img.src = imgSrc;
+                img.onload = function () {
+                    var ctx = canvas.getContext('2d');
+                    var width = canvas.width;
+                    var height = canvas.height;
+                    var aspectRatio = img.width / img.height;
+
+                    if (width / height > aspectRatio) {
+                        width = height * aspectRatio;
+                    } else {
+                        height = width / aspectRatio;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                };
+            });
+        }
+
+    // ==================== INISIALISASI ====================
+
+    // Panggil semua fungsi yang diperlukan
+    renderCanvasImgGuest();
+    @endif
     toggleOtherReasonInput();
     handleLikeButton();
     handleAddToAlbum();
     handleCreateAlbum();
-    handleReplyButton();
-    handleDeleteReply();
     blockRightClickAndInspect();
     renderImageWithWatermark();
+    handleFollowUnfollow();
 });
 </script>
 @endpush

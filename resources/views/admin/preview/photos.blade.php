@@ -107,6 +107,11 @@
     }
 </style>
 
+<div class="d-flex justify-content-start mb-3">
+    <button class="btn btn-link text-decoration-none" onclick="history.back()">
+        <i class="bi bi-arrow-left" style="font-size: 2rem; color: #32bd40;"></i>
+    </button>
+</div>
 
 <div class="container mt-5">
     <div class="row">

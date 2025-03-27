@@ -72,27 +72,27 @@ class ReportController extends Controller
     public function reportUsers()
     {
         $reportUsers = Report::whereNotNull('reported_user_id')->get();
-        return view('admin.reportUsers', compact('reportUsers'));
+        return view('admin.reports.reportUsers', compact('reportUsers'));
     }
 
     public function reportComments()
     {
         $reportComments = Report::whereNotNull('comment_id')->get();
         $reportReplies = Report::whereNotNull('reply_id')->get();
-        return view('admin.reportComments', compact('reportComments', 'reportReplies'));
+        return view('admin.reports.reportComments', compact('reportComments', 'reportReplies'));
     }
 
     public function reportPhotos()
     {
         $reportPhotos = Report::whereNotNull('photo_id')->get();
-        return view('admin.reportPhotos', compact('reportPhotos'));
+        return view('admin.reports.reportPhotos', compact('reportPhotos'));
     }
 
     public function deleteReport($id)
     {
         $report = Report::findOrFail($id);
         $report->delete();
-
-        return redirect()->back()->with('success', 'Laporan berhasil dihapus.');
+    
+        return response()->json(['message' => 'Laporan berhasil dihapus.']);
     }
 }

@@ -2,7 +2,7 @@
 
 @section('title', 'Upload Photo')
 
-@push('styles')
+@push('link')
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Dropify/0.2.2/css/dropify.min.css">
   <style>
 .container {
@@ -51,15 +51,6 @@
 @section('content')
     <div class="container">
         <h3 class="my-4">Unggah Foto</h3>
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
         <form method="POST" action="{{ route('photos.store') }}" enctype="multipart/form-data">
             @csrf
             <div class="row">

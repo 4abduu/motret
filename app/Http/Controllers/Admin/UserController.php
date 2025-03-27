@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -49,16 +50,23 @@ class UserController extends Controller
         return view('admin.preview.albums', compact('album'));
     }
 
-    public function previewComment($id)
+    public function previewCommentReplies($id, $type)
     {
-        $comment = Comment::findOrFail($id);
-        return view('admin.preview.comments', compact('comment'));
-    }
-
-    public function previewReply($id)
-    {
-        $reply = Reply::findOrFail($id);
-        return view('admin.preview.replies', compact('reply'));
+        Log::info("Type: $type, ID: $id");
+    
+        if ($type === 'comment') {
+            $comment = Comment::with(['photo.user', 'replies.user', 'user'])->findOrFail($id);
+            $highlighted = $comment;
+            $parentComment = null;
+        } elseif ($type === 'reply') {
+            $reply = Reply::with(['comment.photo.user', 'comment.replies.user', 'user'])->findOrFail($id);
+            $highlighted = $reply;
+            $parentComment = $reply->comment;
+        } else {
+            abort(404, 'Invalid preview type');
+        }
+    
+        return view('admin.preview.comments', compact('highlighted', 'parentComment', 'type'));
     }
 
     public function createUser(Request $request)
@@ -97,6 +105,7 @@ class UserController extends Controller
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ], $messages);
     
+        try {
         $user = new User();
         $user->name = $validated['name'];
         $user->username = $validated['username'];
@@ -114,7 +123,10 @@ class UserController extends Controller
     
         $user->save();
     
-        return redirect()->route('admin.users')->with('success', 'User created successfully.');
+            return response()->json(['success' => true, 'message' => 'Pengguna berhasil dibuat.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Gagal membuat pengguna. Pesan: ' . $e->getMessage()]);
+        }
     }
 
     public function updateUser(Request $request, $id)
@@ -165,9 +177,9 @@ class UserController extends Controller
     
             $user->save();
     
-            return redirect()->route('admin.users')->with('success', 'User updated successfully.');
+            return response()->json(['success' => true, 'message' => 'Pengguna berhasil diperbarui.']);
         } catch (\Exception $e) {
-            return redirect()->route('admin.users')->with('error', 'Failed to update user. Pesan: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui pengguna. Pesan: ' . $e->getMessage()]);
         }
     }
 
@@ -192,9 +204,9 @@ class UserController extends Controller
     {
         try {
             User::findOrFail($id)->delete();
-            return redirect()->route('admin.users')->with('success', 'User deleted successfully.');
+            return response()->json(['success' => true, 'message' => 'User deleted successfully.']);
         } catch (\Exception $e) {
-            return redirect()->route('admin.users')->with('error', 'Failed to delete user.');
+            return response()->json(['success' => false, 'message' => 'Failed to delete user.'], 500);
         }
     }
 
@@ -206,7 +218,7 @@ class UserController extends Controller
         $user->banned_reason = $request->banned_reason;
         $user->banned = true;
         $user->save();
-
-        return redirect()->route('admin.reports.users')->with('success', 'User has been banned successfully.');
+    
+        return response()->json(['message' => 'User has been banned successfully.']);
     }
 }

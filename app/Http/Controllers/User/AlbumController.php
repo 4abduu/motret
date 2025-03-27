@@ -110,7 +110,7 @@ class AlbumController extends Controller
         $album = Album::findOrFail($id);
         $album->delete();
 
-        return redirect()->back()->with('success', 'Album berhasil dihapus.');
+        return response()->json(['success' => true, 'message' => 'Album berhasil dihapus.']);
     }
 
     public function removePhoto($albumId, $photoId)

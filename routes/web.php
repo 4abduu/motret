@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\CommentController as AdminCommentController;
@@ -97,6 +98,7 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
     
     // Manage Verification Requests
     Route::get('/admin/verification-requests', [AdminVerificationController::class, 'index'])->name('admin.verificationRequests');
+    Route::delete('/admin/verification-requests/{id}', [AdminVerificationController::class, 'deleteVerificationRequest'])->name('admin.verificationRequests.delete');
     Route::get('/admin/verification-requests/{id}/documents', [AdminVerificationController::class, 'showVerificationDocuments'])->name('admin.verificationDocuments');
     Route::put('/admin/verification-requests/{id}/approve', [AdminVerificationController::class, 'approveVerificationRequest'])->name('admin.verificationRequests.approve');
     Route::put('/admin/verification-requests/{id}/reject', [AdminVerificationController::class, 'rejectVerificationRequest'])->name('admin.verificationRequests.reject');
@@ -104,8 +106,7 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
     // Preview 
     Route::get('/admin/users/{id}/preview', [AdminUserController::class, 'previewProfile'])->name('admin.users.previewProfile');
     Route::get('/admin/users/{id}/photos', [AdminUserController::class, 'previewPhotos'])->name('admin.users.previewPhotos');
-    Route::get('/admin/users/{id}/comments', [AdminUserController::class, 'previewComment'])->name('admin.users.previewComments');
-    Route::get('/admin/users/{id}/replies', [AdminUserController::class, 'previewReply'])->name('admin.users.previewReplies');
+    Route::get('/admin/users/{id}/{type}', [AdminUserController::class, 'previewCommentReplies'])->name('admin.previewCommentReplies');
     Route::get('/admin/users/{id}/albums', [AdminUserController::class, 'previewAlbum'])->name('admin.users.previewAlbums');
 });
 

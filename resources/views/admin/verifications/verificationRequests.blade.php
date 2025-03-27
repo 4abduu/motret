@@ -58,6 +58,7 @@
                                             </form>
                                             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $request->id }}">Tolak</button>
                                         @endif
+                                        <button class="btn btn-danger btn-icon delete-verification-btn" data-id="{{ $request->id }}"><i class="ti-trash" style="color: white;"></i></button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -101,6 +102,50 @@
 
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Inisialisasi DataTables
     new DataTable('#example');
+
+    // Handle delete verification request
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.closest('.delete-verification-btn')) {
+            const button = e.target.closest('.delete-verification-btn');
+            const requestId = button.getAttribute('data-id');
+
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Permintaan verifikasi ini akan dihapus beserta dokumen terkait!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/admin/verification-requests/${requestId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            },
+                        });
+
+                        if (response.ok) {
+                            Swal.fire('Berhasil!', 'Permintaan verifikasi berhasil dihapus.', 'success').then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Gagal!', 'Terjadi kesalahan saat menghapus permintaan verifikasi.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        Swal.fire('Oops...', 'Terjadi kesalahan saat memproses permintaan.', 'error');
+                    }
+                }
+            });
+        }
+    });
+});
 </script>
 @endpush

@@ -1,8 +1,14 @@
 @extends('layouts.app')
+@push('link')
+    <style>
+                .dt-length {
+            margin-left: 20px;
+            padding-bottom: 10px;
+        }
+    </style>
+@endpush
 
 @section('content')
-
-
 <div class="row">
     <h3>Harga Langganan Sistem</h3>
     <ol class="breadcrumb">

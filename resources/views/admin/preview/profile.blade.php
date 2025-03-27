@@ -7,6 +7,13 @@
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 </head>
+
+<div class="d-flex justify-content-start mb-3">
+    <button class="btn btn-link text-decoration-none" onclick="history.back()">
+        <i class="bi bi-arrow-left" style="font-size: 2rem; color: #32bd40;"></i>
+    </button>
+</div>
+
 <div class="d-flex justify-content-center">
     <div class="col-md-4 grid-margin grid-margin-md-0 stretch-card">
         <div class="card shadow-lg">
@@ -91,6 +98,49 @@
                         </div>
                     </div>
                 @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Followers -->
+<div class="modal fade" id="followersModal" tabindex="-1" role="dialog" aria-labelledby="followersModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="followersModalLabel">Followers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="followers-list">
+                    @foreach($user->followers as $follower)
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{{ route('admin.users.previewProfile', $follower->id) }}"><b>{{ $follower->username }}</b></a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Following -->
+<div class="modal fade" id="followingModal" tabindex="-1" role="dialog" aria-labelledby="followingModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="followingModalLabel">Following</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-group" id="following-list">
+                    @foreach($user->following as $following)
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{{ route('admin.users.previewProfile', $following->id) }}"><b>{{ $following->username }}</b></a>
+                        </li>
+                    @endforeach
+                </ul>
             </div>
         </div>
     </div>
