@@ -372,8 +372,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     confirmButtonText: "Login Sekarang",
                     cancelButtonText: "Nanti Saja",
                     footer: '<label><input type="checkbox" id="dontShowAgain"> Jangan tampilkan lagi</label>',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false
+                    allowOutsideClick: true,
+                    allowEscapeKey: true
                 }).then((result) => {
                     // Handle checkbox "Jangan tampilkan lagi"
                     const dontShowAgain = document.getElementById("dontShowAgain").checked;

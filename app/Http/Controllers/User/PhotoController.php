@@ -183,24 +183,29 @@ class PhotoController extends Controller
             }
         } 
         else {
-            // === Guest Download: Mentok 5x, tidak reset ===
-            $download = Download::where('guest_id', $guestId)->first();
-            
-            if (!$download) {
-                Download::create([
-                    'guest_id' => $guestId,
-                    'photo_id' => $photo->id,
-                    'resolution' => 'low',
-                    'count_downloads' => 1
-                ]);
-                return $this->processDownload($photo, 'low');
-            } elseif ($download->count_downloads < 5) {
-                $download->increment('count_downloads');
-                return $this->processDownload($photo, 'low');
-            } else {
-                return back()->with('error', 'Anda telah mencapai batas download sebagai tamu.');
-            }
-        }
+    // === Guest Download: Mentok 5x, tidak reset ===
+    $download = Download::where('guest_id', $guestId)
+                        ->where('photo_id', $photo->id)
+                        ->first();
+
+    if (!$download) {
+        Download::create([
+            'guest_id' => $guestId,
+            'photo_id' => $photo->id,
+            'resolution' => 'low',
+            'count_downloads' => 1
+        ]);
+
+        return $this->processDownload($photo, 'low'); // FIX: Download file langsung
+    } elseif ($download->count_downloads < 5) {
+        $download->increment('count_downloads');
+
+        return $this->processDownload($photo, 'low'); // FIX: Download file langsung
+    } else {
+        return back()->with('error', 'Anda telah mencapai batas download sebagai tamu.');
+    }
+}
+
     }    
 
     private function processDownload($photo, $resolution)

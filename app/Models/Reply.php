@@ -30,4 +30,9 @@ class Reply extends Model
     public static function getRepliesCount(){
         return Reply::count();
     }
+
+    public function reports() 
+    {
+        return $this->hasMany(Report::class, 'reply_id');
+    }
 }

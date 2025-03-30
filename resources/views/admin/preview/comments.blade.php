@@ -113,8 +113,7 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6 position-relative">
-            <canvas id="photoCanvas" class="img-fluid" data-src="{{ asset('storage/' . $highlighted->photo->path) }}" alt="{{ $highlighted->photo->title }}"></canvas>
-            <div class="overlay"></div>
+            <img src="{{ asset('storage/' . $highlighted->photo->path) }}" class="card-img" alt="{{ asset('storage/' . $highlighted->photo->title) }}">
             <div class="d-flex align-items-center mt-3">
                 <form method="POST" action="{{ route('photos.download', $highlighted->photo->id) }}" class="me-3 download-button">
                     @csrf
@@ -177,142 +176,105 @@
                 
 
             {{-- Bagian Komentar dan Replies (Tidak Diubah) --}}
-                <h6 class="text-start">Komentar</h6>
-                <!-- Tampilkan komentar yang di-highlight di paling atas -->
-                @if($type === 'comment')
-                    <div class="mb-2 highlight">
-                        @if($highlighted->user->profile_photo)
-                            <img src="{{ asset('storage/photo_profile/' . $highlighted->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">
+            <h6 class="text-start">Komentar</h6>
+            <!-- Tampilkan komentar yang di-highlight di paling atas -->
+            @if($type === 'comment')
+                <div class="mb-2 highlight">
+                    @if($highlighted->user->profile_photo)
+                        <img src="{{ asset('storage/photo_profile/' . $highlighted->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">
+                    @else
+                        <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>
+                    @endif
+                    <strong>
+                        <a href="{{ route('admin.users.previewProfile', $highlighted->user->id) }}" class="text-dark fw-bold text-decoration-none">
+                            {{ $highlighted->user->username }}
+                        </a>
+                    </strong>
+                    @if($highlighted->user->verified)
+                        <i class="ti-medall-alt" style="color: gold;"></i>
+                    @endif 
+                    @if($highlighted->user->role === 'pro')
+                        <i class="ti-star" style="color: gold;"></i>
+                    @endif
+                    @if($highlighted->user_id === $highlighted->photo->user_id)
+                        <span class="text">• Pembuat</span>
+                    @endif
+                    @if($highlighted->banned)
+                        <p><em class="text-danger">[BANNED] {{ $highlighted->comment }}</em></p>
+                        <small class="text-danger">Alasan: {{ $highlighted->reports->first()->reason ?? 'Tidak ada alasan' }}</small>
+                    @else
+                        <p>{{ $highlighted->comment }}</p>
+                    @endif
+                    <small class="text-muted">{{ $highlighted->created_at->diffForHumans() }}</small>
+                </div>
+            @endif
+            
+            <!-- Tampilkan semua komentar dan replies -->
+            @foreach($highlighted->photo->comments->sortByDesc(function ($c) use ($highlighted) {
+                return $c->id === $highlighted->id ? 1 : 0;
+            }) as $c)
+                @if($type !== 'comment' || $c->id !== $highlighted->id)
+                    <div class="mb-2">
+                        @if($c->user->profile_photo)
+                            <img src="{{ asset('storage/photo_profile/' . $c->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">
                         @else
                             <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>
                         @endif
                         <strong>
-                            <a href="{{ route('admin.users.previewProfile', $highlighted->user->id) }}" class="text-dark fw-bold text-decoration-none">
-                                {{ $highlighted->user->username }}
+                            <a href="{{ route('admin.users.previewProfile', $c->user->id) }}" class="text-dark fw-bold text-decoration-none">
+                                {{ $c->user->username }}
                             </a>
                         </strong>
-                        @if($highlighted->user->verified)
+                        @if($c->user->verified)
                             <i class="ti-medall-alt" style="color: gold;"></i>
                         @endif 
-                        @if($highlighted->user->role === 'pro')
+                        @if($c->user->role === 'pro')
                             <i class="ti-star" style="color: gold;"></i>
                         @endif
-                        @if($highlighted->user_id === $highlighted->photo->user_id)
+                        @if($c->user_id === $highlighted->photo->user_id)
                             <span class="text">• Pembuat</span>
                         @endif
-                        <p>{{ $highlighted->comment }}</p>
-                        <small class="text-muted">{{ $highlighted->created_at->diffForHumans() }}</small>
+                        
+                        @if($c->banned)
+                            <p><em class="text-danger">[BANNED] {{ $c->comment }}</em></p>
+                            <small class="text-danger">Alasan: {{ $c->reports->first()->reason ?? 'Tidak ada alasan' }}</small>
+                        @else
+                            <p>{{ $c->comment }}</p>
+                        @endif
+                        <small class="text-muted">{{ $c->created_at->diffForHumans() }}</small>
+            
+                        {{-- Tampilkan semua replies untuk komentar ini --}}
+                        @foreach($c->replies->sortBy(function ($reply) use ($highlighted) {
+                            return $reply->id === $highlighted->id ? -1 : $reply->created_at->timestamp;
+                        }) as $reply)
+                            <div class="ms-4 mt-2 {{ $type === 'reply' && $reply->id === $highlighted->id ? 'highlight' : '' }}" id="reply-{{ $reply->id }}">
+                                @if($reply->user->profile_photo)
+                                    <img src="{{ asset('storage/photo_profile/' . $reply->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">
+                                @else
+                                    <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>
+                                @endif
+                                <strong>
+                                    <a href="{{ route('admin.users.previewProfile', $reply->user->id) }}" class="text-dark fw-bold text-decoration-none">
+                                        {{ $reply->user->username }}
+                                    </a>
+                                </strong>
+                                
+                                @if($reply->banned)
+                                    <p><em class="text-danger">[BANNED] {{ $reply->reply }}</em></p>
+                                    <small class="text-danger">Alasan: {{ $reply->reports->first()->reason ?? 'Tidak ada alasan' }}</small>
+                                @else
+                                    <p>{{ $reply->reply }}</p>
+                                @endif
+                                
+                                <small class="text-muted">{{ $reply->created_at->diffForHumans() }}</small>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
-
-                <!-- Tampilkan semua komentar dan replies -->
-                @foreach($highlighted->photo->comments->sortByDesc(function ($c) use ($highlighted) {
-                    return $c->id === $highlighted->id ? 1 : 0;
-                }) as $c)
-                    @php
-                        $isOwner = Auth::check() && Auth::id() === $c->user_id;
-                        $hideComment = !$isOwner && $c->banned;
-                        $report = $c->reports->first();
-                    @endphp
-
-                    @if(!$hideComment && ($type !== 'comment' || $c->id !== $highlighted->id))
-                        <div class="mb-2">
-                            @if($c->user->profile_photo)
-                                <img src="{{ asset('storage/photo_profile/' . $c->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">
-                            @else
-                                <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>
-                            @endif
-                            <strong>
-                                <a href="{{ route('admin.users.previewProfile', $c->user->id) }}" class="text-dark fw-bold text-decoration-none">
-                                    {{ $c->user->username }}
-                                </a>
-                            </strong>
-                            @if($c->user->verified)
-                                <i class="ti-medall-alt" style="color: gold;"></i>
-                            @endif 
-                            @if($c->user->role === 'pro')
-                                <i class="ti-star" style="color: gold;"></i>
-                            @endif
-                            @if($c->user_id === $highlighted->photo->user_id)
-                                <span class="text">• Pembuat</span>
-                            @endif
-                            @if($c->banned)
-                                @if($isOwner)
-                                    <p><em class="text-muted">Komentar anda telah dibanned: {{ $report->reason }}</em></p>
-                                @endif
-                            @else
-                                <p>{{ $c->comment }}</p>
-                                <small class="text-muted">{{ $c->created_at->diffForHumans() }}</small>
-                            @endif
-
-                            {{-- Tampilkan semua replies untuk komentar ini --}}
-                            @foreach($c->replies->sortBy(function ($reply) use ($highlighted) {
-                                return $reply->id === $highlighted->id ? -1 : $reply->created_at->timestamp;
-                            }) as $reply)
-                                @php
-                                    $isReplyOwner = Auth::check() && Auth::id() === $reply->user_id;
-                                    $hideReply = $c->banned || (!$isReplyOwner && $reply->banned);
-                                @endphp
-
-                                @if(!$hideReply)
-                                    <div class="ms-4 mt-2 {{ $type === 'reply' && $reply->id === $highlighted->id ? 'highlight' : '' }}" id="reply-{{ $reply->id }}">
-                                        @if($reply->user->profile_photo)
-                                            <img src="{{ asset('storage/photo_profile/' . $reply->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">
-                                        @else
-                                            <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>
-                                        @endif
-                                        <strong>
-                                            <a href="{{ route('admin.users.previewProfile', $reply->user->id) }}" class="text-dark fw-bold text-decoration-none">
-                                                {{ $reply->user->username }}
-                                            </a>
-                                        </strong>
-                                        <p>{{ $reply->reply }}</p>
-                                        <small class="text-muted">{{ $reply->created_at->diffForHumans() }}</small>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    @endif
-                @endforeach
+            @endforeach
         </div>
     </div>
 </div>
 </div>
 
 @endsection
-
-@push('scripts')
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const canvas = document.getElementById('photoCanvas');
-    const imgSrc = canvas.getAttribute('data-src');
-    const img = new Image();
-    img.src = imgSrc;
-    img.crossOrigin = "anonymous";
-    img.onload = function () {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const watermarkText = "MOTRET";
-        const fontSize = 25;
-        ctx.font = `${fontSize}px Arial`;
-        ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        const stepX = 150;
-        const stepY = 100;
-        const angle = -30 * (Math.PI / 180);
-        ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate(angle);
-        for (let x = -canvas.width; x < canvas.width; x += stepX) {
-            for (let y = -canvas.height; y < canvas.height; y += stepY) {
-                ctx.fillText(watermarkText, x, y);
-            }
-        }
-        ctx.restore();
-    };
-});
-</script>
-@endpush

@@ -4,6 +4,9 @@
 
 @push('link')
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<script>
+    var isGuest = @json(Auth::check() ? false : true);
+</script>
 <style>
     /* CSS Variables */
     :root {
@@ -223,7 +226,14 @@
         text-align: center;
         margin-right: 8px;
     }
-    
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+    .card, .photo-card, .album-card-container {
+        overflow: visible !important;
+    }
     /* Premium Badge */
     .premium-badge {
         position: absolute;
@@ -350,14 +360,14 @@
                 @else
                     <div id="follow-section">
                         @if(Auth::check())
-                            <button id="follow-button" class="btn btn-success btn-sm mt-3 mb-4 text-white" data-user-id="{{ $user->id }}" data-following="{{ Auth::user()->isFollowing($user) ? 'true' : 'false' }}">
+                            <button id="follow-button" 
+                                    class="btn {{ Auth::user()->isFollowing($user) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }} btn-sm mt-3 mb-4" 
+                                    data-user-id="{{ $user->id }}"
+                                    data-initial-state="{{ Auth::user()->isFollowing($user) ? 'following' : 'not-following' }}">
                                 {{ Auth::user()->isFollowing($user) ? 'Unfollow' : 'Follow' }}
                             </button>
-                            <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportUserModal">
-                                <i class="bi bi-flag text-danger"></i>
-                            </button>
                         @else
-                            <button id="follow-button" class="btn btn-success btn-sm mt-3 mb-4 text-white" onclick="window.location.href='{{ route('login') }}'">
+                            <button class="btn btn-primary btn-sm mt-3 mb-4" onclick="window.location.href='{{ route('login') }}'">
                                 Follow
                             </button>
                         @endif
@@ -448,9 +458,9 @@
                                                     </button>
                                                 </li>
                                                 <li>
-                                                    <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button">
+                                                    <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button" id="downloadForm">
                                                         @csrf
-                                                        <button type="submit" class="dropdown-item d-flex align-items-center w-100">
+                                                        <button type="button" class="dropdown-item d-flex align-items-center w-100" id="downloadButton">
                                                             <i class="bi bi-download me-2"></i> Download
                                                         </button>
                                                     </form>
@@ -462,9 +472,9 @@
                                                     </button>
                                                 </li>
                                                 <li>
-                                                    <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button">
+                                                    <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button" id="downloadForm">
                                                         @csrf
-                                                        <button type="submit" class="dropdown-item d-flex align-items-center w-100">
+                                                        <button type="button" class="dropdown-item d-flex align-items-center w-100" id="downloadButton">
                                                             <i class="bi bi-download me-2"></i> Download
                                                         </button>
                                                     </form>
@@ -507,9 +517,9 @@
                                                         </button>
                                                     </li>
                                                     <li>
-                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button">
+                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button" id="downloadForm">
                                                             @csrf
-                                                            <button type="submit" class="dropdown-item d-flex align-items-center w-100">
+                                                            <button type="button" class="dropdown-item d-flex align-items-center w-100" id="downloadButton">
                                                                 <i class="bi bi-download me-2"></i> Download
                                                             </button>
                                                         </form>
@@ -521,9 +531,9 @@
                                                         </button>
                                                     </li>
                                                     <li>
-                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button">
+                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button" id="downloadForm">
                                                             @csrf
-                                                            <button type="submit" class="dropdown-item d-flex align-items-center w-100">
+                                                            <button type="button" class="dropdown-item d-flex align-items-center w-100" id="downloadButton">
                                                                 <i class="bi bi-download me-2"></i> Download
                                                             </button>
                                                         </form>
@@ -1150,12 +1160,55 @@ document.addEventListener("DOMContentLoaded", function() {
     const userReasonRadios = document.querySelectorAll('#reportUserModal input[name="reason"]');
     const userDescriptionGroup = document.getElementById('description-group-user');
     const userDescriptionInput = document.getElementById('description-user');
+    const currentUserId = "{{ Auth::id() }}"; // ID user yang sedang login
+    const profileUserId = "{{ $user->id }}"; // ID user yang sedang dilihat profilnya
 
-    // Initialize all dropdowns
     const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
     const dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
         return new bootstrap.Dropdown(dropdownToggleEl);
     });
+
+    function handleDownload(event) {
+            event.preventDefault(); // Biar form gak langsung submit
+
+            @if(!Auth::check())
+                Swal.fire({
+                    title: 'Login Required',
+                    text: 'Downloads as a guest will be low quality. Log in for high-quality downloads.',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Log In',
+                    cancelButtonText: 'Continue as Guest',
+                    cancelButtonColor: '#d33',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('login') }}";
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        Swal.fire({
+                            title: 'Low Quality Download',
+                            text: 'Since you are a guest, this download will be in low resolution.',
+                            icon: 'warning',
+                            confirmButtonText: 'Proceed',
+                            cancelButtonText: 'Cancel',  // Tambahin tombol Cancel
+                            showCancelButton: true,      // Aktifin tombol Cancel
+                            reverseButtons: true
+                        }).then((res) => {
+                            if (res.isConfirmed) {
+                                document.getElementById('downloadForm').submit();
+                            }
+                            // Kalau user klik di luar modal atau cancel, gak ngapa-ngapain
+                        });
+                    }
+                });
+            @else
+                document.getElementById('downloadForm').submit();
+            @endif
+        }
+
+
+                // Tambahkan event listener hanya ke tombol download
+                document.getElementById("downloadButton").addEventListener("click", handleDownload);
 
     userReasonRadios.forEach(radio => {
         radio.addEventListener("change", function () {
@@ -1177,126 +1230,183 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         }
     });
+    // Fungsi update tampilan tombol (disederhanakan)
+    function updateButtonAppearance(button, isFollowing) {
+        if (!button) return;
+        
+        button.textContent = isFollowing ? 'Unfollow' : 'Follow';
+        button.className = isFollowing 
+            ? 'btn btn-danger btn-sm unfollow-button' 
+            : 'btn btn-primary btn-sm follow-button';
+            button.style.marginTop = '16px';
+            button.style.marginBottom = '24px';
+    }
 
-    // Function for follow/unfollow
-    function updateFollowButton(button, following) {
-        if (following) {
-            button.textContent = 'Unfollow';
-            button.classList.remove('btn-success', 'follow-button');
-            button.classList.add('btn-dark', 'unfollow-button');
-        } else {
-            button.textContent = 'Follow';
-            button.classList.remove('btn-dark', 'unfollow-button');
-            button.classList.add('btn-success', 'follow-button');
+    // Fungsi utama handle follow/unfollow yang lebih smooth
+    async function handleFollowAction(button, event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        const targetUserId = button.getAttribute('data-user-id');
+        const isUnfollow = button.classList.contains('unfollow-button');
+        const url = isUnfollow ? `/users/${targetUserId}/unfollow` : `/users/${targetUserId}/follow`;
+        
+        // Simpan state asli untuk rollback jika error
+        const originalState = {
+            text: button.textContent,
+            class: button.className,
+            disabled: button.disabled
+        };
+        
+        try {
+            // Langsung update tampilan tanpa loading state
+            updateButtonAppearance(button, !isUnfollow);
+            button.disabled = true;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error! Status: ${response.status}`);
+            }
+
+            // Update semua tombol untuk user ini
+            document.querySelectorAll(`button[data-user-id="${targetUserId}"]`).forEach(btn => {
+                updateButtonAppearance(btn, data.action === 'follow');
+                btn.disabled = false;
+            });
+
+            // Update counter
+            if (targetUserId === profileUserId) {
+                document.querySelectorAll('#followers-count').forEach(el => {
+                    el.textContent = data.followers_count;
+                });
+            }
+
+            if (currentUserId === profileUserId) {
+                document.querySelectorAll('#following-count').forEach(el => {
+                    el.textContent = data.following_count;
+                });
+            }
+
+            // Refresh modal tanpa scroll jump
+            await refreshModalContentSmoothly('#followersModal');
+            await refreshModalContentSmoothly('#followingModal');
+            
+            return data;
+        } catch (error) {
+            console.error('Error:', error);
+            // Rollback ke state asli jika error
+            button.textContent = originalState.text;
+            button.className = originalState.class;
+            button.disabled = originalState.disabled;
+            
+            // Tampilkan error hanya di console, tidak tampil ke user
+            return null;
         }
     }
 
-    function handleFollowUnfollow(button) {
-        const userId = button.getAttribute('data-user-id');
-        const isUnfollow = button.classList.contains('unfollow-button');
-        const url = isUnfollow ? `/users/${userId}/unfollow` : `/users/${userId}/follow`;
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                updateFollowButton(button, !isUnfollow);
-
-                // Update followers count
-                const followersCount = document.getElementById('followers-count');
-                if (followersCount) {
-                    followersCount.textContent = data.followers_count;
+    // Refresh modal yang lebih smooth
+    async function refreshModalContentSmoothly(modalId) {
+        const modal = document.querySelector(modalId);
+        if (!modal || !modal.classList.contains('show')) return;
+        
+        try {
+            // Simpan scroll position sebelum refresh
+            const modalBody = modal.querySelector('.modal-body');
+            const scrollPosition = modalBody.scrollTop;
+            
+            const response = await fetch(window.location.href, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'text/html'
                 }
-
-                // Update followers list in the modal
-                const followersList = document.getElementById('followers-list');
-                if (followersList) {
-                    if (!isUnfollow) {
-                        const newFollowerItem = document.createElement('li');
-                        newFollowerItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-                        newFollowerItem.innerHTML = `
-                            <a href="/users/${data.current_user.username}"><b>${data.current_user.username}</b></a>
-                            <button class="btn btn-sm btn-dark unfollow-button" data-user-id="${data.current_user.id}">Unfollow</button>
-                        `;
-                        followersList.appendChild(newFollowerItem);
-
-                        // Add event listener to the new unfollow button
-                        newFollowerItem.querySelector('.unfollow-button').addEventListener('click', function () {
-                            handleFollowUnfollow(this);
-                        });
-                    } else {
-                        const followerItems = followersList.querySelectorAll('li');
-                        followerItems.forEach(item => {
-                            if (item.querySelector('button').getAttribute('data-user-id') === data.current_user.id) {
-                                item.remove();
-                            }
-                        });
-                    }
-                }
-
-                // Update following list in the modal
-                const followingList = document.getElementById('following-list');
-                if (followingList) {
-                    if (!isUnfollow) {
-                        const newFollowingItem = document.createElement('li');
-                        newFollowingItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-                        newFollowingItem.innerHTML = `
-                            <a href="/users/${data.current_user.username}"><b>${data.current_user.username}</b></a>
-                            <button class="btn btn-sm btn-dark unfollow-button" data-user-id="${data.current_user.id}">Unfollow</button>
-                        `;
-                        followingList.appendChild(newFollowingItem);
-
-                        // Add event listener to the new unfollow button
-                        newFollowingItem.querySelector('.unfollow-button').addEventListener('click', function () {
-                            handleFollowUnfollow(this);
-                        });
-                    } else {
-                        const followingItems = followingList.querySelectorAll('li');
-                        followingItems.forEach(item => {
-                            if (item.querySelector('button').getAttribute('data-user-id') === data.current_user.id) {
-                                item.remove();
-                            }
-                        });
-                    }
-                }
-            } else {
-                throw new Error(data.message || 'Gagal memproses permintaan.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: error.message || 'Terjadi kesalahan saat memproses permintaan.',
-                confirmButtonText: 'OK'
             });
+            
+            if (!response.ok) return;
+            
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContent = doc.querySelector(modalId + ' .modal-body')?.innerHTML;
+            
+            if (newContent) {
+                modalBody.innerHTML = newContent;
+                // Kembalikan scroll position
+                modalBody.scrollTop = scrollPosition;
+                initModalButtons(modal);
+            }
+        } catch (error) {
+            console.error('Gagal refresh modal:', error);
+        }
+    }
+
+    // Inisialisasi tombol modal
+    function initModalButtons(modal) {
+        if (!modal) return;
+        
+        modal.querySelectorAll('.follow-button, .unfollow-button').forEach(btn => {
+            const userId = btn.getAttribute('data-user-id');
+            const isFollowing = btn.classList.contains('unfollow-button');
+            
+            // Clone button untuk menghindari event listener duplikat
+            const newBtn = btn.cloneNode(true);
+            btn.replaceWith(newBtn);
+            
+            newBtn.addEventListener('click', (e) => handleFollowAction(newBtn, e));
+            updateButtonAppearance(newBtn, isFollowing);
         });
     }
 
-    // Follow/Unfollow button in user profile
+    // Inisialisasi tombol utama
     const followButton = document.getElementById('follow-button');
     if (followButton) {
-        followButton.addEventListener('click', function () {
-            handleFollowUnfollow(followButton);
-        });
+        const initialState = followButton.getAttribute('data-initial-state') === 'following';
+        updateButtonAppearance(followButton, initialState);
+        followButton.addEventListener('click', (e) => handleFollowAction(followButton, e));
     }
 
-    // Follow/Unfollow buttons in modals
+    // Event delegation untuk tombol di dalam modal
     document.addEventListener('click', function(e) {
-        if (e.target.closest('.follow-button') || e.target.closest('.unfollow-button')) {
-            handleFollowUnfollow(e.target.closest('.follow-button, .unfollow-button'));
+        const button = e.target.closest('.follow-button, .unfollow-button');
+        if (button) {
+            handleFollowAction(button, e);
+        }
+    });
+
+    // Inisialisasi modal saat dibuka
+    ['#followersModal', '#followingModal'].forEach(modalId => {
+        const modal = document.querySelector(modalId);
+        if (modal) {
+            modal.addEventListener('show.bs.modal', function() {
+                fetch(window.location.href, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html'
+                    }
+                })
+                .then(response => response.ok ? response.text() : Promise.reject())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.querySelector(modalId + ' .modal-body')?.innerHTML;
+                    if (newContent) {
+                        this.querySelector('.modal-body').innerHTML = newContent;
+                        initModalButtons(this);
+                    }
+                })
+                .catch(() => console.log('Gagal memuat data modal'));
+            });
         }
     });
 

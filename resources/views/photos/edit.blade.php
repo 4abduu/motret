@@ -30,7 +30,7 @@
                     </select>
                 </div>
                 @endif
-                <button type="submit" class="btn btn-success text-white me-2">Reset Password</button>
+                <button type="submit" class="btn btn-success text-white me-2">Ubah Foto</button>
             </form>
           </div>
         </div>

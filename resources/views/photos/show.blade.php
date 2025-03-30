@@ -4,23 +4,41 @@
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script>
+        var isGuest = @json(Auth::check() ? false : true);
+    </script>
 </head>
 <style>
-    #photo-modal {
+    /* Modal Zoom Styles */
+    .photo-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        justify-content: center;
+        align-items: center;
         overflow: hidden;
+        z-index: 9999;
         touch-action: none;
     }
 
-    #modal-img {
-        transform-origin: 0 0;
-        touch-action: none;
-        user-select: none;
+    .modal-content {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
         cursor: grab;
+        transform-origin: 0 0;
+        user-select: none;
+        transition: transform 0.15s ease-out;
     }
 
-    #modal-img:active {
+    .modal-content.grabbing {
         cursor: grabbing;
     }
+
     .container {
         width: 80%;
         max-width: 1000px;
@@ -127,123 +145,69 @@
     z-index: 1;
 }
 
-    #photo-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        z-index: 1000;
-        touch-action: none; /* Penting untuk zoom di mobile */
-    }
-
-    
-#modal-img {
-    max-width: 90%;
-    max-height: 90%;
-    cursor: grab;
-    transition: transform 0.2s ease-out;
-    touch-action: none; /* Penting untuk zoom di mobile */
-}
-
-#close-modal {
+.close-modal {
     position: absolute;
-    top: 10px;
-    left: 30px;
-    font-size: 30px;
-    color: white;
+    top: 20px;
+    right: 30px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
     cursor: pointer;
-    z-index: 1002; /* Pastikan di atas semua elemen */
+    z-index: 1001;
+    transition: 0.3s;
 }
 
+.close-modal:hover {
+    color: #bbb;
+}
 #zoom-controls {
-    position: fixed; /* Ubah dari absolute ke fixed untuk mobile */
-    bottom: 20px;
+    position: fixed;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.7);
-    padding: 8px 15px;
-    border-radius: 20px;
-    z-index: 1001; /* Pastikan tombol di atas gambar */
     display: flex;
-    gap: 15px; /* Lebih besar untuk mobile */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    gap: 15px;
+    z-index: 1001;
 }
 
-    /* Modal and Zoom Styles */
-    #photo-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        z-index: 1000;
-        touch-action: none;
-    }
+#zoom-controls button {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    transition: all 0.2s;
+}
+
+
+#zoom-controls button:hover {
+    transform: scale(1.1);
+}
     
-    #modal-img {
-        max-width: 90%;
-        max-height: 90%;
-        cursor: grab;
-        transition: transform 0.2s ease-out;
-        touch-action: none;
-        transform-origin: 0 0;
-        user-select: none;
-    }
-    
-    #modal-img:active {
-        cursor: grabbing;
-    }
-    
-    #close-modal {
-        position: absolute;
-        top: 10px;
-        left: 30px;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .close-modal {
+        top: 15px;
+        right: 20px;
         font-size: 30px;
-        color: white;
-        cursor: pointer;
-        z-index: 1002;
     }
     
     #zoom-controls {
-        position: fixed;
         bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.7);
-        padding: 8px 15px;
-        border-radius: 20px;
-        z-index: 1001;
-        display: flex;
-        gap: 15px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
     
     #zoom-controls button {
-        background: none;
-        color: white;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        padding: 5px 15px;
-        border-radius: 5px;
-        transition: background 0.3s;
-        touch-action: manipulation;
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
     }
-    
-    #zoom-controls button:active {
-        background: rgba(255, 255, 255, 0.3);
-    }
+}
+
+/* Prevent scrolling when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
     
     /* Other UI Elements */
     .photo-container {
@@ -399,9 +363,9 @@ body.modal-open {
             </div>
             <div class="overlay"></div>
             <div class="d-flex align-items-center mt-3">
-                <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="me-3 download-button">
+                <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="me-3 download-button" id="downloadForm">
                     @csrf
-                    <button type="submit" class="btn btn-link p-0">
+                    <button type="button" class="btn btn-link p-0" id="downloadButton">
                         <i class="bi bi-download text-dark fw-bold fs-5"></i>
                     </button>
                 </form>
@@ -504,152 +468,170 @@ body.modal-open {
                 
                 <h6 class="text-start">Komentar</h6>
                 
+                <h6 class="text-start">Komentar</h6>
+                
                 @foreach($photo->comments as $comment)
                     @php
                         $isOwner = Auth::check() && Auth::id() === $comment->user_id;
-                        $hideComment = !$isOwner && $comment->banned;
+                        $isBanned = $comment->banned && $comment->ban_expires_at;
+                        $showBannedMessage = $isBanned && now()->lt($comment->ban_expires_at);
                         $report = $comment->reports->first();
                     @endphp
-
-                    @if(!$hideComment)
+                
+                    @if(!$isBanned || ($showBannedMessage && $isOwner))
                         <div class="card mb-2">
                             <div class="card-body p-2">
-                                <div class="d-flex align-items-center mb-1">
-                                    @if($comment->user->profile_photo)
-                                        <img src="{{ asset('storage/photo_profile/' . $comment->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">
-                                    @else
-                                        <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>
-                                    @endif
-                                    <strong>
-                                        <a href="{{ route('user.showProfile', $comment->user->username) }}" class="text-dark fw-bold text-decoration-none">
-                                            {{ $comment->user->username }}
-                                        </a>
-                                    </strong>
-                                    @if($comment->user->verified)
-                                        <i class="ti-medall-alt" style="color: gold;"></i>
-                                    @endif 
-                                    @if($comment->user->role === 'pro')
-                                        <i class="ti-star" style="color: gold;"></i>
-                                    @endif
-                                    @if($comment->user_id === $photo->user_id)
-                                        <span class="text">• Pembuat</span>
-                                    @endif
-                                </div>
-                                <p class="mb-1 ms-4">{{ $comment->comment }}</p>
-                                <div class="d-flex align-items-center ms-4 mt-1">
-                                    <small class="text-muted me-2" style="font-size: 13px;">
-                                        {{ $comment->created_at->diffForHumans() }}
-                                    </small>
-                                    @if(Auth::check())
-                                    <button class="btn btn-link p-0 reply-button" data-comment-id="{{ $comment->id }}">
-                                        <i class="bi bi-reply"></i>
-                                    </button>
-                                        <div class="dropdown ms-2">
-                                            <button class="btn btn-link p-0" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="bi bi-three-dots"></i>
-                                            </button>
-                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $comment->id }}">
-                                                @if($isOwner)
-                                                    <li>
-                                                        <button class="dropdown-item delete-comment" data-comment-id="{{ $comment->id }}">
-                                                            Hapus Komentar
-                                                        </button>
-                                                    </li>
-                                                @else
-                                                    <li>
-                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-{{ $comment->id }}">
-                                                            Lapor Komentar
-                                                        </button>
-                                                    </li>
-                                                @endif
-                                            </ul>
+                                @if($isBanned && $isOwner)
+                                    <div class="alert alert-warning p-2 mb-2">
+                                        Komentar anda telah ditangguhkan
+                                    </div>
+                                @else
+                                    <div class="d-flex align-items-center mb-1">
+                                        @if($comment->user->profile_photo)
+                                            <img src="{{ asset('storage/photo_profile/' . $comment->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">
+                                        @else
+                                            <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>
+                                        @endif
+                                        <strong>
+                                            <a href="{{ route('user.showProfile', $comment->user->username) }}" class="text-dark fw-bold text-decoration-none">
+                                                {{ $comment->user->username }}
+                                            </a>
+                                        </strong>
+                                        @if($comment->user->verified)
+                                            <i class="ti-medall-alt" style="color: gold;"></i>
+                                        @endif 
+                                        @if($comment->user->role === 'pro')
+                                            <i class="ti-star" style="color: gold;"></i>
+                                        @endif
+                                        @if($comment->user_id === $photo->user_id)
+                                            <span class="text">• Pembuat</span>
+                                        @endif
+                                    </div>
+                                    <p class="mb-1 ms-4">{{ $comment->comment }}</p>
+                                    <div class="d-flex align-items-center ms-4 mt-1">
+                                        <small class="text-muted me-2" style="font-size: 13px;">
+                                            {{ $comment->created_at->diffForHumans() }}
+                                        </small>
+                                        @if(Auth::check())
+                                        <button class="btn btn-link p-0 reply-button" data-comment-id="{{ $comment->id }}">
+                                            <i class="bi bi-reply"></i>
+                                        </button>
+                                            <div class="dropdown ms-2">
+                                                <button class="btn btn-link p-0" type="button" id="dropdownMenuButton-{{ $comment->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="bi bi-three-dots"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $comment->id }}">
+                                                    @if($isOwner)
+                                                        <li>
+                                                            <button class="dropdown-item delete-comment" data-comment-id="{{ $comment->id }}">
+                                                                Hapus Komentar
+                                                            </button>
+                                                        </li>
+                                                    @else
+                                                        <li>
+                                                            <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportCommentModal-{{ $comment->id }}">
+                                                                Lapor Komentar
+                                                            </button>
+                                                        </li>
+                                                    @endif
+                                                </ul>
+                                            </div>
+                                        @endif
+                                    </div>
+                                    @if(Auth::check() && !$isBanned)
+                                        <div class="reply-form" id="reply-form-{{ $comment->id }}" style="display: none;">
+                                            <form method="POST" action="{{ route('comments.reply', $comment->id) }}">
+                                                @csrf
+                                                <div class="input-group mb-3 ms-4">
+                                                    <input type="text" class="form-control" name="reply" placeholder="Tambahkan balasan..." required>
+                                                    <button class="btn btn-outline-secondary" type="submit">
+                                                        <i class="bi bi-send-fill text-dark fw-bold fs-5 rotate-90"></i>
+                                                    </button>
+                                                </div>
+                                            </form>
                                         </div>
                                     @endif
-                                </div>
-                                @if(Auth::check())
-                                    <div class="reply-form" id="reply-form-{{ $comment->id }}" style="display: none;">
-                                        <form method="POST" action="{{ route('comments.reply', $comment->id) }}">
-                                            @csrf
-                                            <div class="input-group mb-3 ms-4">
-                                                <input type="text" class="form-control" name="reply" placeholder="Tambahkan balasan..." required>
-                                                <button class="btn btn-outline-secondary" type="submit">
-                                                    <i class="bi bi-send-fill text-dark fw-bold fs-5 rotate-90"></i>
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
                                 @endif
                             </div>
                         </div>
-
-                        <!-- Replies -->
-                        @foreach($comment->replies as $reply)
-                            @php
-                                $hideReply = $comment->banned || (!$isOwner && $reply->banned);
-                            @endphp
-
-                            @if(!$hideReply)
-                                <div class="ms-4 mt-1">
-                                    <div class="card">
-                                        <div class="card-body p-2">
-                                            <div class="d-flex align-items-center mb-1">
-                                                @if($reply->user->profile_photo)
-                                                    <img src="{{ asset('storage/photo_profile/' . $reply->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">
+                
+                        <!-- Replies - Hanya tampilkan jika komentar tidak dibanned -->
+                        @if(!$isBanned)
+                            @foreach($comment->replies as $reply)
+                                @php
+                                    $isReplyOwner = Auth::check() && Auth::id() === $reply->user_id;
+                                    $isReplyBanned = $reply->banned && $reply->ban_expires_at;
+                                    $showReplyBannedMessage = $isReplyBanned && now()->lt($reply->ban_expires_at);
+                                @endphp
+                
+                                @if(!$isReplyBanned || ($showReplyBannedMessage && $isReplyOwner))
+                                    <div class="ms-4 mt-1">
+                                        <div class="card">
+                                            <div class="card-body p-2">
+                                                @if($isReplyBanned && $isReplyOwner)
+                                                    <div class="alert alert-warning p-2 mb-2">
+                                                        Balasan anda telah ditangguhkan
+                                                    </div>
                                                 @else
-                                                    <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>
-                                                @endif
-                                                <strong>
-                                                    <a href="{{ route('user.showProfile', $reply->user->username) }}" class="text-dark fw-bold text-decoration-none">
-                                                        {{ $reply->user->username }}
-                                                    </a>
-                                                </strong>
-                                                @if($reply->user->verified)
-                                                    <i class="ti-medall-alt" style="color: gold;"></i>
-                                                @endif 
-                                                @if($reply->user->role === 'pro')
-                                                    <i class="ti-star" style="color: gold;"></i>
-                                                @endif
-                                                @if($reply->user_id === $photo->user_id)
-                                                    <span class="text">• Pembuat</span>
-                                                @endif
-                                            </div>
-                                            <p class="mb-1 ms-4">{{ $reply->reply }}</p>
-                                            <div class="d-flex align-items-center ms-4 mt-1">
-                                                <small class="text-muted" style="font-size: 12px; margin-top: -2px;">
-                                                    {{ $reply->created_at->diffForHumans() }}
-                                                </small>
-                                            
-                                                <!-- Dropdown harus membungkus button -->
-                                                <div class="dropdown ms-2" style="margin-top: -15px;">
-                                                    @if (Auth::check())
-                                                        <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $reply->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                                            <i class="bi bi-three-dots"></i>
-                                                        </button>
-                                                        
-                                                    @endif
-                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $reply->id }}">
-                                                        @if($reply->user_id === Auth::id())
-                                                            <li>
-                                                                <button type="button" class="dropdown-item delete-reply" data-reply-id="{{ $reply->id }}">
-                                                                    Hapus Balasan
-                                                                </button>
-                                                            </li>
-                                                        @elseif (Auth::check())
-                                                            <li>
-                                                                <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportReplyModal-{{ $reply->id }}">
-                                                                    Lapor Balasan
-                                                                </button>
-                                                            </li>
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        @if($reply->user->profile_photo)
+                                                            <img src="{{ asset('storage/photo_profile/' . $reply->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">
+                                                        @else
+                                                            <img src="{{ asset('images/foto profil.jpg') }}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>
                                                         @endif
-                                                    </ul>
-                                                </div>
+                                                        <strong>
+                                                            <a href="{{ route('user.showProfile', $reply->user->username) }}" class="text-dark fw-bold text-decoration-none">
+                                                                {{ $reply->user->username }}
+                                                            </a>
+                                                        </strong>
+                                                        @if($reply->user->verified)
+                                                            <i class="ti-medall-alt" style="color: gold;"></i>
+                                                        @endif 
+                                                        @if($reply->user->role === 'pro')
+                                                            <i class="ti-star" style="color: gold;"></i>
+                                                        @endif
+                                                        @if($reply->user_id === $photo->user_id)
+                                                            <span class="text">• Pembuat</span>
+                                                        @endif
+                                                    </div>
+                                                    <p class="mb-1 ms-4">{{ $reply->reply }}</p>
+                                                    <div class="d-flex align-items-center ms-4 mt-1">
+                                                        <small class="text-muted" style="font-size: 12px; margin-top: -2px;">
+                                                            {{ $reply->created_at->diffForHumans() }}
+                                                        </small>
+                                                    
+                                                        <!-- Dropdown harus membungkus button -->
+                                                        <div class="dropdown ms-2" style="margin-top: -15px;">
+                                                            @if (Auth::check())
+                                                                <button class="btn btn-link" type="button" id="dropdownMenuButton-{{ $reply->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    <i class="bi bi-three-dots"></i>
+                                                                </button>
+                                                                
+                                                            @endif
+                                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $reply->id }}">
+                                                                @if($reply->user_id === Auth::id())
+                                                                    <li>
+                                                                        <button type="button" class="dropdown-item delete-reply" data-reply-id="{{ $reply->id }}">
+                                                                            Hapus Balasan
+                                                                        </button>
+                                                                    </li>
+                                                                @elseif (Auth::check())
+                                                                    <li>
+                                                                        <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#reportReplyModal-{{ $reply->id }}">
+                                                                            Lapor Balasan
+                                                                        </button>
+                                                                    </li>
+                                                                @endif
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                @endif
                                             </div>
-                                            
                                         </div>
                                     </div>
-                                </div>
-                            @endif
-                        @endforeach
+                                @endif
+                            @endforeach
+                        @endif
                     @endif
                 @endforeach
             </div>  
@@ -782,9 +764,9 @@ body.modal-open {
                             </label>
                         </div>
                     </div>
-                    <div class="form-group" id="description-group" style="display: none;">
-                        <label for="description">Alasan</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    <div class="form-group" id="photo-description-group" style="display: none;">
+                        <label for="photo-description">Alasan</label>
+                        <textarea class="form-control" id="photo-description" name="description" rows="3"></textarea>
                     </div>
                     <button type="submit" class="btn btn-danger">Laporkan</button>
                 </form>
@@ -836,9 +818,9 @@ body.modal-open {
                             </label>
                         </div>
                     </div>
-                    <div class="form-group" id="description-group" style="display: none;">
-                        <label for="description">Alasan</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    <div class="form-group" id="comment-description-group" style="display: none;">
+                        <label for="comment-description">Alasan</label>
+                        <textarea class="form-control" id="comment-description" name="description" rows="3"></textarea>
                     </div>
                     <button type="submit" class="btn btn-danger">Laporkan</button>
                 </form>
@@ -891,9 +873,9 @@ body.modal-open {
                             </label>
                         </div>
                     </div>
-                    <div class="form-group" id="description-group" style="display: none;">
-                        <label for="description">Alasan</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    <div class="form-group" id="reply-description-group" style="display: none;">
+                        <label for="reply-description">Alasan</label>
+                        <textarea class="form-control" id="reply-description" name="description" rows="3"></textarea>
                     </div>
                     <button type="submit" class="btn btn-danger">Laporkan</button>
                 </form>
@@ -905,13 +887,13 @@ body.modal-open {
 @endforeach
 
 <!-- Modal Zoom Foto -->
-<div id="photo-modal">
-    <span id="close-modal">&times;</span>
-    <img id="modal-img" class="img-fluid" alt="{{ $photo->title }}">
+<div id="photo-modal" class="photo-modal">
+    <span class="close-modal">&times;</span>
+    <img id="modal-img" class="modal-content">
     <div id="zoom-controls">
-        <button id="zoom-in">+</button>
-        <button id="zoom-out">-</button>
-        <button id="reset-zoom">Reset</button> <!-- Tombol reset zoom -->
+        <button id="zoom-in" class="btn btn-light rounded-circle"><i class="bi bi-zoom-in"></i></button>
+        <button id="zoom-out" class="btn btn-light rounded-circle"><i class="bi bi-zoom-out"></i></button>
+        <button id="reset-zoom" class="btn btn-light rounded-circle"><i class="bi bi-arrow-counterclockwise"></i></button>
     </div>
 </div>
 @endsection
@@ -978,13 +960,55 @@ document.addEventListener("DOMContentLoaded", function () {
             timerProgressBar: true
         });
     }
+    
+        function handleDownload(event) {
+            event.preventDefault(); // Biar form gak langsung submit
 
-    // ==================== FITUR ZOOM GAMBAR ====================
+            @if(!Auth::check())
+                Swal.fire({
+                    title: 'Login Required',
+                    text: 'Downloads as a guest will be low quality. Log in for high-quality downloads.',
+                    icon: 'info',
+                    showCancelButton: true,
+                    confirmButtonText: 'Log In',
+                    cancelButtonText: 'Continue as Guest',
+                    cancelButtonColor: '#d33',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ route('login') }}";
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        Swal.fire({
+                            title: 'Low Quality Download',
+                            text: 'Since you are a guest, this download will be in low resolution.',
+                            icon: 'warning',
+                            confirmButtonText: 'Proceed',
+                            cancelButtonText: 'Cancel',  // Tambahin tombol Cancel
+                            showCancelButton: true,      // Aktifin tombol Cancel
+                            reverseButtons: true
+                        }).then((res) => {
+                            if (res.isConfirmed) {
+                                document.getElementById('downloadForm').submit();
+                            }
+                            // Kalau user klik di luar modal atau cancel, gak ngapa-ngapain
+                        });
+                    }
+                });
+            @else
+                document.getElementById('downloadForm').submit();
+            @endif
+        }
+
+
+                // Tambahkan event listener hanya ke tombol download
+                document.getElementById("downloadButton").addEventListener("click", handleDownload);
+
+// ==================== FITUR ZOOM GAMBAR ====================
 
     // Inisialisasi modal zoom gambar
     const modal = document.getElementById("photo-modal");
     const modalImg = document.getElementById("modal-img");
-    const closeModal = document.getElementById("close-modal");
+    const closeModal = document.querySelector(".close-modal");
     const zoomInBtn = document.getElementById("zoom-in");
     const zoomOutBtn = document.getElementById("zoom-out");
     const resetZoomBtn = document.getElementById("reset-zoom");
@@ -1028,6 +1052,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (currentScale > 1) {
                 initialPosX = posX;
                 initialPosY = posY;
+                modalImg.style.cursor = 'grabbing';
             }
         });
 
@@ -1037,6 +1062,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 posY = initialPosY + e.deltaY;
                 updateTransform();
             }
+        });
+
+        hammer.on('panend', function() {
+            modalImg.style.cursor = currentScale > 1 ? 'grab' : 'default';
         });
 
         // Gesture pinch zoom
@@ -1628,11 +1657,100 @@ function showErrorAlert(message) {
     // ==================== FITUR LAINNYA ====================
 
     // Fungsi untuk menampilkan/menyembunyikan input deskripsi alasan lainnya
-    function toggleOtherReasonInput() {
-        document.querySelectorAll('input[name="reason"]').forEach(radio => {
-            radio.addEventListener("change", function() {
-                const isOther = this.value === "Lainnya";
-                document.getElementById("description-group").style.display = isOther ? "block" : "none";
+    function setupReportModals() {
+        // Event delegation for all report modals
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.name === 'reason') {
+                const modal = e.target.closest('.modal');
+                if (!modal) return;
+                
+                const isOther = e.target.value === "Lainnya";
+                let descriptionGroup, textarea;
+                
+                if (modal.id.startsWith('reportModal-')) {
+                    descriptionGroup = document.getElementById('photo-description-group');
+                    textarea = document.getElementById('photo-description');
+                } else if (modal.id.startsWith('reportCommentModal-')) {
+                    descriptionGroup = document.getElementById('comment-description-group');
+                    textarea = document.getElementById('comment-description');
+                } else if (modal.id.startsWith('reportReplyModal-')) {
+                    descriptionGroup = document.getElementById('reply-description-group');
+                    textarea = document.getElementById('reply-description');
+                }
+                
+                if (descriptionGroup) {
+                    descriptionGroup.style.display = isOther ? 'block' : 'none';
+                    if (textarea) {
+                        textarea.required = isOther;
+                        if (isOther) {
+                            textarea.focus(); // Auto-focus when "Lainnya" is selected
+                        }
+                    }
+                }
+            }
+        });
+
+        // Form submission validation
+        document.querySelectorAll('[id^="reportModal-"], [id^="reportCommentModal-"], [id^="reportReplyModal-"]').forEach(modal => {
+            const form = modal.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const selectedReason = form.querySelector('input[name="reason"]:checked');
+                    const isOther = selectedReason && selectedReason.value === "Lainnya";
+                    let textarea;
+                    
+                    if (modal.id.startsWith('reportModal-')) {
+                        textarea = document.getElementById('photo-description');
+                    } else if (modal.id.startsWith('reportCommentModal-')) {
+                        textarea = document.getElementById('comment-description');
+                    } else if (modal.id.startsWith('reportReplyModal-')) {
+                        textarea = document.getElementById('reply-description');
+                    }
+                    
+                    if (isOther && (!textarea || textarea.value.trim() === '')) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Harap isi alasan pelaporan',
+                            confirmButtonColor: '#3085d6',
+                        });
+                        textarea.focus();
+                    }
+                });
+            }
+        });
+
+        // Reset all report modals when closed
+        document.querySelectorAll('[id^="reportModal-"], [id^="reportCommentModal-"], [id^="reportReplyModal-"]').forEach(modal => {
+            modal.addEventListener('hidden.bs.modal', function() {
+                // Reset radio buttons
+                const radioButtons = modal.querySelectorAll('input[type="radio"]');
+                radioButtons.forEach(radio => {
+                    radio.checked = false;
+                });
+
+                // Hide and clear description field
+                let descriptionGroup, textarea;
+                
+                if (modal.id.startsWith('reportModal-')) {
+                    descriptionGroup = document.getElementById('photo-description-group');
+                    textarea = document.getElementById('photo-description');
+                } else if (modal.id.startsWith('reportCommentModal-')) {
+                    descriptionGroup = document.getElementById('comment-description-group');
+                    textarea = document.getElementById('comment-description');
+                } else if (modal.id.startsWith('reportReplyModal-')) {
+                    descriptionGroup = document.getElementById('reply-description-group');
+                    textarea = document.getElementById('reply-description');
+                }
+
+                if (descriptionGroup) {
+                    descriptionGroup.style.display = 'none';
+                }
+                if (textarea) {
+                    textarea.required = false;
+                    textarea.value = '';
+                }
             });
         });
     }
@@ -1897,9 +2015,9 @@ function showErrorAlert(message) {
     // ==================== INISIALISASI ====================
 
     // Panggil semua fungsi yang diperlukan
-    renderCanvasImgGuest();
+    renderCanvasImgGuest();    
     @endif
-    toggleOtherReasonInput();
+    setupReportModals();
     handleLikeButton();
     handleAddToAlbum();
     handleCreateAlbum();

@@ -2,131 +2,198 @@
 
 @push('link')
     <style>
-        /* Styling untuk header album */
-.album-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding: 25px;
-    background: linear-gradient(135deg, #32bd40, #2a9d36);
-    color: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
+        :root {
+            --primary-color: #3a86ff;
+            --success-color: #2a9d36;
+            --danger-color: #e63946;
+            --dark-color: #1d3557;
+            --light-color: #f1faee;
+        }
 
-/* Styling untuk nama album */
-.album-title {
-    font-size: 2.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-block;
-    position: relative;
-}
+        /* Album Header */
+        .album-header {
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
 
-.album-title:hover {
-    opacity: 0.8;
-}
+        .album-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-.album-title .edit-icon {
-    margin-left: 10px;
-    font-size: 1rem;
-    cursor: pointer;
-}
+        .album-title:hover {
+            opacity: 0.9;
+        }
 
-/* Styling untuk deskripsi album */
-.album-description {
-    font-size: 1.2rem;
-    font-style: italic;
-    margin-top: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    max-width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-}
+        .album-description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-.album-description:hover {
-    opacity: 0.8;
-}
+        .album-description:hover {
+            opacity: 1;
+        }
 
-.album-description .edit-icon {
-    margin-left: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-}
-/* Tampilan grid untuk foto */
-.photo-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px; /* Jarak antar foto */
-    margin-bottom: 30px; /* Beri jarak dengan footer */
-}
+        .edit-icon {
+            font-size: 0.8em;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+        }
 
-/* Kartu foto */
-.photo-grid .card {
-    flex: 1 1 calc(25% - 15px); /* 4 foto per baris */
-    max-width: calc(25% - 15px);
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+        .album-title:hover .edit-icon,
+        .album-description:hover .edit-icon {
+            opacity: 1;
+        }
 
-.photo-grid .card img {
-    width: 100%;
-    height: 200px; /* Sesuaikan tinggi foto */
-    object-fit: cover;
-}
+        /* Visibility Toggle */
+        .visibility-toggle {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
 
-/* Overlay untuk judul foto */
-.overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.5);
-    color: white;
-    padding: 10px;
-    text-align: center;
-}
+        .visibility-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
 
-/* Dropdown titik tiga horizontal */
-.dropdown-container {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
+        .visibility-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
 
-.dropdown-toggle {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-}
+        /* Photo Grid */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
 
-/* Footer */
-.footer {
-    margin-top: auto; /* Footer selalu di bawah */
-    padding: 20px 0;
-    background: #f8f9fa;
-    text-align: center;
-    border-top: 1px solid #ddd;
-}
+        .photo-card {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            aspect-ratio: 1;
+        }
 
-/* Responsif */
-@media (max-width: 768px) {
-    .photo-grid .card {
-        flex: 1 1 calc(50% - 15px); /* 2 foto per baris di layar kecil */
-        max-width: calc(50% - 15px);
-    }
-}
+        .photo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+            padding: 1rem;
+            color: white;
+        }
+
+        .photo-title {
+            font-weight: 600;
+            margin-bottom: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .photo-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+        }
+
+        .photo-menu-btn {
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .photo-menu-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+            
+            .album-title {
+                font-size: 1.5rem;
+            }
+            
+            .visibility-toggle {
+                position: static;
+                margin-top: 1rem;
+                justify-content: flex-end;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .photo-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
     </style>
 @endpush
 
 @section('content')
-<div class="container mt-4">
-    <!-- Judul dan Deskripsi Album -->
+<div class="container py-4">
+    <!-- Album Header -->
     <div class="album-header">
         <h2 id="album-title" class="album-title editable" data-id="{{ $album->id }}">
             {{ $album->name }}
@@ -134,135 +201,261 @@
                 <i class="fas fa-pencil-alt edit-icon"></i>
             @endif
         </h2>
+        
         <p id="album-description" class="album-description editable" data-id="{{ $album->id }}">
             {{ $album->description }}
             @if(Auth::check() && Auth::id() === $album->user_id)
                 <i class="fas fa-pencil-alt edit-icon"></i>
             @endif
         </p>
-    </div>
-
-    <!-- Daftar Foto -->
-    <div class="row">
-        @if($album->photos->isEmpty())
-            <div class="col-md-12 text-center">
-                <p>Album ini belum memiliki foto.</p>
-                <a href="{{ route('home') }}" class="btn btn-primary">Tambahkan foto ke album Anda</a>
-            </div>
-        @else
-            <div class="photo-grid">
-                @foreach($album->photos as $photo)
-                    <div class="card card-pin">
-                        <a href="{{ route('photos.show', $photo->id) }}">
-                            <img class="card-img" src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
-                            <div class="overlay">
-                                <h2 class="card-title title">{{ $photo->title }}</h2>
-                            </div>
-                        </a>
-                        <!-- Dropdown Hapus Foto (Hanya untuk Pemilik Album) -->
-                        @if(Auth::check() && Auth::id() === $album->user_id)
-                            <div class="dropdown-container">
-                                <button class="dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                    &#8942; <!-- Unicode untuk titik tiga horizontal -->
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <li>
-                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#deletePhotoModal-{{ $photo->id }}">
-                                            <i class="fas fa-trash"></i> Hapus Foto
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Modal Hapus Foto -->
-                    @if(Auth::check() && Auth::id() === $album->user_id)
-                        <div class="modal fade" id="deletePhotoModal-{{ $photo->id }}" tabindex="-1" role="dialog" aria-labelledby="deletePhotoModalLabel" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="deletePhotoModalLabel">Konfirmasi Hapus Foto</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Apakah Anda yakin ingin menghapus foto ini dari album?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                        <form action="{{ route('albums.removePhoto', ['albumId' => $album->id, 'photoId' => $photo->id]) }}" method="POST">
-                                            @csrf
-                                            @method('POST')
-                                            <button type="submit" class="btn btn-danger">Hapus</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                @endforeach
+        
+        @if(Auth::check() && Auth::id() === $album->user_id && Auth::user()->role === 'pro')
+            <div class="visibility-toggle" id="visibility-toggle" data-id="{{ $album->id }}">
+                <i class="fas {{ $album->status ? 'fa-eye' : 'fa-eye-slash' }}"></i>
+                <span class="visibility-text">{{ $album->status ? 'Publik' : 'Privat' }}</span>
             </div>
         @endif
+    </div>
+
+    <!-- Photo Grid -->
+    @if($album->photos->isEmpty())
+        <div class="empty-state">
+            <i class="fas fa-images fa-3x mb-3" style="color: #ddd;"></i>
+            <h4>Album ini masih kosong</h4>
+            <p class="text-muted">Tambahkan foto untuk mengisi album Anda</p>
+            <a href="{{ route('home') }}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus"></i> Tambahkan Foto
+            </a>
+        </div>
+    @else
+        <div class="photo-grid">
+            @foreach($album->photos as $photo)
+                <div class="photo-card">
+                    <a href="{{ route('photos.show', $photo->id) }}">
+                        <img src="{{ asset('storage/' . $photo->path) }}" alt="{{ $photo->title }}">
+                        <div class="photo-overlay">
+                            <h3 class="photo-title">{{ $photo->title }}</h3>
+                        </div>
+                    </a>
+                    
+                    @if(Auth::check() && Auth::id() === $album->user_id)
+                        <div class="photo-actions">
+                            <button class="photo-menu-btn" data-photo-id="{{ $photo->id }}">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    @endif
+</div>
+
+<!-- Delete Photo Modal (Dynamic content will be inserted by JavaScript) -->
+<div class="modal fade" id="deletePhotoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Hapus Foto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus foto ini dari album?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete">Hapus</button>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Fungsi untuk membuat elemen editable
+    // CSRF Token for AJAX requests
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // Make elements editable (title and description)
     function makeEditable(element, type) {
         const id = element.getAttribute('data-id');
         const originalText = element.textContent.trim();
-        const input = document.createElement('input');
-        input.type = 'text';
+        
+        // Create input element
+        const input = document.createElement(type === 'description' ? 'textarea' : 'input');
         input.value = originalText;
-        input.classList.add('form-control');
-        input.addEventListener('blur', function () {
-            saveChanges(element, input.value, type, id);
-        });
-        input.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                saveChanges(element, input.value, type, id);
+        input.className = 'form-control';
+        
+        // For description textarea
+        if (type === 'description') {
+            input.rows = 3;
+        }
+        
+        // Handle save on blur or Enter key
+        const saveChanges = () => {
+            const newValue = input.value.trim();
+            if (newValue !== originalText) {
+                updateAlbumField(id, type, newValue);
+            } else {
+                element.innerHTML = `${originalText} <i class="fas fa-pencil-alt edit-icon"></i>`;
+            }
+        };
+        
+        input.addEventListener('blur', saveChanges);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && type !== 'description') {
+                saveChanges();
             }
         });
+        
+        // Replace element content with input
         element.innerHTML = '';
         element.appendChild(input);
         input.focus();
     }
-
-    // Fungsi untuk menyimpan perubahan
-    function saveChanges(element, newValue, type, id) {
-        const url = type === 'title' ? `/albums/${id}/updateTitle` : `/albums/${id}/updateDescription`;
-        const token = '{{ csrf_token() }}';
-
-        fetch(url, {
+    
+    // Update album field via AJAX
+    function updateAlbumField(albumId, field, value) {
+        const endpoint = `/albums/${albumId}/update${field.charAt(0).toUpperCase() + field.slice(1)}`;
+        
+        fetch(endpoint, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token
+                'X-CSRF-TOKEN': csrfToken
             },
-            body: JSON.stringify({ [type]: newValue })
+            body: JSON.stringify({ [field]: value })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                element.innerHTML = `${data[type]} <i class="fas fa-pencil-alt edit-icon"></i>`;
-            } else {
-                element.innerHTML = `${originalText} <i class="fas fa-pencil-alt edit-icon"></i>`;
+                // Update UI
+                const element = document.getElementById(`album-${field}`);
+                element.innerHTML = `${data[field]} <i class="fas fa-pencil-alt edit-icon"></i>`;
+                
+                // Show success notification
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: `Album ${field} telah diperbarui`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            element.innerHTML = `${originalText} <i class="fas fa-pencil-alt edit-icon"></i>`;
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Terjadi kesalahan saat memperbarui album'
+            });
         });
     }
-
-    // Tambahkan event listener untuk elemen editable
+    
+    // Toggle album visibility (for Pro users)
+    const visibilityToggle = document.getElementById('visibility-toggle');
+    if (visibilityToggle) {
+        visibilityToggle.addEventListener('click', function() {
+            const albumId = this.getAttribute('data-id');
+            const icon = this.querySelector('i');
+            const text = this.querySelector('.visibility-text');
+            const isPublic = icon.classList.contains('fa-eye');
+            
+            fetch(`/albums/${albumId}/toggleVisibility`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ status: isPublic ? 0 : 1 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI
+                    if (data.status) {
+                        icon.classList.replace('fa-eye-slash', 'fa-eye');
+                        text.textContent = 'Publik';
+                    } else {
+                        icon.classList.replace('fa-eye', 'fa-eye-slash');
+                        text.textContent = 'Privat';
+                    }
+                    
+                    // Show notification
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Visibilitas Diubah',
+                        text: `Album sekarang ${data.status ? 'Publik' : 'Privat'}`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: 'Terjadi kesalahan saat mengubah visibilitas'
+                });
+            });
+        });
+    }
+    
+    // Photo delete functionality
+    const deleteModal = new bootstrap.Modal(document.getElementById('deletePhotoModal'));
+    let currentPhotoId = null;
+    let currentAlbumId = {{ $album->id }};
+    
+    document.querySelectorAll('.photo-menu-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            currentPhotoId = this.getAttribute('data-photo-id');
+            deleteModal.show();
+        });
+    });
+    
+    document.getElementById('confirm-delete').addEventListener('click', function() {
+        fetch(`/albums/${currentAlbumId}/removePhoto/${currentPhotoId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                deleteModal.hide();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Foto Dihapus',
+                    text: 'Foto telah dihapus dari album',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload(); // Refresh after delete
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Terjadi kesalahan saat menghapus foto'
+            });
+        });
+    });
+    
+    // Add click handlers for editable elements
     document.querySelectorAll('.editable').forEach(element => {
         if (element.querySelector('.edit-icon')) {
-            element.addEventListener('click', function () {
-                const type = element.id === 'album-title' ? 'title' : 'description';
+            element.addEventListener('click', function() {
+                const type = this.id.includes('title') ? 'title' : 'description';
                 makeEditable(element, type);
             });
         }

@@ -1,311 +1,715 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-3">
-    <div class="text-center">
-        <img src="{{ $user->profile_photo_url }}" class="img-lg rounded-circle mb-2" alt="profile image" />
-        <h4>{{ $user->name }}</h4>
-        <p class="text-muted mb-0">{{ $user->username }}</p>
+<style>
+    .subscription-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .creator-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .creator-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #10b981;
+        margin-bottom: 1rem;
+    }
+    .creator-name {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+    }
+    .creator-username {
+        font-size: 1.1rem;
+        color: #4a5568;
+    }
+    .section-title {
+        text-align: center;
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 3rem 0 2rem;
+        position: relative;
+    }
+    .section-title:after {
+        content: '';
+        display: block;
+        width: 80px;
+        height: 4px;
+        background: #10b981;
+        margin: 0.5rem auto 0;
+        border-radius: 2px;
+    }
+    .subscription-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+    }
+    .subscription-card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+    .subscription-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    .card-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .card-header h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    .card-price {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
+    .card-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1.5rem 0;
+    }
+    .card-features li {
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .card-features li:last-child {
+        border-bottom: none;
+    }
+    .card-features i {
+        margin-right: 0.75rem;
+        font-size: 1.25rem;
+    }
+    .bi-check-circle {
+        color: #10b981;
+    }
+    .card-button {
+        display: block;
+        width: 100%;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+    }
+    .btn-disabled {
+        background-color: #f1f5f9;
+        color: #94a3b8;
+        cursor: not-allowed;
+    }
+    .combo-card .card-header {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+    .combo-card .btn-primary {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+    .combo-card .btn-primary:hover {
+        background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        box-shadow: 0 4px 6px rgba(124, 58, 237, 0.2);
+    }
+    .price-per-month {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    .subscription-status {
+        background-color: #f0fdf4;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 5px solid #10b981;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<div class="subscription-container">
+    <div class="creator-header">
+        <img src="{{ $user->profile_photo_url }}" class="creator-avatar" alt="{{ $user->name }}">
+        <h1 class="creator-name">{{ $user->name }}</h1>
+        <p class="creator-username">{{ $user->username }}</p>
     </div>
-    <h3 class="mt-5 mb-3 text-center">Pilih Paket Langganan</h3>
-    @if($duration && $endDateFormatted)
-        <p>Anda memiliki paket langganan {{ $duration }}, yang akan berakhir pada {{ $endDateFormatted }}.</p>
+
+    @if($existingDuration > 0)
+    <div class="subscription-status">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-1">Your Current Subscription</h4>
+                <p class="mb-0">You have an active subscription for <strong>{{ $duration }}</strong> 
+                   that will end on <strong>{{ $endDateFormatted }}</strong>.</p>
+            </div>
+            <span class="badge badge-success">Active</span>
+        </div>
+    </div>
     @endif
 
-    @php
-        $count = 0;
-        if($subscriptionPrices->price_1_month) $count++;
-        if($subscriptionPrices->price_3_months) $count++;
-        if($subscriptionPrices->price_6_months) $count++;
-        if($subscriptionPrices->price_1_year) $count++;
-        $colSize = $count == 1 ? 'col-md-12' : ($count == 2 ? 'col-md-6' : 'col-md-4');
-    @endphp
-
-    <div class="d-flex justify-content-center">
-        <div class="row">
-            @if($subscriptionPrices)
-                @if($subscriptionPrices->price_1_month)
-                    <div class="{{ $colSize }}">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">1 Bulan</h5>
-                                <p class="card-text">Rp. {{ number_format($subscriptionPrices->price_1_month, 0, ',', '.') }}</p>
-                                @if($existingDuration >= 1)
-                                    <button class="btn btn-success text-white" disabled>Langganan</button>
-                                @else
-                                    <button class="btn btn-success text-white" onclick="buySubscription('{{ $subscriptionPrices->price_1_month }}', '1_month')">Langganan</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
+    <h2 class="section-title">Creator Subscriptions</h2>
+    
+    <div class="subscription-cards">
+        @if($subscriptionPrices->price_1_month)
+        <div class="subscription-card">
+            <div class="card-header">
+                <h3>1 Month</h3>
+                <div class="card-price">Rp {{ number_format($subscriptionPrices->price_1_month, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ number_format($subscriptionPrices->price_1_month / 1, 0, ',', '.') }}/month</div>
+            </div>
+            <div class="card-body">
+                <ul class="card-features">
+                    <li><i class="bi bi-check-circle"></i> Access to exclusive content</li>
+                    <li><i class="bi bi-check-circle"></i> Direct messages</li>
+                    <li><i class="bi bi-check-circle"></i> Behind-the-scenes</li>
+                </ul>
+                @if($existingDuration >= 1)
+                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @else
+                    <button class="card-button btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_1_month }}', '1_month')">
+                        Subscribe Now
+                    </button>
                 @endif
-                @if($subscriptionPrices->price_3_months)
-                    <div class="{{ $colSize }} mb-3">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">3 Bulan</h5>
-                                <p class="card-text">Rp. {{ number_format($subscriptionPrices->price_3_months, 0, ',', '.') }}</p>
-                                @if($existingDuration >= 3)
-                                    <button class="btn btn-success text-white" disabled>Langganan</button>
-                                @else
-                                    <button class="btn btn-success text-white" onclick="buySubscription('{{ $subscriptionPrices->price_3_months }}', '3_months')">Langganan</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                @if($subscriptionPrices->price_6_months)
-                    <div class="{{ $colSize }} mb-3">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">6 Bulan</h5>
-                                <p class="card-text">Rp. {{ number_format($subscriptionPrices->price_6_months, 0, ',', '.') }}</p>
-                                @if($existingDuration >= 6)
-                                    <button class="btn btn-success text-white" disabled>Langganan</button>
-                                @else
-                                    <button class="btn btn-success text-white" onclick="buySubscription('{{ $subscriptionPrices->price_6_months }}', '6_months')">Langganan</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                @if($subscriptionPrices->price_1_year)
-                    <div class="{{ $colSize }} mb-2">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">1 Tahun</h5>
-                                <p class="card-text">Rp. {{ number_format($subscriptionPrices->price_1_year, 0, ',', '.') }}</p>
-                                @if($existingDuration >= 12)
-                                    <button class="btn btn-success text-white" disabled>Langganan</button>
-                                @else
-                                    <button class="btn btn-success text-white" onclick="buySubscription('{{ $subscriptionPrices->price_1_year }}', '1_year')">Langganan</button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-            @else
-                <p class="text-center">Pengguna ini belum menetapkan harga langganan.</p>
-            @endif
+            </div>
         </div>
+        @endif
+        
+        @if($subscriptionPrices->price_3_months)
+        <div class="subscription-card">
+            <div class="card-header">
+                <h3>3 Months</h3>
+                <div class="card-price">Rp {{ number_format($subscriptionPrices->price_3_months, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ number_format($subscriptionPrices->price_3_months / 3, 0, ',', '.') }}/month</div>
+            </div>
+            <div class="card-body">
+                <ul class="card-features">
+                    <li><i class="bi bi-check-circle"></i> All 1-month benefits</li>
+                    <li><i class="bi bi-check-circle"></i> Exclusive live streams</li>
+                    <li><i class="bi bi-check-circle"></i> Early access to content</li>
+                </ul>
+                @if($existingDuration >= 3)
+                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @else
+                    <button class="card-button btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_3_months }}', '3_months')">
+                        Subscribe Now
+                    </button>
+                @endif
+            </div>
+        </div>
+        @endif
+        
+        @if($subscriptionPrices->price_6_months)
+        <div class="subscription-card">
+            <div class="card-header">
+                <h3>6 Months</h3>
+                <div class="card-price">Rp {{ number_format($subscriptionPrices->price_6_months, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ number_format($subscriptionPrices->price_6_months / 6, 0, ',', '.') }}/month</div>
+            </div>
+            <div class="card-body">
+                <ul class="card-features">
+                    <li><i class="bi bi-check-circle"></i> All 3-month benefits</li>
+                    <li><i class="bi bi-check-circle"></i> Personalized content</li>
+                    <li><i class="bi bi-check-circle"></i> Monthly Q&A sessions</li>
+                </ul>
+                @if($existingDuration >= 6)
+                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @else
+                    <button class="card-button btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_6_months }}', '6_months')">
+                        Subscribe Now
+                    </button>
+                @endif
+            </div>
+        </div>
+        @endif
+        
+        @if($subscriptionPrices->price_1_year)
+        <div class="subscription-card">
+            <div class="card-header">
+                <h3>1 Year</h3>
+                <div class="card-price">Rp {{ number_format($subscriptionPrices->price_1_year, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ number_format($subscriptionPrices->price_1_year / 12, 0, ',', '.') }}/month</div>
+            </div>
+            <div class="card-body">
+                <ul class="card-features">
+                    <li><i class="bi bi-check-circle"></i> All 6-month benefits</li>
+                    <li><i class="bi bi-check-circle"></i> Annual surprise gift</li>
+                    <li><i class="bi bi-check-circle"></i> Priority requests</li>
+                </ul>
+                @if($existingDuration >= 12)
+                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @else
+                    <button class="card-button btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_1_year }}', '1_year')">
+                        Subscribe Now
+                    </button>
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
 
-    <h3 class="mt-5 mb-3 text-center">Pilih Paket Langganan Kombo</h3>
-
-    @php
-        $countCombo = 0;
-        if($subscriptionPrices->price_1_month) $countCombo++;
-        if($subscriptionPrices->price_3_months) $countCombo++;
-        if($subscriptionPrices->price_6_months) $countCombo++;
-        if($subscriptionPrices->price_1_year) $countCombo++;
-        $colSizeCombo = $countCombo == 1 ? 'col-md-12' : ($countCombo == 2 ? 'col-md-6' : 'col-md-4');
-    @endphp
-
-    <div class="d-flex justify-content-center">
-        <div class="row">
-            @if($subscriptionPrices->price_1_month)
-                @php
-                    $comboPrice1Month = $systemPrices->where('duration', '1_month')->first()->price + $subscriptionPrices->price_1_month;
-                @endphp
-                <div class="{{ $colSizeCombo }} mb-3">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">1 Bulan</h5>
-                            <p class="card-text">Rp. {{ number_format($comboPrice1Month, 0, ',', '.') }}</p>
-                            @if($existingDuration >= 1)
-                                <button class="btn btn-success text-white" id="combo_1_month" disabled>Langganan Kombo</button>
-                            @else
-                                <button class="btn btn-success text-white" id="combo_1_month" onclick="buyComboSubscription('{{ $comboPrice1Month }}', '1_month')">Langganan Kombo</button>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
-            @if($subscriptionPrices->price_3_months)
-                @php
-                    $comboPrice3Months = $systemPrices->where('duration', '3_months')->first()->price + $subscriptionPrices->price_3_months;
-                @endphp
-                <div class="{{ $colSizeCombo }} mb-3">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">3 Bulan</h5>
-                            <p class="card-text">Rp. {{ number_format($comboPrice3Months, 0, ',', '.') }}</p>
-                            @if($existingDuration >= 3)
-                                <button class="btn btn-success text-white" id="combo_3_months" disabled>Langganan Kombo</button>
-                            @else
-                                <button class="btn btn-success text-white" id="combo_3_months" onclick="buyComboSubscription('{{ $comboPrice3Months }}', '3_months')">Langganan Kombo</button>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
-            @if($subscriptionPrices->price_6_months)
-                @php
-                    $comboPrice6Months = $systemPrices->where('duration', '6_months')->first()->price + $subscriptionPrices->price_6_months;
-                @endphp
-                <div class="{{ $colSizeCombo }} mb-3">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">6 Bulan</h5>
-                            <p class="card-text">Rp. {{ number_format($comboPrice6Months, 0, ',', '.') }}</p>
-                            @if($existingDuration >= 6)
-                                <button class="btn btn-success text-white" id="combo_6_months" disabled>Langganan Kombo</button>
-                            @else
-                                <button class="btn btn-success text-white" id="combo_6_months" onclick="buyComboSubscription('{{ $comboPrice6Months }}', '6_months')">Langganan Kombo</button>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
-            @if($subscriptionPrices->price_1_year)
-                @php
-                    $comboPrice1Year = $systemPrices->where('duration', '1_year')->first()->price + $subscriptionPrices->price_1_year;
-                @endphp
-                <div class="{{ $colSizeCombo }} mb-3">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h5 class="card-title">1 Tahun</h5>
-                            <p class="card-text">Rp. {{ number_format($comboPrice1Year, 0, ',', '.') }}</p>
-                            @if($existingDuration >= 12)
-                                <button class="btn btn-success text-white" id="combo_1_year" disabled>Langganan Kombo</button>
-                            @else
-                                <button class="btn btn-success text-white" id="combo_1_year" onclick="buyComboSubscription('{{ $comboPrice1Year }}', '1_year')">Langganan Kombo</button>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
+    <h2 class="section-title">Combo Subscriptions</h2>
+    
+    <div class="subscription-cards">
+        @if($subscriptionPrices->price_1_month)
+        @php
+            $comboPrice1Month = $systemPrices->where('duration', '1_month')->first()->price + $subscriptionPrices->price_1_month;
+        @endphp
+        <div class="subscription-card combo-card">
+            <div class="card-header">
+                <h3>1 Month Combo</h3>
+                <div class="card-price">Rp {{ number_format($comboPrice1Month, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ number_format($comboPrice1Month / 1, 0, ',', '.') }}/month</div>
+            </div>
+            <div class="card-body">
+                <ul class="card-features">
+                    <li><i class="bi bi-check-circle"></i> All creator benefits</li>
+                    <li><i class="bi bi-check-circle"></i> Plus system features</li>
+                    <li><i class="bi bi-check-circle"></i> Best value package</li>
+                </ul>
+                @if($existingDuration >= 1)
+                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @else
+                    <button class="card-button btn-primary" onclick="buyComboSubscription('{{ $comboPrice1Month }}', '1_month')">
+                        Subscribe Now
+                    </button>
+                @endif
+            </div>
         </div>
+        @endif
+        
+        @if($subscriptionPrices->price_3_months)
+        @php
+            $comboPrice3Months = $systemPrices->where('duration', '3_months')->first()->price + $subscriptionPrices->price_3_months;
+        @endphp
+        <div class="subscription-card combo-card">
+            <div class="card-header">
+                <h3>3 Months Combo</h3>
+                <div class="card-price">Rp {{ number_format($comboPrice3Months, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ number_format($comboPrice3Months / 3, 0, ',', '.') }}/month</div>
+            </div>
+            <div class="card-body">
+                <ul class="card-features">
+                    <li><i class="bi bi-check-circle"></i> All creator benefits</li>
+                    <li><i class="bi bi-check-circle"></i> Plus system features</li>
+                    <li><i class="bi bi-check-circle"></i> Best value package</li>
+                </ul>
+                @if($existingDuration >= 3)
+                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @else
+                    <button class="card-button btn-primary" onclick="buyComboSubscription('{{ $comboPrice3Months }}', '3_months')">
+                        Subscribe Now
+                    </button>
+                @endif
+            </div>
+        </div>
+        @endif
+        
+        @if($subscriptionPrices->price_6_months)
+        @php
+            $comboPrice6Months = $systemPrices->where('duration', '6_months')->first()->price + $subscriptionPrices->price_6_months;
+        @endphp
+        <div class="subscription-card combo-card">
+            <div class="card-header">
+                <h3>6 Months Combo</h3>
+                <div class="card-price">Rp {{ number_format($comboPrice6Months, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ number_format($comboPrice6Months / 6, 0, ',', '.') }}/month</div>
+            </div>
+            <div class="card-body">
+                <ul class="card-features">
+                    <li><i class="bi bi-check-circle"></i> All creator benefits</li>
+                    <li><i class="bi bi-check-circle"></i> Plus system features</li>
+                    <li><i class="bi bi-check-circle"></i> Best value package</li>
+                </ul>
+                @if($existingDuration >= 6)
+                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @else
+                    <button class="card-button btn-primary" onclick="buyComboSubscription('{{ $comboPrice6Months }}', '6_months')">
+                        Subscribe Now
+                    </button>
+                @endif
+            </div>
+        </div>
+        @endif
+        
+        @if($subscriptionPrices->price_1_year)
+        @php
+            $comboPrice1Year = $systemPrices->where('duration', '1_year')->first()->price + $subscriptionPrices->price_1_year;
+        @endphp
+        <div class="subscription-card combo-card">
+            <div class="card-header">
+                <h3>1 Year Combo</h3>
+                <div class="card-price">Rp {{ number_format($comboPrice1Year, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ number_format($comboPrice1Year / 12, 0, ',', '.') }}/month</div>
+            </div>
+            <div class="card-body">
+                <ul class="card-features">
+                    <li><i class="bi bi-check-circle"></i> All creator benefits</li>
+                    <li><i class="bi bi-check-circle"></i> Plus system features</li>
+                    <li><i class="bi bi-check-circle"></i> Best value package</li>
+                </ul>
+                @if($existingDuration >= 12)
+                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @else
+                    <button class="card-button btn-primary" onclick="buyComboSubscription('{{ $comboPrice1Year }}', '1_year')">
+                        Subscribe Now
+                    </button>
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 
+<!-- Midtrans SDK -->
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function buySubscription(price, package) {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        
+        // Show loading state
+        button.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Processing...
+        `;
+        button.disabled = true;
+        
+        Swal.fire({
+            title: 'Processing Payment',
+            html: 'Preparing your subscription...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         fetch('{{ route('subscription.subscribe', ['username' => $user->username]) }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({ subscription_price_id: price, package: package })
+            body: JSON.stringify({ 
+                package: package,
+                _token: '{{ csrf_token() }}'
+            })
         })
-        .then(response => response.json())
+        .then(async response => {
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Payment processing failed');
+            }
+            return response.json();
+        })
         .then(data => {
-            console.log(data);
+            Swal.close();
+            button.innerHTML = originalText;
+            button.disabled = false;
+            
             if (data.snap_token) {
                 snap.pay(data.snap_token, {
                     onSuccess: function(result) {
-                        alert('Pembayaran berhasil!');
+                        showSuccessAlert('Payment Successful!', 'Your subscription has been activated.');
                         checkTransactionStatus(result.order_id);
                     },
                     onPending: function(result) {
-                        alert('Menunggu pembayaran...');
+                        showInfoAlert('Payment Pending', 'Please complete your payment to activate subscription.');
                         checkTransactionStatus(result.order_id);
                     },
                     onError: function(result) {
-                        alert('Pembayaran gagal!');
+                        showPaymentError(result);
                     },
                     onClose: function() {
-                        alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+                        showWarningAlert('Payment Cancelled', 'You closed the payment popup without completing the transaction.');
                     }
                 });
             } else {
-                alert('Terjadi kesalahan, coba lagi!');
+                throw new Error('Failed to get payment token');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan dalam permintaan pembayaran.');
+            button.innerHTML = originalText;
+            button.disabled = false;
+            Swal.fire({
+                icon: 'error',
+                title: 'Payment Failed',
+                text: error.message || 'An error occurred during payment processing',
+                confirmButtonColor: '#3b82f6',
+            });
         });
     }
 
     function buyComboSubscription(price, duration) {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        
+        // Show loading state
+        button.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Processing...
+        `;
+        button.disabled = true;
+        
+        Swal.fire({
+            title: 'Processing Payment',
+            html: 'Preparing your subscription...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         fetch('{{ route('subscription.subscribeCombo', ['username' => $user->username]) }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({ combo_price: price, duration: duration })
+            body: JSON.stringify({ 
+                combo_price: price,
+                duration: duration,
+                _token: '{{ csrf_token() }}'
+            })
         })
-        .then(response => response.json())
+        .then(async response => {
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Payment processing failed');
+            }
+            return response.json();
+        })
         .then(data => {
-            console.log(data);
+            Swal.close();
+            button.innerHTML = originalText;
+            button.disabled = false;
+            
             if (data.snap_token) {
                 snap.pay(data.snap_token, {
                     onSuccess: function(result) {
-                        alert('Pembayaran berhasil!');
-                        checkTransactionStatusCombo(result.order_id);
+                        showSuccessAlert('Payment Successful!', 'Your combo subscription has been activated.');
+                        checkComboTransactionStatus(result.order_id);
                     },
                     onPending: function(result) {
-                        alert('Menunggu pembayaran...');
-                        checkTransactionStatusCombo(result.order_id);
+                        showInfoAlert('Payment Pending', 'Please complete your payment to activate subscription.');
+                        checkComboTransactionStatus(result.order_id);
                     },
                     onError: function(result) {
-                        alert('Pembayaran gagal!');
+                        showPaymentError(result);
                     },
                     onClose: function() {
-                        alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+                        showWarningAlert('Payment Cancelled', 'You closed the payment popup without completing the transaction.');
                     }
                 });
             } else {
-                alert('Terjadi kesalahan, coba lagi!');
+                throw new Error('Failed to get payment token');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan dalam permintaan pembayaran.');
+            button.innerHTML = originalText;
+            button.disabled = false;
+            Swal.fire({
+                icon: 'error',
+                title: 'Payment Failed',
+                text: error.message || 'An error occurred during payment processing',
+                confirmButtonColor: '#8b5cf6',
+            });
         });
     }
 
     function checkTransactionStatus(orderId) {
+        Swal.fire({
+            title: 'Verifying Payment',
+            html: 'Please wait while we verify your payment...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         fetch('{{ route('transaction.checkStatusUser') }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({ order_id: orderId })
+            body: JSON.stringify({ 
+                order_id: orderId,
+                _token: '{{ csrf_token() }}'
+            })
         })
-        .then(response => response.json())
+        .then(async response => {
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Verification failed');
+            }
+            return response.json();
+        })
         .then(data => {
-            console.log(data);
             if (data.status === 'success') {
-                alert('Status transaksi berhasil diperbarui.');
-                window.location.href = data.redirect_url; // Arahkan ke halaman profil akun yang dilanggan
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Subscription Activated!',
+                    text: 'Your creator subscription is now active.',
+                    confirmButtonColor: '#3b82f6',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    willClose: () => {
+                        window.location.reload();
+                    }
+                });
             } else {
-                alert('Gagal memperbarui status transaksi.');
+                throw new Error(data.message || 'Verification failed');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan dalam memeriksa status transaksi.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Verification Failed',
+                text: error.message || 'Failed to verify payment status',
+                confirmButtonColor: '#3b82f6',
+            });
         });
     }
 
-    function checkTransactionStatusCombo(orderId) {
+    function checkComboTransactionStatus(orderId) {
+        Swal.fire({
+            title: 'Verifying Payment',
+            html: 'Please wait while we verify your payment...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         fetch('{{ route('transaction.checkStatusCombo') }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({ order_id: orderId })
+            body: JSON.stringify({ 
+                order_id: orderId,
+                _token: '{{ csrf_token() }}'
+            })
         })
-        .then(response => response.json())
+        .then(async response => {
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Verification failed');
+            }
+            return response.json();
+        })
         .then(data => {
-            console.log(data);
             if (data.status === 'success') {
-                alert('Status transaksi berhasil diperbarui.');
-                window.location.href = data.redirect_url; // Arahkan ke halaman profil akun yang dilanggan
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Subscription Activated!',
+                    text: 'Your combo subscription is now active.',
+                    confirmButtonColor: '#8b5cf6',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    willClose: () => {
+                        window.location.reload();
+                    }
+                });
             } else {
-                alert('Gagal memperbarui status transaksi.');
+                throw new Error(data.message || 'Verification failed');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan dalam memeriksa status transaksi.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Verification Failed',
+                text: error.message || 'Failed to verify payment status',
+                confirmButtonColor: '#8b5cf6',
+            });
+        });
+    }
+
+    function showPaymentError(result) {
+        let errorMessage = 'Payment failed. Please try again.';
+        
+        if (result.status_code === '202') {
+            errorMessage = 'Transaction was denied by your bank.';
+        } else if (result.status_code === '400') {
+            errorMessage = 'Invalid payment data.';
+        } else if (result.status_message) {
+            errorMessage = result.status_message;
+        }
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Payment Failed',
+            html: `
+                <div class="text-left">
+                    <p>${errorMessage}</p>
+                    ${result.status_code ? `<p class="mb-1"><strong>Error Code:</strong> ${result.status_code}</p>` : ''}
+                    ${result.transaction_id ? `<p class="mb-0"><strong>Transaction ID:</strong> ${result.transaction_id}</p>` : ''}
+                </div>
+            `,
+            confirmButtonColor: '#3b82f6',
+        });
+    }
+
+    function showSuccessAlert(title, text) {
+        Swal.fire({
+            icon: 'success',
+            title: title,
+            text: text,
+            confirmButtonColor: '#3b82f6',
+            timer: 3000,
+            timerProgressBar: true,
+        });
+    }
+
+    function showInfoAlert(title, text) {
+        Swal.fire({
+            icon: 'info',
+            title: title,
+            text: text,
+            confirmButtonColor: '#3b82f6',
+            timer: 5000,
+            timerProgressBar: true,
+        });
+    }
+
+    function showWarningAlert(title, text) {
+        Swal.fire({
+            icon: 'warning',
+            title: title,
+            text: text,
+            confirmButtonColor: '#3b82f6',
         });
     }
 </script>
