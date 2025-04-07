@@ -5,24 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Album extends Model
+class Withdrawal extends Model
 {
     use HasFactory;
 
-    protected $table = 'album';
+    protected $table = 'tarik_saldo';
 
     protected $fillable = [
         'user_id',
-        'name',
-        'description',
+        'amount',
         'status',
+        'method',
+        'destination',
+        'destination_name',
+        'note',
     ];
 
-    public function photos()
-    {
-        return $this->belongsToMany(Photo::class, 'album_foto', 'album_id', 'photo_id');
-    }
-
+    // Relasi ke user
     public function user()
     {
         return $this->belongsTo(User::class);

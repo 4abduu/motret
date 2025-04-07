@@ -344,10 +344,10 @@
                     <img src="{{ $user->profile_photo_url }}" class="img-lg rounded-circle mb-2" alt="profile image" />
                     <h4>{{ $user->name }} 
                         @if($user->verified)
-                        <i class="ti-medall-alt" style="color: gold;"></i>
+                        <i class="ti-medall-alt" style="color: gold;" title="Verified User"></i>
                         @endif
                         @if ($user->role === 'pro')
-                        <i class="ti-star" style="color: gold;"></i>
+                        <i class="ti-star" style="color: gold;" title="Professional User"></i>
                         @endif
                     </h4>
                     <p class="text-muted mb-0">{{ $user->username }}</p>
@@ -814,6 +814,9 @@
                                 </button>
                                 <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#subscribersModal">
                                     <i class="bi bi-people me-2"></i> Lihat Daftar Langganan
+                                </button>
+                                <button class="btn btn-danger me-3" onclick="window.location.href='{{ route('withdrawal.balance') }}'">
+                                    <i class="bi bi-cash-stack"></i> Tarik Saldo
                                 </button>
                             </div>
                             <button class="btn btn-success text-white" onclick="window.location.href='{{ route('photos.create') }}'">

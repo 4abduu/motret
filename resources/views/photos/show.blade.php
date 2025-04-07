@@ -467,9 +467,7 @@ body.modal-open {
                 </p>
                 
                 <h6 class="text-start">Komentar</h6>
-                
-                <h6 class="text-start">Komentar</h6>
-                
+                                
                 @foreach($photo->comments as $comment)
                     @php
                         $isOwner = Auth::check() && Auth::id() === $comment->user_id;

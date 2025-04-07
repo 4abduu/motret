@@ -162,17 +162,36 @@
         <p>Unlock exclusive features and content with our premium subscriptions</p>
     </div>
 
-    @if($existingDuration > 0)
+    {{-- V1 --}}
+    {{-- @if($hasActiveSubscription)
     <div class="subscription-status">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="mb-1">Your Current Subscription</h4>
-                <p class="mb-0">You have an active subscription for <strong>{{ $duration }}</strong> 
-                   that will end on <strong>{{ $endDateFormatted }}</strong>.</p>
-            </div>
-            <span class="badge badge-success">Active</span>
-        </div>
+        @if($hasComboSubscription)
+            <h4>Paket Kombo Aktif</h4>
+            <p>Anda mengaktifkan <strong>langganan kombo</strong> selama <strong>{{ $comboDuration }}</strong>.</p>
+            <p class="mb-0">
+                 Langganan sistem aktif hingga <strong>{{ $systemEndDateFormatted }}</strong>
+            </p>
+        @else
+            <h4>Langganan Sistem Aktif</h4>
+            <p class="mb-0">
+                Anda berlangganan sistem selama <strong>{{ $duration }}</strong> 
+                hingga <strong>{{ $endDateFormatted }}</strong>.
+            </p>
+        @endif
     </div>
+    @endif --}}
+
+    {{-- V2 --}}
+    @if($hasActiveSubscription)
+        <div class="subscription-status">
+            @if($hasComboSubscription)
+                <h4>Paket Kombo Aktif</h4>
+                <p>Durasi langganan sistem anda saat ini diambil dari <strong>combo</strong>, aktif selama <strong>{{ $duration }}</strong>, berakhir <strong>{{ $comboEndDateFormatted }}</strong>.</p>
+            @else
+                <h4>Langganan Sistem Aktif</h4>
+                <p>Durasi langganan sistem anda saat ini diambil dari <strong>langganan sistem murni</strong>, aktif selama <strong>{{ $duration }}</strong>, berakhir <strong>{{ $endDateFormatted }}</strong>.</p>
+            @endif
+        </div>
     @endif
 
     <div class="subscription-plans">
@@ -195,8 +214,9 @@
                 12 => '1 Year',
                 default => $durationMonths . ' Months'
             };
-            
-            $canSubscribe = $durationMonths > $existingDuration;
+        
+            // Disable if current duration is <= existing duration
+            $shouldDisable = $durationMonths <= $existingDuration;
             $isPopular = $durationMonths == 3 || $durationMonths == 6;
         @endphp
         
@@ -220,27 +240,27 @@
                     <li><i class="bi bi-x-circle"></i> Creator mode features</li>
                 </ul>
                 
-                @if($canSubscribe)
-                    <button class="plan-button btn-primary" 
-                            onclick="buySubscription({{ $price->id }})">
-                        Subscribe Now
-                    </button>
-                @else
+                @if($shouldDisable)
                     <button class="plan-button btn-disabled" disabled>
-                        @if($existingDuration > 0)
-                            Choose Longer Duration
+                        @if($hasActiveSubscription)
+                            Already Subscribed
                         @else
                             Select Plan
                         @endif
                     </button>
-                    @if($existingDuration > 0)
+                    @if($hasActiveSubscription)
                         <p class="text-center mt-3 text-sm text-gray-500">
-                            Please select a plan with longer duration
+                            Your current plan ends in {{ $duration }}
                         </p>
                     @endif
+                @else
+                    <button class="plan-button btn-primary" 
+                            onclick="buySubscription({{ $price->id }})">
+                        Subscribe Now
+                    </button>
                 @endif
             </div>
-        </div>
+        </div>        
         @endforeach
     </div>
 </div>

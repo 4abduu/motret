@@ -5,24 +5,26 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Album extends Model
+class BalanceHistory extends Model
 {
     use HasFactory;
 
-    protected $table = 'album';
+    protected $table = 'riwayat_saldo';
 
     protected $fillable = [
         'user_id',
-        'name',
-        'description',
+        'type',
+        'amount',
+        'source_id',
+        'source_type',
         'status',
+        'method',
+        'destination',
+        'destination_name',
+        'note',
     ];
 
-    public function photos()
-    {
-        return $this->belongsToMany(Photo::class, 'album_foto', 'album_id', 'photo_id');
-    }
-
+    // Relasi ke user
     public function user()
     {
         return $this->belongsTo(User::class);

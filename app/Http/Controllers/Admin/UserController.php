@@ -19,7 +19,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        $users = User::orderBy('created_at', 'desc')->get();
         return view('admin.manageUsers', compact('users'));
     }
 
@@ -31,10 +31,15 @@ class UserController extends Controller
     public function previewProfile($id)
     {
         $user = User::findOrFail($id);
-        $photos = $user->photos()->get();
-        $albums = $user->albums()->get();
-
-        return view('admin.preview.profile', compact('user', 'photos', 'albums'));
+        $photos = $user->photos()->where('premium', false)->get();
+        $premiumPhotos = $user->photos()->where('premium', true)->get();
+        $albums = $user->albums()->with(['photos' => function ($query) {
+            $query->where('status', 1); // Hanya foto publik
+        }])->get();
+        $hasSubscriptionPrice = $user->subscriptionPrice()->exists(); // Cek apakah user memiliki harga langganan
+        $subscribers = $user->subscribers()->with('user')->get(); // Ambil data subscriber
+    
+        return view('admin.preview.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice', 'subscribers'));
     }
 
     public function previewPhotos($id)
@@ -43,10 +48,9 @@ class UserController extends Controller
         return view('admin.preview.photos', compact('photo'));
     }
 
-    public function previewAlbum($id)
+    public function previewAlbum($albumId)
     {
-        $album = Album::findOrFail($id);
-        $album->load('photos');
+        $album = Album::with('photos')->findOrFail($albumId);
         return view('admin.preview.albums', compact('album'));
     }
 

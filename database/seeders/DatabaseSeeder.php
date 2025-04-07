@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             UsersTableSeeder::class,
             FotoTableSeeder::class,
             SystemSubscriptionPriceSeeder::class,
+            SyncBalanceSeeder::class,
         ]);
     }
 }

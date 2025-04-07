@@ -19,6 +19,11 @@ class SubscriptionSystem extends Model
         'transaction_id',
     ];
 
+    protected $casts = [
+        'end_date' => 'datetime',
+        'start_date' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

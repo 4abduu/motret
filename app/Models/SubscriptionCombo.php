@@ -23,8 +23,10 @@ class SubscriptionCombo extends Model
         'transaction_id',
     ];
 
-    public $timestamps = true; // Otomatis kelola created_at & updated_at
-
+    protected $casts = [
+        'end_date' => 'datetime',
+        'start_date' => 'datetime',
+    ];
     // Relasi ke user yang berlangganan
     public function user()
     {

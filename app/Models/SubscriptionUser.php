@@ -13,6 +13,11 @@ class SubscriptionUser extends Model
 
     protected $fillable = ['user_id', 'target_user_id', 'price', 'start_date', 'end_date', 'transaction_id'];
 
+    protected $casts = [
+        'end_date' => 'datetime',
+        'start_date' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

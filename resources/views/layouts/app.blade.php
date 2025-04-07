@@ -155,6 +155,40 @@
 .social-icons i {
         font-size: 20px; /* Sesuaikan ukuran ikon */
     }
+
+    /* Floating Action Button Mobile Only */
+    .fab-upload {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: #32bd40;
+    color: white;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 99999; /* INI YANG DIBESARIN! */
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    pointer-events: auto; /* PASTIKAN INI ADA */
+}
+
+.fab-upload:hover {
+    background-color: #2aa836;
+    transform: scale(1.1);
+}
+
+/* Tampilkan hanya di mobile */
+@media (max-width: 768px) {
+    .fab-upload {
+        display: flex;
+    }
+}
     </style>
 </head>
 <body>
@@ -274,6 +308,20 @@
         </div>
     </div>
 
+    @auth
+        @php
+            $isAdmin = auth()->user()->role === 'admin';
+            $isUploadPage = request()->is('foto/upload*');
+        @endphp
+
+        @if(!$isAdmin && !$isUploadPage)
+            <button class="fab-upload" id="mobileUploadBtn" title="Upload Foto">
+                <i class="bi bi-camera-fill"></i>
+            </button>
+        @endif
+    @endauth
+
+
     <!-- Scripts -->
     <script src="{{ asset('/assets/vendors/js/vendor.bundle.base.js') }}"></script>
     <script src="{{ asset('/assets/js/off-canvas.js') }}"></script>
@@ -354,8 +402,8 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Hide Reminder Flag:', hideReminder);
     console.log('Last Reminder Time:', lastReminderTime);
 
-    // Atur waktu delay untuk reminder (5 menit = 300000 ms)
-    const reminderDelay = 300000;
+    // Atur waktu delay untuk reminder (10 menit = 600000 ms)
+    const reminderDelay = 600000;
     
     // Cek apakah perlu menampilkan reminder
     if (!isLoggedIn && !hideReminder) {
@@ -398,6 +446,16 @@ document.addEventListener('DOMContentLoaded', function () {
     if (isLoggedIn) {
         sessionStorage.removeItem("hideLoginReminder");
         sessionStorage.removeItem("lastReminderTime");
+    }
+
+    const uploadBtn = document.getElementById('mobileUploadBtn');
+    
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Button clicked!'); // Debugging
+            window.location.href = "{{ route('photos.create') }}";
+        });
     }
 });
 

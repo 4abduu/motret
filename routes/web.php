@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
+use App\Http\Controllers\Admin\BalanceController as AdminBalanceController;
+use App\Http\Controllers\User\BalanceController as UserBalanceController;
 use App\Http\Controllers\User\SubscriptionController as UserSubscriptionController;
 use App\Http\Controllers\User\AlbumController as UserAlbumController;
 use App\Http\Controllers\User\CommentController as UserCommentController;
@@ -107,10 +109,17 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
     Route::get('/admin/users/{id}/preview', [AdminUserController::class, 'previewProfile'])->name('admin.users.previewProfile');
     Route::get('/admin/users/{id}/photos', [AdminUserController::class, 'previewPhotos'])->name('admin.users.previewPhotos');
     Route::get('/admin/users/{id}/{type}', [AdminUserController::class, 'previewCommentReplies'])->name('admin.previewCommentReplies');
-    Route::get('/admin/users/{id}/albums', [AdminUserController::class, 'previewAlbum'])->name('admin.users.previewAlbums');
+    Route::get('/admin/albums/{album}/preview', [AdminUserController::class, 'previewAlbum'])->name('admin.albums.preview');
+
+    //Saldo
+    Route::get('/admin/penarikan-saldo', [AdminBalanceController::class, 'indexPenarikan'])->name('admin.saldo.penarikan');
+    Route::post('/admin/penarikan-saldo/{id}/acc', [AdminBalanceController::class, 'accPenarikan'])->name('admin.saldo.acc');
+    Route::post('/admin/penarikan-saldo/{id}/reject', [AdminBalanceController::class, 'rejectPenarikan'])->name('admin.saldo.reject');
+    Route::get('/admin/riwayat-saldo', [AdminBalanceController::class, 'riwayatSaldoUser'])->name('admin.saldo.riwayat');
+    Route::get('/admin/riwayat-saldo/{id}', [AdminBalanceController::class, 'detailRiwayatSaldoUser'])->name('admin.saldo.detail');
 });
 
-// Grup untuk User dan Pro
+ // Grup untuk User dan Pro
 Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_authenticated'])->group(function () {
     // Profil
     Route::get('/profil', [UserProfileController::class, 'index'])->name('user.profile');
@@ -146,10 +155,11 @@ Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_a
     Route::put('/albums/{id}', [UserAlbumController::class, 'update'])->name('albums.update');
     Route::delete('/albums/{id}', [UserAlbumController::class, 'destroy'])->name('albums.destroy');
     Route::post('/albums/{albumId}/photos/{photoId}/add', [UserAlbumController::class, 'addPhoto'])->name('albums.addPhoto');
-    Route::post('/albums/{albumId}/photos/{photoId}/remove', [UserAlbumController::class, 'removePhoto'])->name('albums.removePhoto');
-    Route::put('/albums/{id}/updateTitle', [UserAlbumController::class, 'updateTitle'])->name('albums.updateTitle');
-    Route::put('/albums/{id}/updateDescription', [UserAlbumController::class, 'updateDescription'])->name('albums.updateDescription');
-    
+    Route::put('/albums/{id}/updateTitle', [UserAlbumController::class, 'updateTitle']);
+    Route::put('/albums/{id}/updateDescription', [UserAlbumController::class, 'updateDescription']);
+    Route::put('/albums/{id}/updateVisibility', [UserAlbumController::class, 'updateVisibility']);    
+    Route::post('/albums/{albumId}/removePhoto/{photoId}', [UserAlbumController::class, 'removePhoto']);
+
     // Notifikasi
     Route::get('/notifications', [UserNotifController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [UserNotifController::class, 'markAsRead'])->name('notifications.markAsRead');
@@ -179,6 +189,12 @@ Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_a
     Route::post('/transaction/check-status', [UserSubscriptionController::class, 'checkTransactionStatus'])->name('transaction.checkStatus');
     Route::post('/transaction/check-status-user', [UserSubscriptionController::class, 'checkTransactionStatusUser'])->name('transaction.checkStatusUser');
     Route::post('/transaction/check-status-combo', [UserSubscriptionController::class, 'checkTransactionStatusCombo'])->name('transaction.checkStatusCombo');
+
+    // Saldo
+    Route::get('/penarikan', [UserBalanceController::class, 'index'])->name('withdrawal.balance');
+    Route::post('/penarikan', [UserBalanceController::class, 'storeWithdrawal'])->name('withdrawal.store');
+    Route::get('/riwayat', [UserBalanceController::class, 'historyBalance'])->name('balance.history');
+    Route::get('/riwayat/{id}', [UserBalanceController::class, 'detailRiwayatSaldo'])->name('user.saldo.detail');
 });
 
 // Rute untuk guest melihat album

@@ -21,6 +21,13 @@ class Transaction extends Model
         'transaction_id',
         'fraud_status',
         'type',
+        'metadata',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
     public function user()

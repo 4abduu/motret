@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable
 {
@@ -26,6 +27,7 @@ class User extends Authenticatable
         'download_reset_at',
         'google_id',
         'verified',
+        'balance',
         'banned_type',
         'banned_until',
         'banned_reason',
@@ -147,5 +149,30 @@ class User extends Authenticatable
     public function subscribers()
     {
         return $this->hasMany(SubscriptionUser::class, 'target_user_id');
+    }
+
+    public function subscriptionPrice()
+    {
+        return $this->hasOne(SubscriptionPriceUser::class, 'user_id');
+    }
+
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class);
+    }
+
+    public function balanceHistory()
+    {
+        return $this->hasMany(BalanceHistory::class);
+    }
+
+    public function syncBalance()
+    {
+        $total = DB::table('langganan_pengguna')
+            ->where('target_user_id', $this->id)
+            ->sum('price');
+
+        $this->balance = $total;
+        $this->save();
     }
 }

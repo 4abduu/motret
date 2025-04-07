@@ -160,17 +160,22 @@
         <p class="creator-username">{{ $user->username }}</p>
     </div>
 
-    @if($existingDuration > 0)
-    <div class="subscription-status">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="mb-1">Your Current Subscription</h4>
-                <p class="mb-0">You have an active subscription for <strong>{{ $duration }}</strong> 
-                   that will end on <strong>{{ $endDateFormatted }}</strong>.</p>
+    @php
+        $existingDuration = $maxEndDate ? $existingDuration : 0;
+    @endphp
+    
+    @if($hasActiveSubscription)
+        @if($hasComboSubscription)
+            <div class="subscription-status">
+                <h4>Paket Kombo Aktif</h4>
+                <p>Anda saat ini berlangganan ke user ini selama <strong>{{ $comboDurationText ?? 'N/A' }}</strong>, berakhir <strong>{{ $comboEndDateFormatted ?? 'N/A' }}</strong>.</p>
             </div>
-            <span class="badge badge-success">Active</span>
-        </div>
-    </div>
+        @else
+            <div class="subscription-status">
+                <h4>Langganan Creator Aktif</h4>
+                <p>Anda saat ini berlangganan ke user ini selama <strong>{{ $userDurationText ?? 'N/A' }}</strong>, berakhir <strong>{{ $userEndDateFormatted ?? 'N/A' }}</strong>.</p>
+            </div>
+        @endif
     @endif
 
     <h2 class="section-title">Creator Subscriptions</h2>
@@ -189,8 +194,14 @@
                     <li><i class="bi bi-check-circle"></i> Direct messages</li>
                     <li><i class="bi bi-check-circle"></i> Behind-the-scenes</li>
                 </ul>
-                @if($existingDuration >= 1)
-                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @if($userExistingDuration >= 1)
+                    <button class="card-button btn-disabled" disabled>
+                        @if($hasUserSubscription ?? false)
+                            Already Subscribed
+                        @else
+                            Select Plan
+                        @endif
+                    </button>
                 @else
                     <button class="card-button btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_1_month }}', '1_month')">
                         Subscribe Now
@@ -209,12 +220,18 @@
             </div>
             <div class="card-body">
                 <ul class="card-features">
-                    <li><i class="bi bi-check-circle"></i> All 1-month benefits</li>
-                    <li><i class="bi bi-check-circle"></i> Exclusive live streams</li>
-                    <li><i class="bi bi-check-circle"></i> Early access to content</li>
+                    <li><i class="bi bi-check-circle"></i> Access to exclusive content</li>
+                    <li><i class="bi bi-check-circle"></i> Direct messages</li>
+                    <li><i class="bi bi-check-circle"></i> Behind-the-scenes</li>
                 </ul>
-                @if($existingDuration >= 3)
-                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @if($userExistingDuration >= 3)
+                    <button class="card-button btn-disabled" disabled>
+                        @if($hasUserSubscription ?? false)
+                            Already Subscribed
+                        @else
+                            Select Plan
+                        @endif
+                    </button>
                 @else
                     <button class="card-button btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_3_months }}', '3_months')">
                         Subscribe Now
@@ -233,12 +250,18 @@
             </div>
             <div class="card-body">
                 <ul class="card-features">
-                    <li><i class="bi bi-check-circle"></i> All 3-month benefits</li>
-                    <li><i class="bi bi-check-circle"></i> Personalized content</li>
-                    <li><i class="bi bi-check-circle"></i> Monthly Q&A sessions</li>
+                    <li><i class="bi bi-check-circle"></i> Access to exclusive content</li>
+                    <li><i class="bi bi-check-circle"></i> Direct messages</li>
+                    <li><i class="bi bi-check-circle"></i> Behind-the-scenes</li>
                 </ul>
-                @if($existingDuration >= 6)
-                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @if($userExistingDuration >= 6)
+                    <button class="card-button btn-disabled" disabled>
+                        @if($hasUserSubscription ?? false)
+                            Already Subscribed
+                        @else
+                            Select Plan
+                        @endif
+                    </button>
                 @else
                     <button class="card-button btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_6_months }}', '6_months')">
                         Subscribe Now
@@ -257,12 +280,18 @@
             </div>
             <div class="card-body">
                 <ul class="card-features">
-                    <li><i class="bi bi-check-circle"></i> All 6-month benefits</li>
-                    <li><i class="bi bi-check-circle"></i> Annual surprise gift</li>
-                    <li><i class="bi bi-check-circle"></i> Priority requests</li>
+                    <li><i class="bi bi-check-circle"></i> Access to exclusive content</li>
+                    <li><i class="bi bi-check-circle"></i> Direct messages</li>
+                    <li><i class="bi bi-check-circle"></i> Behind-the-scenes</li>
                 </ul>
-                @if($existingDuration >= 12)
-                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @if($userExistingDuration >= 12)
+                    <button class="card-button btn-disabled" disabled>
+                        @if($hasUserSubscription ?? false)
+                            Already Subscribed
+                        @else
+                            Select Plan
+                        @endif
+                    </button>
                 @else
                     <button class="card-button btn-primary" onclick="buySubscription('{{ $subscriptionPrices->price_1_year }}', '1_year')">
                         Subscribe Now
@@ -276,15 +305,20 @@
     <h2 class="section-title">Combo Subscriptions</h2>
     
     <div class="subscription-cards">
-        @if($subscriptionPrices->price_1_month)
+        {{-- COMBO 1 MONTH --}}
+        @if($subscriptionPrices && $subscriptionPrices->price_1_month && isset($systemPrices['1_month']))
         @php
-            $comboPrice1Month = $systemPrices->where('duration', '1_month')->first()->price + $subscriptionPrices->price_1_month;
+            $systemPrice = $systemPrices['1_month'] ?? 0;
+            $userPrice = $subscriptionPrices->price_1_month ?? 0;
+            $comboPrice = $systemPrice + $userPrice;
+            $pricePerMonth = number_format(round($comboPrice / 1), 0, ',', '.');
         @endphp
+    
         <div class="subscription-card combo-card">
             <div class="card-header">
                 <h3>1 Month Combo</h3>
-                <div class="card-price">Rp {{ number_format($comboPrice1Month, 0, ',', '.') }}</div>
-                <div class="price-per-month">Rp {{ number_format($comboPrice1Month / 1, 0, ',', '.') }}/month</div>
+                <div class="card-price">Rp {{ number_format($comboPrice, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ $pricePerMonth }}/month</div>
             </div>
             <div class="card-body">
                 <ul class="card-features">
@@ -292,26 +326,45 @@
                     <li><i class="bi bi-check-circle"></i> Plus system features</li>
                     <li><i class="bi bi-check-circle"></i> Best value package</li>
                 </ul>
-                @if($existingDuration >= 1)
-                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @if($comboExistingDuration >= 1)
+                    <button class="card-button btn-disabled" disabled>
+                        @if($hasComboSubscription)
+                            Already Subscribed
+                        @else
+                            Choose Longer Duration
+                        @endif
+                    </button>
+                    @if($comboExistingDuration > 0)
+                        <p class="text-center mt-2 text-sm text-gray-500">
+                            Current subscription ends in {{ $comboDurationText ?? 'N/A' }}
+                        </p>
+                    @endif
                 @else
-                    <button class="card-button btn-primary" onclick="buyComboSubscription('{{ $comboPrice1Month }}', '1_month')">
+                    <button class="card-button btn-primary" 
+                            onclick="buyComboSubscription('{{ $comboPrice }}', '1_month')"
+                            data-system-price="{{ $systemPrice }}"
+                            data-user-price="{{ $userPrice }}">
                         Subscribe Now
                     </button>
                 @endif
             </div>
         </div>
         @endif
-        
-        @if($subscriptionPrices->price_3_months)
+
+        {{-- COMBO 3 MONTHS --}}
+        @if($subscriptionPrices && $subscriptionPrices->price_3_months && isset($systemPrices['3_months']))
         @php
-            $comboPrice3Months = $systemPrices->where('duration', '3_months')->first()->price + $subscriptionPrices->price_3_months;
+            $systemPrice = $systemPrices['3_months'] ?? 0;
+            $userPrice = $subscriptionPrices->price_3_months ?? 0;
+            $comboPrice = $systemPrice + $userPrice;
+            $pricePerMonth = number_format(round($comboPrice / 3), 0, ',', '.');
         @endphp
+    
         <div class="subscription-card combo-card">
             <div class="card-header">
                 <h3>3 Months Combo</h3>
-                <div class="card-price">Rp {{ number_format($comboPrice3Months, 0, ',', '.') }}</div>
-                <div class="price-per-month">Rp {{ number_format($comboPrice3Months / 3, 0, ',', '.') }}/month</div>
+                <div class="card-price">Rp {{ number_format($comboPrice, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ $pricePerMonth }}/month</div>
             </div>
             <div class="card-body">
                 <ul class="card-features">
@@ -319,10 +372,24 @@
                     <li><i class="bi bi-check-circle"></i> Plus system features</li>
                     <li><i class="bi bi-check-circle"></i> Best value package</li>
                 </ul>
-                @if($existingDuration >= 3)
-                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @if($comboExistingDuration >= 3)
+                    <button class="card-button btn-disabled" disabled>
+                        @if($hasComboSubscription)
+                            Already Subscribed
+                        @else
+                            Choose Longer Duration
+                        @endif
+                    </button>
+                    @if($comboExistingDuration > 0)
+                        <p class="text-center mt-2 text-sm text-gray-500">
+                            Current subscription ends in {{ $comboDurationText ?? 'N/A' }}
+                        </p>
+                    @endif
                 @else
-                    <button class="card-button btn-primary" onclick="buyComboSubscription('{{ $comboPrice3Months }}', '3_months')">
+                    <button class="card-button btn-primary" 
+                            onclick="buyComboSubscription('{{ $comboPrice }}', '3_months')"
+                            data-system-price="{{ $systemPrice }}"
+                            data-user-price="{{ $userPrice }}">
                         Subscribe Now
                     </button>
                 @endif
@@ -330,15 +397,20 @@
         </div>
         @endif
         
-        @if($subscriptionPrices->price_6_months)
+        {{-- COMBO 6 MONTHS --}}
+        @if($subscriptionPrices && $subscriptionPrices->price_6_months && isset($systemPrices['6_months']))
         @php
-            $comboPrice6Months = $systemPrices->where('duration', '6_months')->first()->price + $subscriptionPrices->price_6_months;
+            $systemPrice = $systemPrices['6_months'] ?? 0;
+            $userPrice = $subscriptionPrices->price_6_months ?? 0;
+            $comboPrice = $systemPrice + $userPrice;
+            $pricePerMonth = number_format(round($comboPrice / 6), 0, ',', '.');
         @endphp
+    
         <div class="subscription-card combo-card">
             <div class="card-header">
                 <h3>6 Months Combo</h3>
-                <div class="card-price">Rp {{ number_format($comboPrice6Months, 0, ',', '.') }}</div>
-                <div class="price-per-month">Rp {{ number_format($comboPrice6Months / 6, 0, ',', '.') }}/month</div>
+                <div class="card-price">Rp {{ number_format($comboPrice, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ $pricePerMonth }}/month</div>
             </div>
             <div class="card-body">
                 <ul class="card-features">
@@ -346,10 +418,24 @@
                     <li><i class="bi bi-check-circle"></i> Plus system features</li>
                     <li><i class="bi bi-check-circle"></i> Best value package</li>
                 </ul>
-                @if($existingDuration >= 6)
-                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @if($comboExistingDuration >= 6)
+                    <button class="card-button btn-disabled" disabled>
+                        @if($hasComboSubscription)
+                            Already Subscribed
+                        @else
+                            Choose Longer Duration
+                        @endif
+                    </button>
+                    @if($comboExistingDuration > 0)
+                        <p class="text-center mt-2 text-sm text-gray-500">
+                            Current subscription ends in {{ $comboDurationText ?? 'N/A' }}
+                        </p>
+                    @endif
                 @else
-                    <button class="card-button btn-primary" onclick="buyComboSubscription('{{ $comboPrice6Months }}', '6_months')">
+                    <button class="card-button btn-primary" 
+                            onclick="buyComboSubscription('{{ $comboPrice }}', '6_months')"
+                            data-system-price="{{ $systemPrice }}"
+                            data-user-price="{{ $userPrice }}">
                         Subscribe Now
                     </button>
                 @endif
@@ -357,15 +443,20 @@
         </div>
         @endif
         
-        @if($subscriptionPrices->price_1_year)
+        {{-- COMBO 1 YEAR --}}
+        @if($subscriptionPrices && $subscriptionPrices->price_1_year && isset($systemPrices['1_year'])) 
         @php
-            $comboPrice1Year = $systemPrices->where('duration', '1_year')->first()->price + $subscriptionPrices->price_1_year;
+            $systemPrice = $systemPrices['1_year'] ?? 0; // Updated to '1_year'
+            $userPrice = $subscriptionPrices->price_1_year ?? 0; // Updated to price_1_year
+            $comboPrice = $systemPrice + $userPrice;
+            $pricePerMonth = number_format(round($comboPrice / 12), 0, ',', '.');
         @endphp
+    
         <div class="subscription-card combo-card">
             <div class="card-header">
                 <h3>1 Year Combo</h3>
-                <div class="card-price">Rp {{ number_format($comboPrice1Year, 0, ',', '.') }}</div>
-                <div class="price-per-month">Rp {{ number_format($comboPrice1Year / 12, 0, ',', '.') }}/month</div>
+                <div class="card-price">Rp {{ number_format($comboPrice, 0, ',', '.') }}</div>
+                <div class="price-per-month">Rp {{ $pricePerMonth }}/month</div>
             </div>
             <div class="card-body">
                 <ul class="card-features">
@@ -373,10 +464,24 @@
                     <li><i class="bi bi-check-circle"></i> Plus system features</li>
                     <li><i class="bi bi-check-circle"></i> Best value package</li>
                 </ul>
-                @if($existingDuration >= 12)
-                    <button class="card-button btn-disabled" disabled>Subscribed</button>
+                @if($comboExistingDuration >= 12)
+                    <button class="card-button btn-disabled" disabled>
+                        @if($hasComboSubscription)
+                            Already Subscribed
+                        @else
+                            Choose Longer Duration
+                        @endif
+                    </button>
+                    @if($comboExistingDuration > 0)
+                        <p class="text-center mt-2 text-sm text-gray-500">
+                            Current subscription ends in {{ $comboDurationText ?? 'N/A' }}
+                        </p>
+                    @endif
                 @else
-                    <button class="card-button btn-primary" onclick="buyComboSubscription('{{ $comboPrice1Year }}', '1_year')">
+                    <button class="card-button btn-primary" 
+                            onclick="buyComboSubscription('{{ $comboPrice }}', '1_year')"
+                            data-system-price="{{ $systemPrice }}"
+                            data-user-price="{{ $userPrice }}">
                         Subscribe Now
                     </button>
                 @endif
@@ -394,7 +499,6 @@
         const button = event.target;
         const originalText = button.innerHTML;
         
-        // Show loading state
         button.innerHTML = `
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             Processing...
@@ -470,8 +574,9 @@
     function buyComboSubscription(price, duration) {
         const button = event.target;
         const originalText = button.innerHTML;
+        const systemPrice = button.dataset.systemPrice || 0;
+        const userPrice = button.dataset.userPrice || 0;
         
-        // Show loading state
         button.innerHTML = `
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
             Processing...
@@ -497,6 +602,8 @@
             body: JSON.stringify({ 
                 combo_price: price,
                 duration: duration,
+                system_price: systemPrice,
+                user_price: userPrice,
                 _token: '{{ csrf_token() }}'
             })
         })
