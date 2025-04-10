@@ -26,6 +26,36 @@
                 </a>
             </li>
             
+            {{-- Dropdown Saldo Pengguna --}}
+            @php 
+                $isBalanceActive = request()->is('admin/penarikan-saldo*') || 
+                                 request()->is('admin/daftar-saldo*') ||
+                                 request()->is('admin/riwayat-saldo*');
+            @endphp
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#balance" aria-expanded="{{ $isBalanceActive ? 'true' : 'false' }}" aria-controls="balance">
+                    <i class="mdi mdi-cash-multiple menu-icon"></i>
+                    <span class="menu-title" onclick="window.location='{{ route('admin.saldo') }}'">Balance</span>
+                    <i class="menu-arrow" onclick="toggleDropdown(event, '#balance')"></i>
+                </a>
+                <div class="collapse {{ $isBalanceActive ? 'show' : '' }}" id="balance">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('admin/penarikan-saldo*') ? 'active' : '' }}" 
+                               href="{{ route('admin.saldo.penarikan') }}">
+                                 Withdrawals
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->is('admin/daftar-saldo*') ? 'active' : '' }}" 
+                               href="{{ route('admin.saldo.daftar') }}">
+                                 User Balance
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
             {{-- Dropdown Comment --}}
             @php 
                 $isCommentActive = request()->routeIs('admin.comments') || request()->routeIs('admin.replies'); 

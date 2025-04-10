@@ -89,13 +89,13 @@
 @endpush
 
 @section('content')
-    <div class="container mt-5">
-        <h3 class="my-4">Search Results for "{{ $keyword }}"</h3>
+    <div class="container mt-3">
+        <h4 class="my-4">Search Results for "{{ $keyword }}"</h4>
         @if($users->isEmpty() && $photos->isEmpty())
             <p class="text-muted">No results found.</p>
         @else
             @if(!$users->isEmpty())
-                <h2 class="mb-4">Users</h2>
+                <h3 class="mb-4">Users</h3>
                 <div class="list-group mb-4">
                     @foreach($users as $user)
                         <a href="{{ route('user.showProfile', $user->username) }}" class="list-group-item list-group-item-action">
@@ -111,7 +111,7 @@
             @endif
 
             @if(!$photos->isEmpty())
-                <h2 class="mb-4">Photos</h2>
+                <h3 class="mb-4">Photos</h3>
                 <div class="row">
                     @foreach($photos as $photo)
                         <div class="col-md-4 mb-4">

@@ -21,6 +21,17 @@
             right: 10px !important; /* Sesuaikan posisi ke kanan */
     }
 }
+
+
+@media (min-width: 768px) {
+    .dropdown-menu a[href*="/notifications"],
+    .dropdown-menu a[href*="/subscription"] {
+        display: none !important;
+        position: absolute; /* Supaya elemen tidak mengambil space */
+        visibility: hidden;
+    }
+}
+
 </style>
     
     
@@ -112,12 +123,12 @@
                             <a class="dropdown-item" href="{{ route('user.settings') }}">
                                 <i class="ti-settings text-success"></i> Pengaturan
                             </a>
-                            <a class="dropdown-item" href="{{ route('notifications.index') }}">
+                            <a class="dropdown-item desktop-hide" href="{{ route('notifications.index') }}">
                                 <i class="icon-bell text-success"></i> Notifikasi
                             </a>
-                            <a class="dropdown-item" href="{{ route('subscription') }}">
+                            <a class="dropdown-item desktop-hide" href="{{ route('subscription') }}">
                                 <i class="ti-crown text-success"></i> Subscription
-                            </a>
+                            </a>                            
                             <a class="dropdown-item" href="{{ route('logout') }}">
                                 <i class="ti-power-off text-success"></i> Keluar
                             </a>

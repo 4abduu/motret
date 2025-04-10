@@ -26,7 +26,7 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         border: none;
         overflow: hidden;
-        border-radius: 8px;
+        border-radius: 15px;
     }
     
     .card:hover {
@@ -172,6 +172,7 @@
         box-shadow: var(--shadow-sm);
         border: none;
         z-index: 1050 !important; /* Increased z-index */
+        transform-origin: top left !important;
     }
     
     /* Mobile Actions */
@@ -344,7 +345,7 @@
                     <img src="{{ $user->profile_photo_url }}" class="img-lg rounded-circle mb-2" alt="profile image" />
                     <h4>{{ $user->name }} 
                         @if($user->verified)
-                        <i class="ti-medall-alt" style="color: gold;" title="Verified User"></i>
+                        <i class="ti-crown" style="color: gold;" title="Verified User"></i>
                         @endif
                         @if ($user->role === 'pro')
                         <i class="ti-star" style="color: gold;" title="Professional User"></i>
@@ -365,6 +366,9 @@
                                     data-user-id="{{ $user->id }}"
                                     data-initial-state="{{ Auth::user()->isFollowing($user) ? 'following' : 'not-following' }}">
                                 {{ Auth::user()->isFollowing($user) ? 'Unfollow' : 'Follow' }}
+                            </button>
+                            <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportUserModal">
+                                <i class="bi bi-flag text-danger"></i>
                             </button>
                         @else
                             <button class="btn btn-primary btn-sm mt-3 mb-4" onclick="window.location.href='{{ route('login') }}'">
@@ -430,8 +434,8 @@
                                 
                                 <!-- Mobile Dropdown -->
                                 <div class="mobile-actions d-md-none">
-                                    <div class="dropdown">
-                                        <button class="dropdown-toggle" type="button" id="mobilePhotoDropdown-{{ $photo->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="dropdown dropup">
+                                        <button class="dropdown-toggle" type="button" id="mobilePhotoDropdown-{{ $photo->id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper="static">
                                             <i class="bi bi-three-dots-vertical text-white"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobilePhotoDropdown-{{ $photo->id }}">
@@ -442,7 +446,7 @@
                                                     </a>
                                                 </li>
                                                 <li>
-                                                    <button class="dropdown-item d-flex align-items-center delete-photo-btn" data-id="{{ $photo->id }}" data-title="{{ $photo->title }}">
+                                                    <button type="button" class="dropdown-item d-flex align-items-center delete-photo-btn" data-id="{{ $photo->id }}" data-title="{{ $photo->title }}">
                                                         <i class="bi bi-trash me-2"></i> Hapus Foto
                                                     </button>
                                                 </li>
@@ -489,8 +493,8 @@
                                         <h5 class="card-title mb-2">{{ $photo->title }}</h5>
                                         
                                         <!-- Desktop Dropdown -->
-                                        <div class="dropdown d-none d-md-block">
-                                            <button class="btn btn-link p-0 dropdown-toggle" type="button" id="desktopPhotoDropdown-{{ $photo->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <div class="dropdown dropup d-none d-md-block">
+                                            <button class="btn btn-link p-0 dropdown-toggle" type="button" id="desktopPhotoDropdown-{{ $photo->id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper="static">
                                                 <i class="bi bi-three-dots-vertical text-dark"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="desktopPhotoDropdown-{{ $photo->id }}">
@@ -501,7 +505,7 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <button class="dropdown-item d-flex align-items-center delete-photo-btn" data-id="{{ $photo->id }}" data-title="{{ $photo->title }}">
+                                                        <button type="button" class="dropdown-item d-flex align-items-center delete-photo-btn" data-id="{{ $photo->id }}" data-title="{{ $photo->title }}">
                                                             <i class="bi bi-trash me-2"></i> Hapus Foto
                                                         </button>
                                                     </li>
@@ -517,9 +521,9 @@
                                                         </button>
                                                     </li>
                                                     <li>
-                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button" id="downloadForm">
+                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button" id="downloadForm-{{ $photo->id }}">
                                                             @csrf
-                                                            <button type="button" class="dropdown-item d-flex align-items-center w-100" id="downloadButton">
+                                                            <button type="button" class="dropdown-item d-flex align-items-center w-100 download-btn" data-id="{{ $photo->id }}">
                                                                 <i class="bi bi-download me-2"></i> Download
                                                             </button>
                                                         </form>
@@ -531,9 +535,9 @@
                                                         </button>
                                                     </li>
                                                     <li>
-                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button" id="downloadForm">
+                                                        <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button" id="downloadForm-{{ $photo->id }}">
                                                             @csrf
-                                                            <button type="button" class="dropdown-item d-flex align-items-center w-100" id="downloadButton">
+                                                            <button type="button" class="dropdown-item d-flex align-items-center w-100 download-btn" data-id="{{ $photo->id }}">
                                                                 <i class="bi bi-download me-2"></i> Download
                                                             </button>
                                                         </form>
@@ -548,41 +552,49 @@
                         </div>
                     </div>
         
-                    <!-- Report Photo Modal -->
-                    <div class="modal fade" id="reportPhotoModal-{{ $photo->id }}" tabindex="-1" aria-labelledby="reportPhotoModalLabel-{{ $photo->id }}" aria-hidden="true">
-                        <div class="modal-dialog">
+                    <!-- Modal Report Photo -->
+                    <div class="modal fade" id="reportPhotoModal-{{ $photo->id }}" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel-{{ $photo->id }}" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="reportPhotoModalLabel-{{ $photo->id }}">Laporkan Foto</h5>
+                                    <h5 class="modal-title" id="reportModalLabel-{{ $photo->id }}">Laporkan Foto</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <form method="POST" action="{{ route('photo.report', $photo->id) }}">
+                                    <form id="reportForm-photo-{{ $photo->id }}" method="POST" action="{{ route('photo.report', $photo->id) }}">
                                         @csrf
-                                        <div class="mb-3">
-                                            <label class="form-label">Alasan Melaporkan</label>
+                                        <div class="form-group">
+                                            <label for="reason">Alasan Melaporkan</label>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason1-{{ $photo->id }}" value="Konten tidak pantas">
-                                                <label class="form-check-label" for="reason1-{{ $photo->id }}">Konten tidak pantas</label>
+                                                <label class="form-check-label">
+                                                    <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $photo->id }}" value="Konten tidak pantas">
+                                                    Konten tidak pantas
+                                                </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason2-{{ $photo->id }}" value="Spam">
-                                                <label class="form-check-label" for="reason2-{{ $photo->id }}">Spam</label>
+                                                <label class="form-check-label">
+                                                    <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $photo->id }}" value="Spam">
+                                                    Spam
+                                                </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason3-{{ $photo->id }}" value="Pelanggaran hak cipta">
-                                                <label class="form-check-label" for="reason3-{{ $photo->id }}">Pelanggaran hak cipta</label>
+                                                <label class="form-check-label">
+                                                    <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $photo->id }}" value="Pelanggaran hak cipta">
+                                                    Pelanggaran hak cipta
+                                                </label>
                                             </div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="reason" id="reason4-{{ $photo->id }}" value="Lainnya">
-                                                <label class="form-check-label" for="reason4-{{ $photo->id }}">Lainnya</label>
+                                                <label class="form-check-label">
+                                                    <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $photo->id }}" value="Lainnya">
+                                                    Lainnya
+                                                </label>
                                             </div>
                                         </div>
-                                        <div class="mb-3" id="description-group-{{ $photo->id }}" style="display: none;">
-                                            <label for="description-{{ $photo->id }}" class="form-label">Keterangan</label>
-                                            <textarea class="form-control" id="description-{{ $photo->id }}" name="description" rows="3"></textarea>
+                                        <div class="form-group mt-3" id="description-group-photo-{{ $photo->id }}" style="display: none;">
+                                            <label for="description-photo-{{ $photo->id }}">Alasan</label>
+                                            <textarea class="form-control" id="description-photo-{{ $photo->id }}" name="description" rows="3"></textarea>
                                         </div>
-                                        <button type="submit" class="btn btn-danger">Laporkan</button>
+                                        <button type="submit" class="btn btn-danger mt-3">Laporkan</button>
                                     </form>
                                 </div>
                             </div>
@@ -619,7 +631,7 @@
         <div class="tab-pane fade" id="albums" role="tabpanel" aria-labelledby="albums-tab">
             <h3 class="mt-5 mb-3">Album</h3>
             @if(Auth::id() === $user->id)
-                <button type="button" class="btn btn-success btn-sm mb-3 text-white" data-bs-toggle="modal" data-bs-target="#createAlbumModal">
+                <button type="button" class="btn btn-success mb-3 text-white" data-bs-toggle="modal" data-bs-target="#createAlbumModal">
                     <i class="bi bi-plus"></i> Buat Album
                 </button>
             @endif
@@ -664,8 +676,8 @@
                         
                         <!-- Mobile Dropdown -->
                         <div class="album-mobile-actions d-md-none">
-                            <div class="dropdown">
-                                <button class="dropdown-toggle" type="button" id="mobileAlbumDropdown-{{ $album->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="dropdown dropup">
+                                <button class="dropdown-toggle" type="button" id="mobileAlbumDropdown-{{ $album->id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper="static">
                                     <i class="bi bi-three-dots-vertical text-white"></i>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobileAlbumDropdown-{{ $album->id }}">
@@ -682,8 +694,10 @@
                                             </button>
                                         </li>
                                         <li>
-                                            <button class="dropdown-item d-flex align-items-center text-danger delete-album-btn" data-id="{{ $album->id }}" data-name="{{ $album->name }}">
-                                                <i class="bi bi-trash me-2"></i> Hapus
+                                            <button type="button" class="dropdown-item d-flex align-items-center delete-album-btn" 
+                                                    data-id="{{ $album->id }}" 
+                                                    data-name="{{ $album->name }}">
+                                                <i class="bi bi-trash me-2"></i> Hapus Album
                                             </button>
                                         </li>
                                     @endif
@@ -700,8 +714,8 @@
                                         <p class="album-desc text-muted small mb-1">{{ Str::limit($album->description, 40) }}</p>
                                     @endif
                                 </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-link p-0 dropdown-toggle" type="button" id="desktopAlbumDropdown-{{ $album->id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="dropdown dropup">
+                                    <button class="btn btn-link p-0 dropdown-toggle" type="button" id="desktopAlbumDropdown-{{ $album->id }}" data-bs-toggle="dropdown" aria-expanded="false" data-bs-popper="static">
                                         <i class="bi bi-three-dots-vertical text-dark"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="desktopAlbumDropdown-{{ $album->id }}">
@@ -718,8 +732,10 @@
                                                 </button>
                                             </li>
                                             <li>
-                                                <button class="dropdown-item d-flex align-items-center text-danger delete-album-btn" data-id="{{ $album->id }}" data-name="{{ $album->name }}">
-                                                    <i class="bi bi-trash me-2"></i> Hapus
+                                                <button type="button" class="dropdown-item d-flex align-items-center delete-album-btn" 
+                                                    data-id="{{ $album->id }}" 
+                                                    data-name="{{ $album->name }}">
+                                                    <i class="bi bi-trash me-2"></i> Hapus Album
                                                 </button>
                                             </li>
                                         @endif
@@ -770,7 +786,7 @@
                 </div>
 
                 <!-- Modal Hapus Album -->
-                <div class="modal fade" id="deleteAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="deleteAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
+                {{-- <div class="modal fade" id="deleteAlbumModal-{{ $album->id }}" tabindex="-1" aria-labelledby="deleteAlbumModalLabel-{{ $album->id }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -791,7 +807,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
                 @endforeach
             </div>
         </div>
@@ -847,7 +863,7 @@
                     @endif
                 @else
                     @if(Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists())
-                        <button class="btn btn-info" onclick="window.location.href='{{ route('subscription.options', ['username' => $user->username]) }}'">
+                        <button class="btn btn-info text-white" onclick="window.location.href='{{ route('subscription.options', ['username' => $user->username]) }}'">
                             <i class="bi bi-arrow-repeat me-2"></i> Perpanjang Langganan
                         </button>
                     @endif
@@ -876,11 +892,11 @@
                     </div>
                 @elseif(Auth::id() !== $user->id)
                     <!-- Pesan untuk Pengguna yang Belum Berlangganan -->
-                    <div class="alert alert-info mt-4">
+                    <div class="alert alert-success mt-4">
                         <h5 class="alert-heading">Anda belum berlangganan!</h5>
                         <p>Silakan berlangganan untuk membuka akses foto eksklusif.</p>
                         <hr>
-                        <a href="{{ route('subscription.options', ['username' => $user->username]) }}" class="btn btn-primary">
+                        <a href="{{ route('subscription.options', ['username' => $user->username]) }}" class="btn btn-success">
                             <i class="bi bi-star me-2"></i> Langganan Sekarang
                         </a>
                     </div>
@@ -908,7 +924,7 @@
                                 </a>
                                 @if(Auth::check() && Auth::id() !== $subscriber->user_id)
                                     <button 
-                                        class="btn btn-sm {{ Auth::user()->isFollowing($subscriber->user) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }}" 
+                                        class="btn btn-sm {{ Auth::user()->isFollowing($subscriber->user) ? 'btn-danger unfollow-button' : 'btn-success follow-button' }}" 
                                         data-user-id="{{ $subscriber->user->id }}">
                                         {{ Auth::user()->isFollowing($subscriber->user) ? 'Unfollow' : 'Follow' }}
                                     </button>
@@ -927,7 +943,7 @@
 <div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form method="POST" action="{{ route('user.updateProfile') }}" enctype="multipart/form-data">
+            <form id="editProfileForm" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="modal-header">
@@ -1013,10 +1029,10 @@
                 <ul class="list-group" id="followers-list">
                     @foreach($user->followers as $follower)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{{ route('user.showProfile', $follower->username) }}"><b>{{ $follower->username }}</b></a>
+                            <a href="{{ route('user.showProfile', $follower->username) }}" style="color: black;"><b>{{ $follower->username }}</b></a>
                             @if(Auth::check() && Auth::id() !== $follower->id)
                                 <button 
-                                    class="btn btn-sm {{ Auth::user()->isFollowing($follower) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }}" 
+                                    class="btn btn-sm {{ Auth::user()->isFollowing($follower) ? 'btn-danger unfollow-button' : 'btn-success follow-button' }}" 
                                     data-user-id="{{ $follower->id }}">
                                     {{ Auth::user()->isFollowing($follower) ? 'Unfollow' : 'Follow' }}
                                 </button>
@@ -1041,10 +1057,10 @@
                 <ul class="list-group" id="following-list">
                     @foreach($user->following as $following)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{{ route('user.showProfile', $following->username) }}"><b>{{ $following->username }}</b></a>
+                            <a href="{{ route('user.showProfile', $following->username) }}" style="color: black;"><b>{{ $following->username }}</b></a>
                             @if(Auth::check() && Auth::id() !== $following->id)
                                 <button 
-                                    class="btn btn-sm {{ Auth::user()->isFollowing($following) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }}" 
+                                    class="btn btn-sm {{ Auth::user()->isFollowing($following) ? 'btn-danger unfollow-button' : 'btn-success follow-button' }}" 
                                     data-user-id="{{ $following->id }}">
                                     {{ Auth::user()->isFollowing($following) ? 'Unfollow' : 'Follow' }}
                                 </button>
@@ -1066,44 +1082,40 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="reportUserForm" method="POST" action="{{ route('user.report', $user->id) }}">
+                <form id="reportForm-user-{{ $user->id }}" method="POST" action="{{ route('user.report', $user->id) }}">
                     @csrf
                     <div class="form-group">
                         <label for="reason">Alasan Melaporkan</label>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input"name="reason" id="reason1"
-                                value="Konten tidak pantas">
+                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $user->id }}" value="Konten tidak pantas">
                                 Konten tidak pantas
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input" name="reason" id="reason2" 
-                                value="Spam">
+                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $user->id }}" value="Spam">
                                 Spam
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input"name="reason" id="reason3" 
-                                value="Pelanggaran hak cipta">
+                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $user->id }}" value="Pelanggaran hak cipta">
                                 Pelanggaran hak cipta
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input" name="reason" id="reason4"
-                                value="Lainnya">
+                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $user->id }}" value="Lainnya">
                                 Lainnya
                             </label>
                         </div>
                     </div>
-                    <div class="form-group" id="description-group-user" style="display: none;">
-                        <label for="description-user">Alasan</label>
-                        <textarea class="form-control" id="description-user" name="description" rows="3"></textarea>
+                    <div class="form-group mt-3" id="description-group-photo-{{ $user->id }}" style="display: none;">
+                        <label for="description-photo-{{ $user->id }}">Alasan</label>
+                        <textarea class="form-control" id="description-photo-{{ $user->id }}" name="description" rows="3"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-danger text-white">Laporkan</button>
+                    <button type="submit" class="btn btn-danger mt-3">Laporkan</button>
                 </form>
             </div>
         </div>
@@ -1114,6 +1126,7 @@
     
 @push('scripts')
 <script>
+// Clipboard copy function
 function copyToClipboard(text, event) {
     if (event) {
         event.preventDefault();
@@ -1121,111 +1134,119 @@ function copyToClipboard(text, event) {
     }
     
     navigator.clipboard.writeText(text).then(() => {
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: 'Link berhasil disalin',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            background: '#32bd40',
-            iconColor: '#fff',
-            color: '#fff',
-            timerProgressBar: true,
-            width: '300px',
-            padding: '0.5rem',
-            customClass: {
-                container: 'swal-mobile-container',
-                popup: 'swal-mobile-popup',
-                title: 'swal-mobile-title',
-                content: 'swal-mobile-content'
-            }
-        });
+        showSwalAlert('success', 'Berhasil!', 'Link berhasil disalin');
     }).catch(err => {
-        console.error('Gagal menyalin:', err);
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal',
-            text: 'Gagal menyalin link',
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 2000,
-            width: '300px',
-            padding: '0.5rem'
-        });
+        console.error('Failed to copy:', err);
+        showSwalAlert('error', 'Gagal', 'Gagal menyalin link');
     });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    const token = '{{ csrf_token() }}';
-    const userReasonRadios = document.querySelectorAll('#reportUserModal input[name="reason"]');
-    const userDescriptionGroup = document.getElementById('description-group-user');
-    const userDescriptionInput = document.getElementById('description-user');
-    const currentUserId = "{{ Auth::id() }}"; // ID user yang sedang login
-    const profileUserId = "{{ $user->id }}"; // ID user yang sedang dilihat profilnya
+// Show SweetAlert notification
+function showSwalAlert(icon, title, text) {
+    Swal.fire({
+        icon: icon,
+        title: title,
+        text: text,
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        background: icon === 'success' ? '#32bd40' : '',
+        iconColor: '#fff',
+        color: '#fff',
+        timerProgressBar: true,
+        width: '300px',
+        padding: '0.5rem'
+    });
+}
 
+// Initialize when DOM is loaded
+document.addEventListener("DOMContentLoaded", function() {
+    console.log('DOM fully loaded and parsed');
+
+    // CSRF token and elements
+    const token = '{{ csrf_token() }}';
+    const currentUserId = "{{ Auth::id() }}";
+    const profileUserId = "{{ $user->id }}";
+    
+    // Initialize Bootstrap dropdowns
     const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-    const dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+    const dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
         return new bootstrap.Dropdown(dropdownToggleEl);
     });
 
-    function handleDownload(event) {
-            event.preventDefault(); // Biar form gak langsung submit
-
-            @if(!Auth::check())
+    // Download button handler
+// Fungsi untuk handle download
+function handleDownload(event) {
+    event.preventDefault();
+    const photoId = event.currentTarget.getAttribute('data-id');
+    const downloadForm = document.getElementById(`downloadForm-${photoId}`);
+    
+    @if(!Auth::check())
+        Swal.fire({
+            title: 'Login Required',
+            text: 'Downloads as a guest will be low quality. Log in for high-quality downloads.',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Log In',
+            cancelButtonText: 'Continue as Guest',
+            cancelButtonColor: '#d33',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('login') }}";
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
                 Swal.fire({
-                    title: 'Login Required',
-                    text: 'Downloads as a guest will be low quality. Log in for high-quality downloads.',
-                    icon: 'info',
+                    title: 'Low Quality Download',
+                    text: 'Since you are a guest, this download will be in low resolution.',
+                    icon: 'warning',
+                    confirmButtonText: 'Proceed',
+                    cancelButtonText: 'Cancel',
                     showCancelButton: true,
-                    confirmButtonText: 'Log In',
-                    cancelButtonText: 'Continue as Guest',
-                    cancelButtonColor: '#d33',
                     reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "{{ route('login') }}";
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        Swal.fire({
-                            title: 'Low Quality Download',
-                            text: 'Since you are a guest, this download will be in low resolution.',
-                            icon: 'warning',
-                            confirmButtonText: 'Proceed',
-                            cancelButtonText: 'Cancel',  // Tambahin tombol Cancel
-                            showCancelButton: true,      // Aktifin tombol Cancel
-                            reverseButtons: true
-                        }).then((res) => {
-                            if (res.isConfirmed) {
-                                document.getElementById('downloadForm').submit();
-                            }
-                            // Kalau user klik di luar modal atau cancel, gak ngapa-ngapain
-                        });
+                }).then((res) => {
+                    if (res.isConfirmed) {
+                        downloadForm.submit();
                     }
                 });
-            @else
-                document.getElementById('downloadForm').submit();
-            @endif
-        }
-
-
-                // Tambahkan event listener hanya ke tombol download
-                document.getElementById("downloadButton").addEventListener("click", handleDownload);
-
-    userReasonRadios.forEach(radio => {
-        radio.addEventListener("change", function () {
-            if (this.value === "Lainnya") {
-                userDescriptionGroup.style.display = "block";
-                userDescriptionInput.required = true;
-            } else {
-                userDescriptionGroup.style.display = "none";
-                userDescriptionInput.required = false;
             }
         });
-    });
-    
-    // Close dropdown when clicking outside
+    @else
+        downloadForm.submit();
+    @endif
+}
+
+// Attach event listeners to all download buttons
+document.querySelectorAll('.download-btn').forEach(btn => {
+    btn.addEventListener('click', handleDownload);
+});
+
+    // Attach download event listener
+    const downloadButton = document.getElementById("downloadButton");
+    if (downloadButton) {
+        downloadButton.addEventListener("click", handleDownload);
+    }
+
+    // Report user modal logic
+    const userReasonRadios = document.querySelectorAll('#reportUserModal input[name="reason"]');
+    const userDescriptionGroup = document.getElementById('description-group-user');
+    const userDescriptionInput = document.getElementById('description-user');
+
+    if (userReasonRadios && userDescriptionGroup && userDescriptionInput) {
+        userReasonRadios.forEach(radio => {
+            radio.addEventListener("change", function() {
+                if (this.value === "Lainnya") {
+                    userDescriptionGroup.style.display = "block";
+                    userDescriptionInput.required = true;
+                } else {
+                    userDescriptionGroup.style.display = "none";
+                    userDescriptionInput.required = false;
+                }
+            });
+        });
+    }
+
+    // Close dropdowns when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.dropdown')) {
             document.querySelectorAll('.dropdown-menu').forEach(menu => {
@@ -1233,19 +1254,20 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         }
     });
-    // Fungsi update tampilan tombol (disederhanakan)
+
+    // Update follow button appearance
     function updateButtonAppearance(button, isFollowing) {
         if (!button) return;
         
         button.textContent = isFollowing ? 'Unfollow' : 'Follow';
         button.className = isFollowing 
             ? 'btn btn-danger btn-sm unfollow-button' 
-            : 'btn btn-primary btn-sm follow-button';
-            button.style.marginTop = '16px';
-            button.style.marginBottom = '24px';
+            : 'btn btn-success btn-sm follow-button';
+        button.style.marginTop = '16px';
+        button.style.marginBottom = '24px';
     }
 
-    // Fungsi utama handle follow/unfollow yang lebih smooth
+    // Handle follow/unfollow action
     async function handleFollowAction(button, event) {
         if (event) {
             event.preventDefault();
@@ -1256,7 +1278,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const isUnfollow = button.classList.contains('unfollow-button');
         const url = isUnfollow ? `/users/${targetUserId}/unfollow` : `/users/${targetUserId}/follow`;
         
-        // Simpan state asli untuk rollback jika error
         const originalState = {
             text: button.textContent,
             class: button.className,
@@ -1264,7 +1285,6 @@ document.addEventListener("DOMContentLoaded", function() {
         };
         
         try {
-            // Langsung update tampilan tanpa loading state
             updateButtonAppearance(button, !isUnfollow);
             button.disabled = true;
 
@@ -1283,13 +1303,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 throw new Error(data.message || `HTTP error! Status: ${response.status}`);
             }
 
-            // Update semua tombol untuk user ini
             document.querySelectorAll(`button[data-user-id="${targetUserId}"]`).forEach(btn => {
                 updateButtonAppearance(btn, data.action === 'follow');
                 btn.disabled = false;
             });
 
-            // Update counter
             if (targetUserId === profileUserId) {
                 document.querySelectorAll('#followers-count').forEach(el => {
                     el.textContent = data.followers_count;
@@ -1302,30 +1320,25 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
             }
 
-            // Refresh modal tanpa scroll jump
             await refreshModalContentSmoothly('#followersModal');
             await refreshModalContentSmoothly('#followingModal');
             
             return data;
         } catch (error) {
             console.error('Error:', error);
-            // Rollback ke state asli jika error
             button.textContent = originalState.text;
             button.className = originalState.class;
             button.disabled = originalState.disabled;
-            
-            // Tampilkan error hanya di console, tidak tampil ke user
             return null;
         }
     }
 
-    // Refresh modal yang lebih smooth
+    // Refresh modal content
     async function refreshModalContentSmoothly(modalId) {
         const modal = document.querySelector(modalId);
         if (!modal || !modal.classList.contains('show')) return;
         
         try {
-            // Simpan scroll position sebelum refresh
             const modalBody = modal.querySelector('.modal-body');
             const scrollPosition = modalBody.scrollTop;
             
@@ -1345,16 +1358,15 @@ document.addEventListener("DOMContentLoaded", function() {
             
             if (newContent) {
                 modalBody.innerHTML = newContent;
-                // Kembalikan scroll position
                 modalBody.scrollTop = scrollPosition;
                 initModalButtons(modal);
             }
         } catch (error) {
-            console.error('Gagal refresh modal:', error);
+            console.error('Failed to refresh modal:', error);
         }
     }
 
-    // Inisialisasi tombol modal
+    // Initialize modal buttons
     function initModalButtons(modal) {
         if (!modal) return;
         
@@ -1362,7 +1374,6 @@ document.addEventListener("DOMContentLoaded", function() {
             const userId = btn.getAttribute('data-user-id');
             const isFollowing = btn.classList.contains('unfollow-button');
             
-            // Clone button untuk menghindari event listener duplikat
             const newBtn = btn.cloneNode(true);
             btn.replaceWith(newBtn);
             
@@ -1371,7 +1382,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Inisialisasi tombol utama
+    // Initialize main follow button
     const followButton = document.getElementById('follow-button');
     if (followButton) {
         const initialState = followButton.getAttribute('data-initial-state') === 'following';
@@ -1379,7 +1390,7 @@ document.addEventListener("DOMContentLoaded", function() {
         followButton.addEventListener('click', (e) => handleFollowAction(followButton, e));
     }
 
-    // Event delegation untuk tombol di dalam modal
+    // Event delegation for follow buttons in modals
     document.addEventListener('click', function(e) {
         const button = e.target.closest('.follow-button, .unfollow-button');
         if (button) {
@@ -1387,7 +1398,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Inisialisasi modal saat dibuka
+    // Initialize modals when shown
     ['#followersModal', '#followingModal'].forEach(modalId => {
         const modal = document.querySelector(modalId);
         if (modal) {
@@ -1408,186 +1419,267 @@ document.addEventListener("DOMContentLoaded", function() {
                         initModalButtons(this);
                     }
                 })
-                .catch(() => console.log('Gagal memuat data modal'));
+                .catch(() => console.log('Failed to load modal data'));
             });
         }
     });
 
-    // Event listener for create album form
+    // Create album form handler
     const createAlbumForm = document.getElementById('createAlbumForm');
     if (createAlbumForm) {
-        createAlbumForm.addEventListener('submit', async function (event) {
+        createAlbumForm.addEventListener('submit', function(event) {
             event.preventDefault();
+            const formData = new FormData(this);
 
-            const formData = new FormData(createAlbumForm);
-            const submitButton = createAlbumForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-
-            try {
-                const response = await fetch('{{ route('albums.store') }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
+            fetch('{{ route('albums.store') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
                 if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: 'Album berhasil dibuat!',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        window.location.reload();
+                    Swal.fire('Berhasil!', 'Album berhasil dibuat.', 'success').then(() => {
+                        location.reload();
                     });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal!',
-                        text: 'Gagal membuat album. Silakan coba lagi.',
-                        confirmButtonText: 'OK'
-                    });
+                    Swal.fire('Gagal!', data.message || 'Terjadi kesalahan.', 'error');
                 }
-            } catch (error) {
-                console.error('Error creating album:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Terjadi Kesalahan!',
-                    text: 'Terjadi kesalahan saat membuat album. Silakan coba lagi.',
-                    confirmButtonText: 'OK'
-                });
-            } finally {
-                submitButton.disabled = false;
-            }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Oops...', 'Terjadi kesalahan saat memproses permintaan.', 'error');
+            });
         });
     }
 
-    // Handle delete photo with event delegation
-    document.addEventListener('click', function (e) {
-        // Delete Photo
-        if (e.target && e.target.closest('.delete-photo-btn')) {
-            const button = e.target.closest('.delete-photo-btn');
-            const photoId = button.getAttribute('data-id');
-            const photoTitle = button.getAttribute('data-title');
+    // Edit profile form handler
+    const editProfileForm = document.getElementById('editProfileForm');
+    if (editProfileForm) {
+        editProfileForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
 
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                html: `Anda akan menghapus foto <strong>${photoTitle}</strong>.<br>Anda tidak akan bisa mengembalikan foto ini!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#32bd40',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/photos/${photoId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json',
-                            },
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: data.message || 'Foto berhasil dihapus.',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal!',
-                                text: data.message || 'Terjadi kesalahan saat menghapus foto.',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Terjadi kesalahan saat memproses permintaan.',
-                            confirmButtonText: 'OK'
-                        });
-                    }
+            fetch('{{ route('user.updateProfile') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Berhasil!', data.message, 'success').then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Gagal!', data.message, 'error');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire('Oops...', 'Terjadi kesalahan saat memproses permintaan.', 'error');
+            });
+        });
+    }
+
+    // Delete photo handler
+    document.addEventListener('click', function (e) {
+    const button = e.target.closest('.delete-photo-btn');
+    if (!button) return; // Jika tombol tidak ditemukan, hentikan eksekusi
+
+    const photoId = button.getAttribute('data-id');
+    const photoTitle = button.getAttribute('data-title');
+
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        html: `Anda yakin ingin menghapus foto <strong>${photoTitle}</strong>?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#32bd40',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new FormData();
+            formData.append('_method', 'DELETE');
+
+            fetch(`/photos/${photoId}`, {
+                method: 'POST', // Simulasi DELETE dengan method POST
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => {
+                console.log('HTTP Status:', response.status); // Log status HTTP
+                if (!response.ok) {
+                    throw new Error('Gagal menghapus foto.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response Data:', data); // Log data respons
+                if (data.success) {
+                    Swal.fire('Berhasil!', 'Foto berhasil dihapus.', 'success').then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire('Gagal!', data.message || 'Terjadi kesalahan.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error); // Log error
+                Swal.fire('Oops...', 'Terjadi kesalahan saat memproses permintaan.', 'error');
             });
         }
+    });
+});
 
-        // Delete Album
+    // Delete album handler
+    document.addEventListener('click', function(e) {
         if (e.target && e.target.closest('.delete-album-btn')) {
             const button = e.target.closest('.delete-album-btn');
             const albumId = button.getAttribute('data-id');
             const albumName = button.getAttribute('data-name');
 
             Swal.fire({
-                title: 'Apakah Anda yakin?',
-                html: `Anda akan menghapus album <strong>${albumName}</strong>.<br>Anda tidak akan bisa mengembalikan album ini!`,
+                title: 'Konfirmasi Hapus',
+                html: `Anda yakin ingin menghapus album <strong>${albumName}</strong>?`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#32bd40',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!',
+                confirmButtonText: 'Ya, Hapus!',
                 cancelButtonText: 'Batal'
-            }).then(async (result) => {
+            }).then((result) => {
                 if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/albums/${albumId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json',
-                            },
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil!',
-                                text: data.message || 'Album berhasil dihapus.',
-                                confirmButtonText: 'OK'
-                            }).then(() => {
-                                window.location.reload();
+                    fetch(`/albums/${albumId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire('Berhasil!', 'Album berhasil dihapus.', 'success').then(() => {
+                                location.reload();
                             });
                         } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal!',
-                                text: data.message || 'Terjadi kesalahan saat menghapus album.',
-                                confirmButtonText: 'OK'
-                            });
+                            Swal.fire('Gagal!', data.message || 'Terjadi kesalahan.', 'error');
                         }
-                    } catch (error) {
+                    })
+                    .catch(error => {
                         console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Terjadi kesalahan saat memproses permintaan.',
-                            confirmButtonText: 'OK'
-                        });
-                    }
+                        Swal.fire('Oops...', 'Terjadi kesalahan saat memproses permintaan.', 'error');
+                    });
                 }
             });
         }
     });
+
+// Event listener untuk semua form report
+document.querySelectorAll('form[id^="reportForm"]').forEach(form => {
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const actionUrl = this.action;
+        const modalElement = this.closest('.modal');
+        const modal = bootstrap.Modal.getInstance(modalElement);
+
+        try {
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                },
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error! Status: ${response.status}`);
+            }
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: data.message,
+                    confirmButtonText: 'OK',
+                }).then(() => {
+                    // Reset form
+                    this.reset();
+                    // Tutup modal dan bersihkan backdrop
+                    if (modal) {
+                        modal.hide();
+                        document.body.classList.remove('modal-open');
+                        const backdrops = document.querySelectorAll('.modal-backdrop');
+                        backdrops.forEach(backdrop => backdrop.remove());
+                        document.body.style.overflow = 'auto';
+                        document.body.style.paddingRight = '0';
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: data.message || 'Terjadi kesalahan.',
+                    confirmButtonText: 'OK',
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.message || 'Terjadi kesalahan saat memproses permintaan.',
+                confirmButtonText: 'OK',
+            });
+        }
+    });
+});
+
+// Event listener untuk alasan "Lainnya"
+document.querySelectorAll('input[name="reason"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+        const form = this.closest('form');
+        const descriptionGroup = form.querySelector('.form-group[id^="description-group"]');
+        const descriptionInput = form.querySelector('textarea[name="description"]');
+
+        if (this.value === 'Lainnya') {
+            descriptionGroup.style.display = 'block';
+            descriptionInput.required = true;
+        } else {
+            descriptionGroup.style.display = 'none';
+            descriptionInput.required = false;
+        }
+    });
+});
+
+// Pastikan modal di-cleanup dengan benar saat ditutup
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('hidden.bs.modal', function () {
+        document.body.classList.remove('modal-open');
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+        document.body.style.overflow = 'auto';
+        document.body.style.paddingRight = '0';
+    });
+});
 });
 </script>
 @endpush

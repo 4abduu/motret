@@ -159,24 +159,45 @@
         <h1 class="creator-name">{{ $user->name }}</h1>
         <p class="creator-username">{{ $user->username }}</p>
     </div>
-
-    @php
-        $existingDuration = $maxEndDate ? $existingDuration : 0;
-    @endphp
     
-    @if($hasActiveSubscription)
-        @if($hasComboSubscription)
-            <div class="subscription-status">
-                <h4>Paket Kombo Aktif</h4>
-                <p>Anda saat ini berlangganan ke user ini selama <strong>{{ $comboDurationText ?? 'N/A' }}</strong>, berakhir <strong>{{ $comboEndDateFormatted ?? 'N/A' }}</strong>.</p>
-            </div>
-        @else
-            <div class="subscription-status">
-                <h4>Langganan Creator Aktif</h4>
-                <p>Anda saat ini berlangganan ke user ini selama <strong>{{ $userDurationText ?? 'N/A' }}</strong>, berakhir <strong>{{ $userEndDateFormatted ?? 'N/A' }}</strong>.</p>
-            </div>
+@if($hasActiveSubscription)
+<div class="subscription-status">
+
+    {{-- Kalau ada combo --}}
+    @if($hasComboSubscription)
+    <h4>Langganan Kombo Aktif</h4>
+        <p>
+            Anda memiliki langganan <strong>user</strong> sampai {{ $comboEndDateFormatted }} ({{ $comboDuration }}) 
+            dan <strong>sistem</strong> sampai {{ $systemEndDateFormatted }} ({{ $systemDuration }}).
+        </p>
+    @else
+        {{-- Kalau ada user & system --}}
+        @if($hasUserSubscription && $hasSystemSubscription)
+        <h4>Langganan User dan Sistem Aktif</h4>
+            <p>
+                Anda memiliki langganan <strong>user</strong> sampai {{ $userEndDateFormatted }} ({{ $userDuration }}) 
+                dan <strong>sistem</strong> sampai {{ $systemEndDateFormatted }} ({{ $systemDuration }}).
+            </p>
+
+        {{-- Kalau cuma user --}}
+        @elseif($hasUserSubscription)
+            <h4>Langganan User Aktif</h4>
+            <p>
+                Anda memiliki langganan <strong>user</strong> sampai {{ $userEndDateFormatted }} ({{ $userDuration }}).
+            </p>
+
+        {{-- Kalau cuma system --}}
+        @elseif($hasSystemSubscription)
+            <h4>Langganan Sistem Aktif</h4>
+            <p>
+                Anda memiliki langganan <strong>sistem</strong> sampai {{ $systemEndDateFormatted }} ({{ $systemDuration }}).
+            </p>
         @endif
     @endif
+
+</div>
+@endif
+
 
     <h2 class="section-title">Creator Subscriptions</h2>
     
@@ -312,8 +333,10 @@
             $userPrice = $subscriptionPrices->price_1_month ?? 0;
             $comboPrice = $systemPrice + $userPrice;
             $pricePerMonth = number_format(round($comboPrice / 1), 0, ',', '.');
+            $durationMonths = 1;
+            $shouldDisable = $durationMonths <= $maxDuration;
         @endphp
-    
+        
         <div class="subscription-card combo-card">
             <div class="card-header">
                 <h3>1 Month Combo</h3>
@@ -326,7 +349,7 @@
                     <li><i class="bi bi-check-circle"></i> Plus system features</li>
                     <li><i class="bi bi-check-circle"></i> Best value package</li>
                 </ul>
-                @if($comboExistingDuration >= 1)
+                @if($shouldDisable)
                     <button class="card-button btn-disabled" disabled>
                         @if($hasComboSubscription)
                             Already Subscribed
@@ -334,11 +357,7 @@
                             Choose Longer Duration
                         @endif
                     </button>
-                    @if($comboExistingDuration > 0)
-                        <p class="text-center mt-2 text-sm text-gray-500">
-                            Current subscription ends in {{ $comboDurationText ?? 'N/A' }}
-                        </p>
-                    @endif
+                    
                 @else
                     <button class="card-button btn-primary" 
                             onclick="buyComboSubscription('{{ $comboPrice }}', '1_month')"
@@ -350,7 +369,7 @@
             </div>
         </div>
         @endif
-
+        
         {{-- COMBO 3 MONTHS --}}
         @if($subscriptionPrices && $subscriptionPrices->price_3_months && isset($systemPrices['3_months']))
         @php
@@ -358,8 +377,10 @@
             $userPrice = $subscriptionPrices->price_3_months ?? 0;
             $comboPrice = $systemPrice + $userPrice;
             $pricePerMonth = number_format(round($comboPrice / 3), 0, ',', '.');
+            $durationMonths = 3;
+            $shouldDisable = $durationMonths <= $maxDuration;
         @endphp
-    
+        
         <div class="subscription-card combo-card">
             <div class="card-header">
                 <h3>3 Months Combo</h3>
@@ -372,7 +393,7 @@
                     <li><i class="bi bi-check-circle"></i> Plus system features</li>
                     <li><i class="bi bi-check-circle"></i> Best value package</li>
                 </ul>
-                @if($comboExistingDuration >= 3)
+                @if($shouldDisable)
                     <button class="card-button btn-disabled" disabled>
                         @if($hasComboSubscription)
                             Already Subscribed
@@ -380,11 +401,7 @@
                             Choose Longer Duration
                         @endif
                     </button>
-                    @if($comboExistingDuration > 0)
-                        <p class="text-center mt-2 text-sm text-gray-500">
-                            Current subscription ends in {{ $comboDurationText ?? 'N/A' }}
-                        </p>
-                    @endif
+                    
                 @else
                     <button class="card-button btn-primary" 
                             onclick="buyComboSubscription('{{ $comboPrice }}', '3_months')"
@@ -404,8 +421,10 @@
             $userPrice = $subscriptionPrices->price_6_months ?? 0;
             $comboPrice = $systemPrice + $userPrice;
             $pricePerMonth = number_format(round($comboPrice / 6), 0, ',', '.');
+            $durationMonths = 6;
+            $shouldDisable = $durationMonths <= $maxDuration;
         @endphp
-    
+        
         <div class="subscription-card combo-card">
             <div class="card-header">
                 <h3>6 Months Combo</h3>
@@ -418,7 +437,7 @@
                     <li><i class="bi bi-check-circle"></i> Plus system features</li>
                     <li><i class="bi bi-check-circle"></i> Best value package</li>
                 </ul>
-                @if($comboExistingDuration >= 6)
+                @if($shouldDisable)
                     <button class="card-button btn-disabled" disabled>
                         @if($hasComboSubscription)
                             Already Subscribed
@@ -426,11 +445,7 @@
                             Choose Longer Duration
                         @endif
                     </button>
-                    @if($comboExistingDuration > 0)
-                        <p class="text-center mt-2 text-sm text-gray-500">
-                            Current subscription ends in {{ $comboDurationText ?? 'N/A' }}
-                        </p>
-                    @endif
+                    
                 @else
                     <button class="card-button btn-primary" 
                             onclick="buyComboSubscription('{{ $comboPrice }}', '6_months')"
@@ -444,14 +459,16 @@
         @endif
         
         {{-- COMBO 1 YEAR --}}
-        @if($subscriptionPrices && $subscriptionPrices->price_1_year && isset($systemPrices['1_year'])) 
+        @if($subscriptionPrices && $subscriptionPrices->price_1_year && isset($systemPrices['1_year']))
         @php
-            $systemPrice = $systemPrices['1_year'] ?? 0; // Updated to '1_year'
-            $userPrice = $subscriptionPrices->price_1_year ?? 0; // Updated to price_1_year
+            $systemPrice = $systemPrices['1_year'] ?? 0;
+            $userPrice = $subscriptionPrices->price_1_year ?? 0;
             $comboPrice = $systemPrice + $userPrice;
             $pricePerMonth = number_format(round($comboPrice / 12), 0, ',', '.');
+            $durationMonths = 12;
+            $shouldDisable = $durationMonths <= $maxDuration;
         @endphp
-    
+        
         <div class="subscription-card combo-card">
             <div class="card-header">
                 <h3>1 Year Combo</h3>
@@ -464,7 +481,7 @@
                     <li><i class="bi bi-check-circle"></i> Plus system features</li>
                     <li><i class="bi bi-check-circle"></i> Best value package</li>
                 </ul>
-                @if($comboExistingDuration >= 12)
+                @if($shouldDisable)
                     <button class="card-button btn-disabled" disabled>
                         @if($hasComboSubscription)
                             Already Subscribed
@@ -472,11 +489,7 @@
                             Choose Longer Duration
                         @endif
                     </button>
-                    @if($comboExistingDuration > 0)
-                        <p class="text-center mt-2 text-sm text-gray-500">
-                            Current subscription ends in {{ $comboDurationText ?? 'N/A' }}
-                        </p>
-                    @endif
+                    
                 @else
                     <button class="card-button btn-primary" 
                             onclick="buyComboSubscription('{{ $comboPrice }}', '1_year')"

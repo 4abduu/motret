@@ -22,18 +22,12 @@
 
 @section('content')
 <div class="row">
-    <div class="col-md-12 grid-margin">
-        <div class="row">
-            <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                <h2 class="font-weight-bold">Manage Comment</h2>
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item active">Comment</li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.comments') }}" class="text-success">Manage Comment</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.replies') }}" class="text-success">Manage Replies</a></li>
-                </ol>
-            </div>
-        </div>
-    </div>
+    <h2 class="font-weight-bold">Manage Comment</h2>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active">Comment</li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.comments') }}" class="text-success">Manage Comment</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.replies') }}" class="text-success">Manage Replies</a></li>
+        </ol>
 </div>
 
 <!-- Card Stats -->

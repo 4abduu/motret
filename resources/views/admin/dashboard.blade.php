@@ -22,21 +22,15 @@
 
 @section('content')
 <div class="row">
-    <div class="col-md-12 grid-margin">
-        <div class="row">
-            <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                <h2 class="font-weight-bold">Welcome Admin</h2>
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item active">Dashboard</li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.users') }}" class="text-success">Manage User</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.photos') }}" class="text-success">Manage Foto</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.manageComments') }}" class="text-success">Manage Comment</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions') }}" class="text-success">Manage Berlangganan</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.manageReports') }}" class="text-success">Manage Report</a></li>
-                </ol>
-            </div>
-        </div>
-    </div>
+    <h2>Welcome Admin</h2>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active">Dashboard</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.users') }}" class="text-success">Manage User</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.photos') }}" class="text-success">Manage Foto</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.manageComments') }}" class="text-success">Manage Verification</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions') }}" class="text-success">Manage Comment</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.manageReports') }}" class="text-success">Manage Subscription</a></li>
+    </ol>
 </div>
 
 <!-- Card Stats -->

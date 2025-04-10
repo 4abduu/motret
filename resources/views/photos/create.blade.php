@@ -14,7 +14,7 @@
 
     .card {
         border: 1px solid #ddd;
-        border-radius: 8px;
+        border-radius: 15px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
@@ -31,19 +31,6 @@
         padding: 10px;
         border: 1px solid #ddd;
         border-radius: 4px;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .btn-success:hover {
-        background-color: #218838;
     }
 
     .required-field::after {
@@ -168,21 +155,67 @@ $(document).ready(function() {
 
     // Form submission validation
     document.querySelector('form').addEventListener('submit', function(e) {
-        const fileInput = document.getElementById('photo');
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            const validExtensions = ['image/jpeg', 'image/png', 'image/jpg'];
-            if (!validExtensions.includes(file.type)) {
-                e.preventDefault();
-                alert('Harap pilih file gambar yang valid (JPEG, PNG, JPG)');
-                return false;
-            }
-        }
+    e.preventDefault(); // Mencegah form dikirim secara default
 
-        var submitButton = document.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.innerText = 'Uploading...';
+    const form = e.target;
+    const formData = new FormData(form);
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    // Disable tombol submit untuk mencegah pengiriman ganda
+    submitButton.disabled = true;
+    submitButton.innerText = 'Uploading...';
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Gagal mengunggah foto.');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response Data:', data); // Log respons dari server
+
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: data.message || 'Foto berhasil diunggah.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                location.reload(); // Refresh halaman setelah klik OK
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: data.message || 'Terjadi kesalahan saat mengunggah foto.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                submitButton.disabled = false;
+                submitButton.innerText = 'Upload';
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error); // Log error
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Terjadi kesalahan saat memproses permintaan.',
+            confirmButtonText: 'OK',
+        }).then(() => {
+            submitButton.disabled = false;
+            submitButton.innerText = 'Upload';
+        });
     });
+});
 });
 
 </script>

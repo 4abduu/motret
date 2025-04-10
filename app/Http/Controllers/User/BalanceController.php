@@ -99,7 +99,7 @@ class BalanceController extends Controller
         
         $month = $request->input('month');
         $year = $request->input('year');
-
+    
         $query = BalanceHistory::where('user_id', $user->id);
         
         // Apply filters only if provided
@@ -109,15 +109,16 @@ class BalanceController extends Controller
         if ($month) {
             $query->whereMonth('created_at', $month);
         }
-
+    
+        // Perhitungan total berdasarkan semua data yang sesuai filter
+        $totalIncome = $query->where('type', 'income')->sum('amount');
+        $totalWithdrawal = $query->where('type', 'withdrawal')
+                                  ->where('status', 'success')
+                                  ->sum('amount');
+    
+        // Reset query untuk paginasi
         $riwayat = $query->latest()->paginate(15);
-
-        // Calculate totals - only count successful withdrawals
-        $totalIncome = $riwayat->where('type', 'income')->sum('amount');
-        $totalWithdrawal = $riwayat->where('type', 'withdrawal')
-                                ->where('status', 'success')
-                                ->sum('amount');
-
+    
         return view('user.balance_history', [
             'riwayat'         => $riwayat,
             'totalIncome'     => $totalIncome,

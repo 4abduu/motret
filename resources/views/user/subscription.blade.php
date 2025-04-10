@@ -162,37 +162,31 @@
         <p>Unlock exclusive features and content with our premium subscriptions</p>
     </div>
 
-    {{-- V1 --}}
-    {{-- @if($hasActiveSubscription)
+    @if($hasActiveSubscription)
     <div class="subscription-status">
+    
+        {{-- Kalau combo --}}
         @if($hasComboSubscription)
-            <h4>Paket Kombo Aktif</h4>
-            <p>Anda mengaktifkan <strong>langganan kombo</strong> selama <strong>{{ $comboDuration }}</strong>.</p>
-            <p class="mb-0">
-                 Langganan sistem aktif hingga <strong>{{ $systemEndDateFormatted }}</strong>
+            <p>
+                <h4>Langganan Kombo Aktif</h4>
+                Langganan <strong>sistem</strong> sampai {{ $systemEndDateFormatted }} 
+                dan <strong>kombo</strong> sampai {{ $comboEndDateFormatted }}. 
+                Total durasi: <strong>{{ $duration }}</strong> (berakhir {{ $endDateFormatted }}).
             </p>
+        
+        {{-- Kalau cuma sistem --}}
         @else
-            <h4>Langganan Sistem Aktif</h4>
-            <p class="mb-0">
-                Anda berlangganan sistem selama <strong>{{ $duration }}</strong> 
-                hingga <strong>{{ $endDateFormatted }}</strong>.
+            <p>
+                <h4>Langganan Sistem Aktif</h4>
+                Langganan <strong>sistem</strong> sampai {{ $systemEndDateFormatted }} 
+                (Durasi: {{ $duration }}).
             </p>
         @endif
+    
     </div>
-    @endif --}}
-
-    {{-- V2 --}}
-    @if($hasActiveSubscription)
-        <div class="subscription-status">
-            @if($hasComboSubscription)
-                <h4>Paket Kombo Aktif</h4>
-                <p>Durasi langganan sistem anda saat ini diambil dari <strong>combo</strong>, aktif selama <strong>{{ $duration }}</strong>, berakhir <strong>{{ $comboEndDateFormatted }}</strong>.</p>
-            @else
-                <h4>Langganan Sistem Aktif</h4>
-                <p>Durasi langganan sistem anda saat ini diambil dari <strong>langganan sistem murni</strong>, aktif selama <strong>{{ $duration }}</strong>, berakhir <strong>{{ $endDateFormatted }}</strong>.</p>
-            @endif
-        </div>
     @endif
+    
+    
 
     <div class="subscription-plans">
         @foreach($prices as $price)

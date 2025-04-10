@@ -96,15 +96,23 @@
             margin-bottom: 8px;
         }
     
-        /* Footer */
         .footer {
-            width: 100%;
+            background-color: #fff;
+            padding: 1rem 0;
             text-align: center;
-            padding: 20px 0; /* Kurangi padding footer */
-            background-color: #f8f9fa; /* Tambahkan background jika diperlukan */
-            margin-top: auto; /* Pastikan footer tetap di bawah */
+            margin-top: auto; /* Untuk memastikan footer tetap di bawah */
         }
-    
+
+        .footer a {
+            color: #666;
+            text-decoration: none;
+            margin: 0 0.5rem;
+        }
+
+        .footer a:hover {
+            color: #32bd40;
+        }
+        
         .brand-logo {
             display: flex;
             justify-content: center;
@@ -200,9 +208,11 @@
                     </div>
                 </div>
             </div>
-            <footer class="footer ms-4">
-                <div class="d-sm-flex justify-content-center justify-content-sm-between">
-                    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2025 Motret. All rights reserved.</span>
+            <footer class="footer">
+                <div class="footer-bottom">
+                    <span>Copyright © 2025 Motret. All rights reserved.</span>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Privacy Policy</a>
                 </div>
             </footer>
         </div>

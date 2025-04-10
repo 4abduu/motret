@@ -75,48 +75,61 @@ class PhotoController extends Controller
 
     public function storePhoto(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
-            'photo' => 'required|image|mimes:jpeg,png,jpg',
-            'hashtags' => 'required|string',
-            'premium' => 'boolean',
-            'status' => 'in:1,0',
-        ]);
-
-            // Cek apakah foto dengan judul yang sama sudah diupload oleh user yang sama dalam waktu 5 menit terakhir
-                $recentPhoto = Photo::where('user_id', Auth::id())
-                ->where('title', $validated['title'])
-                ->where('created_at', '>=', now()->subMinutes(5))
-                ->first();
-
-            if ($recentPhoto) {
-            return redirect()->back()->with('error', 'Anda sudah mengupload foto dengan judul yang sama dalam 5 menit terakhir.');
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'required|string|max:255',
+                'photo' => 'required|image|mimes:jpeg,png,jpg',
+                'hashtags' => 'required|string',
+                'premium' => 'boolean',
+                'status' => 'in:1,0',
+            ]);
+    
+                // Cek apakah foto dengan judul yang sama sudah diupload oleh user yang sama dalam waktu 5 menit terakhir
+                    $recentPhoto = Photo::where('user_id', Auth::id())
+                    ->where('title', $validated['title'])
+                    ->where('created_at', '>=', now()->subMinutes(5))
+                    ->first();
+    
+                if ($recentPhoto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sudah mengupload foto dengan judul yang sama dalam 5 menit terakhir.'
+                ], 400);
+                }
+        
+            $path = $request->file('photo')->store('photos', 'public');
+        
+            // Buat versi buram dari foto
+            $lowResDir = storage_path('app/public/low_res_photos');
+            if (!file_exists($lowResDir)) {
+                mkdir($lowResDir, 0775, true);
             }
-    
-        $path = $request->file('photo')->store('photos', 'public');
-    
-        // Buat versi buram dari foto
-        $lowResDir = storage_path('app/public/low_res_photos');
-        if (!file_exists($lowResDir)) {
-            mkdir($lowResDir, 0775, true);
+            $lowResPath = $lowResDir . '/' . basename($path);
+            $image = Image::make(storage_path('app/public/' . $path));
+            $image->blur(50);
+            $image->save($lowResPath);
+        
+            Photo::create([
+                'user_id' => Auth::id(),
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'path' => $path,
+                'hashtags' => json_encode(explode(',', $validated['hashtags'])),
+                'premium' => $request->input('premium', false),
+                'status' => $request->input('status', true),
+            ]);
+        
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto berhasil diupload.',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupload foto: ' . $e->getMessage()
+            ], 500);
         }
-        $lowResPath = $lowResDir . '/' . basename($path);
-        $image = Image::make(storage_path('app/public/' . $path));
-        $image->blur(50);
-        $image->save($lowResPath);
-    
-        Photo::create([
-            'user_id' => Auth::id(),
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'path' => $path,
-            'hashtags' => json_encode(explode(',', $validated['hashtags'])),
-            'premium' => $request->input('premium', false),
-            'status' => $request->input('status', true),
-        ]);
-    
-        return redirect()->route('home')->with('success', 'Foto berhasil diunggah.');
     }
 
     public function downloadPhoto(Request $request, $id)
@@ -277,12 +290,35 @@ class PhotoController extends Controller
 
     public function destroyPhoto($id)
     {
-        $photo = Photo::findOrFail($id);
-        if (Auth::id() !== $photo->user_id) {
-            return redirect()->route('user.profile')->with('error', 'Anda tidak memiliki izin untuk menghapus foto ini.');
-        }
+        try{
+            $photo = Photo::findOrFail($id);
 
-        $photo->delete();
-        return redirect()->route('user.profile')->with('success', 'Foto berhasil dihapus.');
+            // Pastikan hanya pemilik foto yang bisa menghapus
+            if (Auth::id() !== $photo->user_id) {
+                return redirect()->route('user.profile')->with('error', 'Anda tidak memiliki izin untuk menghapus foto ini.');
+            }
+    
+            // Hapus file asli dari storage
+            $filePath = storage_path('app/public/' . $photo->path);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+    
+            // Hapus file low-res dari storage
+            $lowResPath = storage_path('app/public/low_res_photos/' . basename($photo->path));
+            if (file_exists($lowResPath)) {
+                unlink($lowResPath);
+            }
+    
+            // Hapus data foto dari database
+            $photo->delete();
+
+            return response()->json(['success' => true, 'message' => 'Foto berhasil dihapus.'], 200);
+        }catch(\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus foto: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

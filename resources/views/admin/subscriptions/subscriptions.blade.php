@@ -22,22 +22,16 @@
 
 @section('content')
 <div class="row">
-    <div class="col-md-12 grid-margin">
-        <div class="row">
-            <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                <h2 class="font-weight-bold">Manage Transactions</h2>
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item active">Dashboard</li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.transactions') }}" class="text-success">Transactions</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.systemPrices') }}" class="text-success">System Prices</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.userPrices') }}" class="text-success">User Prices</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.userSubscriptions') }}" class="text-success">User Subs</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.systemSubscriptions') }}" class="text-success">System Subs</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.comboSubscriptions') }}" class="text-success">Combo Subs</a></li>
-                </ol>
-            </div>
-        </div>
-    </div>
+    <h2 class="font-weight-bold">Manage Transactions</h2>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active">Dashboard</li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.transactions') }}" class="text-success">Transactions</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.systemPrices') }}" class="text-success">System Prices</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.userPrices') }}" class="text-success">User Prices</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.userSubscriptions') }}" class="text-success">User Subs</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.systemSubscriptions') }}" class="text-success">System Subs</a></li>
+        <li class="breadcrumb-item"><a href="{{ route('admin.subscriptions.comboSubscriptions') }}" class="text-success">Combo Subs</a></li>
+    </ol>
 </div>
 
 <!-- Card Stats -->

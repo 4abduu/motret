@@ -70,91 +70,21 @@
         }
 
         .footer {
-            background-color: #f8f9fa;
-            padding: 2rem 0;
-            text-align: center;
-        }
-
-        .footer-container {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            max-width: 1350px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .footer-logo {
-            flex: 1;
-            min-width: 200px;
-            margin: 1rem 0;
-            text-align: left;
-        }
-
-        .footer-logo img {
-            width: 100px; /* Sesuaikan ukuran logo */
-            margin-bottom: 10px; /* Jarak antara logo dan teks */
-        }
-
-        .footer-logo p {
-            font-size: 0.9rem;
-            color: #666;
-            margin: 0;
-        }
-
-        .footer-section {
-            flex: 1;
-            min-width: 200px;
-            margin: 1rem 0;
-            text-align: left
-        }
-
-        .footer-section h4 {
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-
-        .footer-section a {
-            display: block;
-            color: #333;
-            text-decoration: none;
-            margin: 0.5rem 0;
-        }
-
-        .footer-section a:hover {
-            color: #32bd40;
-        }
-
-        .footer-bottom {
-            margin-top: 2rem;
-            border-top: 1px solid #ddd;
-            padding-top: 1rem;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .footer-bottom a {
-            color: #666;
-            text-decoration: none;
-            margin: 0 0.5rem;
-        }
-
-        .footer-bottom a:hover {
-            color: #32bd40;
-        }
-        .social-icons a {
-    color: #333; /* Warna ikon default */
-    text-decoration: none; /* Menghapus underline */
-    transition: color 0.3s ease; /* Efek transisi warna */
+    background-color: #f8f9fa;
+    padding: 1rem 0;
+    text-align: center;
+    margin-top: auto; /* Untuk memastikan footer tetap di bawah */
 }
 
-.social-icons a:hover {
-    color: #32bd40; /* Warna ikon saat dihover */
+.footer a {
+    color: #666;
+    text-decoration: none;
+    margin: 0 0.5rem;
 }
-.social-icons i {
-        font-size: 20px; /* Sesuaikan ukuran ikon */
-    }
+
+.footer a:hover {
+    color: #32bd40;
+}
 
     /* Floating Action Button Mobile Only */
     .fab-upload {
@@ -243,61 +173,6 @@
                     @yield('content')
                 </div>
                 <footer class="footer">
-                    <div class="footer-container">
-                        <!-- Logo dan Teks -->
-                        <div class="footer-logo">
-                            <img src="{{ asset('images/Motret logo.png') }}" class="me-2" alt="logo" />
-                            <!-- Ikon Email, WhatsApp, dan Facebook -->
-                            <div class="social-icons mt-2">
-                                <a href="#" class="me-3">
-                                    <i class="bi bi-envelope"></i> <!-- Ikon Email -->
-                                </a>
-                                <a href="#" class="me-3">
-                                    <i class="bi bi-whatsapp"></i> <!-- Ikon WhatsApp -->
-                                </a>
-                                <a href="#" class="me-3">
-                                    <i class="bi bi-facebook"></i> <!-- Ikon Facebook -->
-                                </a>
-                                <a href="#">
-                                    <i class="bi bi-instagram"></i> <!-- Ikon Facebook -->
-                                </a>
-                            </div>
-                        </div>
-                        <!-- Bagian Lainnya -->
-                        <div class="footer-section">
-                            <h4>Products</h4>
-                            <a href="#">Product</a>
-                            <a href="#">Policy</a>
-                            <a href="#">Log In</a>
-                            <a href="#">Request Asset</a>
-                            <a href="#">Paramahipu</a>
-                        </div>
-                        <div class="footer-section">
-                            <h4>About us</h4>
-                            <a href="#">About India</a>
-                            <a href="#">Contact us</a>
-                            <a href="#">Fastwrist</a>
-                            <a href="#">Consent</a>
-                        </div>
-                        <div class="footer-section">
-                            <h4>Resources</h4>
-                            <a href="#">Help center</a>
-                            <a href="#">Book & demo</a>
-                            <a href="#">Server status</a>
-                            <a href="#">Blog</a>
-                        </div>
-                        <div class="footer-section">
-                            <h4>Contact Us</h4>
-                            <a href="#" class="me-3 text-decoration-none d-flex align-items-center mb-3">
-                                <i class="bi bi-whatsapp" style="font-size: 22px; color: #32bd40;"></i> <!-- Ikon WhatsApp -->
-                                <span class="ms-2">+62 123 4567 890</span> <!-- Nomor Telepon -->
-                            </a>
-                            <a href="#" class="me-3 text-decoration-none d-flex align-items-center">
-                                <i class="bi bi-envelope" style="font-size: 22px; color: #32bd40;"></i> <!-- Ikon WhatsApp -->
-                                <span class="ms-2">motret.kreatif4@gmail.com</span> <!-- Nomor Telepon -->
-                            </a>
-                        </div>
-                    </div>
                     <div class="footer-bottom">
                         <span>Copyright © 2025 Motret. All rights reserved.</span>
                         <a href="#">Terms of Service</a>

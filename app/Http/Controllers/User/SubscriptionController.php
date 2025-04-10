@@ -219,14 +219,18 @@ public function index()
         ->first();
 
     // Determine source and duration
-    $source = $comboSubscription ? 'combo' : ($systemSubscription ? 'langganan sistem murni' : null);
+    $source = $comboSubscription ? 'combo' : ($systemSubscription ? 'system' : null);
     $endDate = null;
     $durationText = '0 Bulan';
     
+    // Calculate combined end date
     if ($systemSubscription || $comboSubscription) {
-        $endDate = $comboSubscription && $systemSubscription 
-            ? max($comboSubscription->end_date, $systemSubscription->end_date)
-            : ($comboSubscription ? $comboSubscription->end_date : $systemSubscription->end_date);
+        $systemEndDate = $systemSubscription ? Carbon::parse($systemSubscription->end_date) : null;
+        $comboEndDate = $comboSubscription ? Carbon::parse($comboSubscription->end_date) : null;
+        
+        $endDate = $systemEndDate && $comboEndDate 
+            ? $systemEndDate->greaterThan($comboEndDate) ? $systemEndDate : $comboEndDate
+            : ($systemEndDate ?? $comboEndDate);
             
         $durationText = $this->getDurationText($endDate);
     }
@@ -237,9 +241,11 @@ public function index()
         'hasComboSubscription' => $comboSubscription !== null,
         'source' => $source,
         'duration' => $durationText,
-        'endDateFormatted' => $endDate ? Carbon::parse($endDate)->format('d F Y') : null,
+        'endDateFormatted' => $endDate ? $endDate->format('d F Y') : null,
         'existingDuration' => $endDate ? $this->calculateAccurateRemainingMonths($endDate) : 0,
+        'systemEndDate' => $systemSubscription ? $systemSubscription->end_date : null,
         'systemEndDateFormatted' => $systemSubscription ? Carbon::parse($systemSubscription->end_date)->format('d F Y') : null,
+        'comboEndDate' => $comboSubscription ? $comboSubscription->end_date : null,
         'comboEndDateFormatted' => $comboSubscription ? Carbon::parse($comboSubscription->end_date)->format('d F Y') : null,
     ]);
 }
@@ -247,11 +253,12 @@ public function index()
     /**
      * Show subscription options for a user
      */
+// Di method showSubscriptionOptions()
 public function showSubscriptionOptions($username)
 {
     $targetUser = User::where('username', $username)->firstOrFail();
     $user = Auth::user();
-
+    
     // Get active user subscription
     $userSubscription = SubscriptionUser::where('user_id', $user->id)
         ->where('target_user_id', $targetUser->id)
@@ -266,34 +273,39 @@ public function showSubscriptionOptions($username)
         ->orderBy('end_date', 'desc')
         ->first();
 
-    // Calculate existing duration for user subscription
+    // Get active system subscription
+    $systemSubscription = SubscriptionSystem::where('user_id', $user->id)
+        ->where('end_date', '>', now())
+        ->orderBy('end_date', 'desc')
+        ->first();
+
+    // Calculate existing duration for each subscription type
     $userExistingDuration = $userSubscription 
         ? $this->calculateAccurateRemainingMonths($userSubscription->end_date) 
         : 0;
 
-    // Calculate existing duration for combo subscription
     $comboExistingDuration = $comboSubscription 
         ? $this->calculateAccurateRemainingMonths($comboSubscription->end_date) 
         : 0;
 
-    // Determine the latest end date for user and combo subscriptions
-    $maxEndDate = null;
-    if ($userSubscription && $comboSubscription) {
-        $maxEndDate = Carbon::parse($userSubscription->end_date) > Carbon::parse($comboSubscription->end_date)
-            ? $userSubscription->end_date
-            : $comboSubscription->end_date;
-    } elseif ($userSubscription) {
-        $maxEndDate = $userSubscription->end_date;
-    } elseif ($comboSubscription) {
-        $maxEndDate = $comboSubscription->end_date;
-    }
+    $systemExistingDuration = $systemSubscription 
+        ? $this->calculateAccurateRemainingMonths($systemSubscription->end_date) 
+        : 0;
 
-    // Calculate remaining duration based on maxEndDate
-    $existingDuration = $maxEndDate ? $this->calculateAccurateRemainingMonths($maxEndDate) : 0;
+    $userDuration = $userSubscription 
+        ? $this->getDurationText($userSubscription->end_date) 
+        : 0;
+    
+    $systemDuration = $systemSubscription
+        ? $this->getDurationText($systemSubscription->end_date) 
+        : 0;
 
-    // Check if there is an active subscription (user or combo)
-    $hasActiveSubscription = $userSubscription !== null || $comboSubscription !== null;
-    $hasComboSubscription = $comboSubscription !== null;
+    $comboDuration = $comboSubscription
+        ? $this->getDurationText($comboSubscription->end_date) 
+        : 0;
+
+    // Determine the maximum duration between system and user subscriptions
+    $maxDuration = max($systemExistingDuration, $userExistingDuration, $comboExistingDuration);
 
     // Prepare data for view
     $data = [
@@ -305,26 +317,36 @@ public function showSubscriptionOptions($username)
             '6_months' => SubscriptionPriceSystem::where('duration', '6_months')->value('price'),
             '1_year' => SubscriptionPriceSystem::where('duration', '1_year')->value('price'),
         ],
-        'hasActiveSubscription' => $hasActiveSubscription,
-        'hasComboSubscription' => $hasComboSubscription,
+        'hasActiveSubscription' => $userSubscription || $comboSubscription || $systemSubscription,
+        'hasComboSubscription' => $comboSubscription !== null,
+        'hasUserSubscription' => $userSubscription !== null,
+        'hasSystemSubscription' => $systemSubscription !== null,
         'userExistingDuration' => $userExistingDuration,
         'comboExistingDuration' => $comboExistingDuration,
-        'existingDuration' => $existingDuration,
-        'maxEndDate' => $maxEndDate,
+        'systemExistingDuration' => $systemExistingDuration,
+        'maxDuration' => $maxDuration, // New variable for maximum duration
+        'userDuration' => $userDuration,
+        'systemDuration' => $systemDuration,
+        'comboDuration' => $comboDuration,
         'userSubscription' => $userSubscription,
         'comboSubscription' => $comboSubscription,
+        'systemSubscription' => $systemSubscription,
     ];
 
-    // Add formatted dates and durations for user subscription
+    // Add formatted dates and durations
     if ($userSubscription) {
         $data['userEndDateFormatted'] = Carbon::parse($userSubscription->end_date)->format('d F Y');
         $data['userDurationText'] = $this->getDurationText($userSubscription->end_date);
     }
 
-    // Add formatted dates and durations for combo subscription
     if ($comboSubscription) {
         $data['comboEndDateFormatted'] = Carbon::parse($comboSubscription->end_date)->format('d F Y');
         $data['comboDurationText'] = $this->getDurationText($comboSubscription->end_date);
+    }
+
+    if ($systemSubscription) {
+        $data['systemEndDateFormatted'] = Carbon::parse($systemSubscription->end_date)->format('d F Y');
+        $data['systemDurationText'] = $this->getDurationText($systemSubscription->end_date);
     }
 
     return view('user.subscription_user', $data);
@@ -774,52 +796,39 @@ public function showSubscriptionOptions($username)
     protected function validateComboSubscriptionDuration($userId, $duration, $targetUserId)
     {
         $durationMonths = $this->getDurationInMonths($duration);
+        
+        // Get system subscription
         $systemSubscription = SubscriptionSystem::where('user_id', $userId)
             ->where('end_date', '>', now())
             ->orderBy('end_date', 'desc')
             ->first();
-    
+        
+        // Get user subscription
         $userSubscription = SubscriptionUser::where('user_id', $userId)
             ->where('target_user_id', $targetUserId)
             ->where('end_date', '>', now())
             ->orderBy('end_date', 'desc')
             ->first();
-    
+        
+        // Get combo subscription
         $comboSubscription = SubscriptionCombo::where('user_id', $userId)
             ->where('target_user_id', $targetUserId)
             ->where('end_date', '>', now())
             ->orderBy('end_date', 'desc')
             ->first();
-    
-        // Hitung durasi maksimum dari semua langganan yang ada
-        $maxEndDate = null;
-        if ($systemSubscription && $userSubscription) {
-            $maxEndDate = Carbon::parse($systemSubscription->end_date) > Carbon::parse($userSubscription->end_date)
-                ? $systemSubscription->end_date
-                : $userSubscription->end_date;
-        } elseif ($systemSubscription) {
-            $maxEndDate = $systemSubscription->end_date;
-        } elseif ($userSubscription) {
-            $maxEndDate = $userSubscription->end_date;
-        } elseif ($comboSubscription) {
-            $maxEndDate = $comboSubscription->end_date;
-        }
-    
-        if (!$maxEndDate) {
-            return [
-                'valid' => true,
-                'remaining_months' => 0,
-                'remaining_text' => '0 bulan'
-            ];
-        }
-    
-        $remainingMonths = $this->calculateAccurateRemainingMonths($maxEndDate);
-        $remainingText = $this->getDurationText($remainingMonths);
-    
+        
+        // Calculate remaining months for each
+        $systemRemaining = $systemSubscription ? $this->calculateAccurateRemainingMonths($systemSubscription->end_date) : 0;
+        $userRemaining = $userSubscription ? $this->calculateAccurateRemainingMonths($userSubscription->end_date) : 0;
+        $comboRemaining = $comboSubscription ? $this->calculateAccurateRemainingMonths($comboSubscription->end_date) : 0;
+        
+        // Get the maximum remaining duration
+        $maxRemaining = max($systemRemaining, $userRemaining, $comboRemaining);
+        
         return [
-            'valid' => $durationMonths > $remainingMonths,
-            'remaining_months' => $remainingMonths,
-            'remaining_text' => $remainingText
+            'valid' => $durationMonths > $maxRemaining,
+            'remaining_months' => $maxRemaining,
+            'remaining_text' => $this->getDurationText($maxRemaining)
         ];
     }
 
@@ -1255,16 +1264,14 @@ protected function addCreatorBalance($transaction, $type)
             return 0;
         }
         
-        // Calculate difference in months
         $diffInMonths = $now->diffInMonths($end);
-        
-        // Calculate the date after adding the months
         $dateAfterMonths = $now->copy()->addMonths($diffInMonths);
         
-        // If we haven't reached the end date yet, add an extra month
         if ($dateAfterMonths < $end) {
             $diffInMonths++;
         }
+        
+        Log::info("Remaining months calculated: {$diffInMonths} for end date {$endDate}");
         
         return $diffInMonths;
     }

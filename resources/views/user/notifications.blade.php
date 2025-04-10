@@ -235,7 +235,7 @@
                 <i class="fas fa-arrow-left"></i>
             </button>
             <div class="header-content">
-                <i class="fas fa-bell"></i>
+                <i class="fas fa-bell me-2"></i>
                 <h2>Notifikasi</h2>
             </div>
         </div>

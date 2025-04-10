@@ -29,6 +29,9 @@
     border-radius: 16px;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
     overflow: hidden;
+    max-width: 700px; /* atau nilai lain sesuai kebutuhan */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .album-header::before {
@@ -61,7 +64,7 @@
 }
 
 .album-title {
-    font-size: 2.2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
     white-space: nowrap;
@@ -75,7 +78,7 @@
 }
 
 .album-description {
-    font-size: 1.15rem;
+    font-size: 1rem;
     opacity: 0.9;
     margin: 0;
     line-height: 1.6;
@@ -130,12 +133,12 @@
 }
 
 .edit-title {
-    font-size: 2.2rem;
+    font-size: 1.5rem;
     font-weight: 700;
 }
 
 .edit-description {
-    font-size: 1.15rem;
+    font-size: 1rem;
     line-height: 1.6;
     min-height: 120px;
     resize: none;

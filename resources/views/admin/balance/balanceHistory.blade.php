@@ -2,21 +2,11 @@
 <style>
     /* Base Styles */
     .history-container {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    
-    /* Biar lebih kecil */
-    max-width: 800px; /* atau 50%, bebas sesuai selera */
-
-    /* Biar di tengah */
-    margin: 50px auto; /* Atas bawah 50px, kiri kanan auto */
-
-    /* Optional: Biar rata tengah isi dalamnya */
-    text-align: left;
-}
-
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
     
     /* Header Styles */
     .history-header {
@@ -51,20 +41,24 @@
         margin: 0;
     }
     
-    .balance-info {
+    .user-info {
         display: flex;
         align-items: center;
         gap: 12px;
         margin-top: 10px;
     }
     
-    .balance-icon {
-        font-size: 1.8rem;
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid white;
     }
     
-    .balance-amount {
-        font-size: 1.3rem;
-        font-weight: 600;
+    .user-name {
+        font-size: 1.1rem;
+        font-weight: 500;
     }
     
     /* Filter Styles */
@@ -256,27 +250,6 @@
         color: #ddd;
     }
     
-    /* Withdraw Button */
-    .withdraw-btn {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 12px 24px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s;
-        margin-top: 20px;
-    }
-    
-    .withdraw-btn:hover {
-        background-color: #3e8e41;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
     /* Pagination */
     .history-pagination {
         display: flex;
@@ -328,7 +301,7 @@
             gap: 10px;
         }
         
-        .balance-info {
+        .user-info {
             margin-top: 8px;
         }
         
@@ -372,23 +345,28 @@
                 <h2>
                     <i class="fas fa-history me-2"></i>Riwayat Saldo
                 </h2>
-                <div class="balance-info">
-                    <i class="fas fa-wallet balance-icon"></i>
-                    <div>
-                        <div class="summary-label">Saldo Anda</div>
-                        <div class="balance-amount">Rp {{ number_format(auth()->user()->balance, 0, ',', '.') }}</div>
-                    </div>
+                <div class="user-info">
+                    @if($user->profile_photo_path)
+                        <img src="{{ asset('storage/' . $user->profile_photo_path) }}" 
+                             alt="{{ $user->name }}" 
+                             class="user-avatar">
+                    @else
+                        <div class="user-avatar bg-success d-flex align-items-center justify-content-center text-white">
+                            {{ strtoupper(substr($user->name, 0, 1)) }}
+                        </div>
+                    @endif
+                    <div class="user-name">{{ $user->name }}</div>
                 </div>
             </div>
         </div>
 
         <!-- Filter Section -->
         <div class="filter-section">
-            <form method="GET" action="{{ route('balance.history') }}" class="filter-form">
+            <form method="GET" action="{{ route('admin.saldo.detail', $user->id) }}" class="filter-form">
                 <select name="month" class="filter-select">
                     <option value="">Semua Bulan</option>
                     @foreach(range(1, 12) as $m)
-                        <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
+                        <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>
                             {{ date('F', mktime(0, 0, 0, $m, 1)) }}
                         </option>
                     @endforeach
@@ -397,7 +375,7 @@
                 <select name="year" class="filter-select">
                     <option value="">Semua Tahun</option>
                     @foreach(range(date('Y'), date('Y') - 5) as $y)
-                        <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
                     @endforeach
                 </select>
                 
@@ -405,8 +383,8 @@
                     <i class="fas fa-filter"></i> Filter
                 </button>
                 
-                @if($month || $year)
-                    <a href="{{ route('balance.history') }}" class="filter-button reset-button">
+                @if(request('month') || request('year'))
+                    <a href="{{ route('admin.saldo.detail', $user->id) }}" class="filter-button reset-button">
                         <i class="fas fa-times"></i> Reset
                     </a>
                 @endif
@@ -429,13 +407,6 @@
                 <div class="summary-label">Saldo Saat Ini</div>
                 <div class="summary-amount">Rp {{ number_format($currentBalance, 0, ',', '.') }}</div>
             </div>
-        </div>
-
-        <!-- Withdraw Button -->
-        <div class="text-center">
-            <a href="{{ route('withdrawal.balance') }}" class="withdraw-btn">
-                <i class="fas fa-money-bill-wave"></i> Ajukan Penarikan
-            </a>
         </div>
 
         <!-- History List -->
@@ -473,15 +444,8 @@
                         @else
                             {{ ucfirst($item->method) }}
                         @endif
-                        ({{ preg_replace('/(?<=\d{3})\d(?=\d{2})/', 'X', $item->destination) }})
+                        ({{ $item->destination }})
                     </div>
-                    
-                    @if($item->status == 'rejected' && $item->rejection_reason)
-                    <div class="history-detail text-danger mt-2">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        Alasan penolakan: {{ $item->rejection_reason }}
-                    </div>
-                    @endif
                 @endif
                 
                 <div class="history-time">
@@ -518,7 +482,7 @@
                     </li>
                 @else
                     <li class="page-item">
-                        <a class="page-link" href="{{ $riwayat->previousPageUrl() }}{{ $month ? '&month='.$month : '' }}{{ $year ? '&year='.$year : '' }}" rel="prev">&laquo;</a>
+                        <a class="page-link" href="{{ $riwayat->previousPageUrl() }}{{ request('month') ? '&month='.request('month') : '' }}{{ request('year') ? '&year='.request('year') : '' }}" rel="prev">&laquo;</a>
                     </li>
                 @endif
 
@@ -530,7 +494,7 @@
                         </li>
                     @else
                         <li class="page-item">
-                            <a class="page-link" href="{{ $url }}{{ $month ? '&month='.$month : '' }}{{ $year ? '&year='.$year : '' }}">{{ $page }}</a>
+                            <a class="page-link" href="{{ $url }}{{ request('month') ? '&month='.request('month') : '' }}{{ request('year') ? '&year='.request('year') : '' }}">{{ $page }}</a>
                         </li>
                     @endif
                 @endforeach
@@ -538,7 +502,7 @@
                 {{-- Next Page Link --}}
                 @if($riwayat->hasMorePages())
                     <li class="page-item">
-                        <a class="page-link" href="{{ $riwayat->nextPageUrl() }}{{ $month ? '&month='.$month : '' }}{{ $year ? '&year='.$year : '' }}" rel="next">&raquo;</a>
+                        <a class="page-link" href="{{ $riwayat->nextPageUrl() }}{{ request('month') ? '&month='.request('month') : '' }}{{ request('year') ? '&year='.request('year') : '' }}" rel="next">&raquo;</a>
                     </li>
                 @else
                     <li class="page-item disabled">

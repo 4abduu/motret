@@ -16,6 +16,7 @@ class ReportController extends Controller
     }
     public function reportPhoto(Request $request, $photoId)
     {
+        
         $validated = $request->validate([
             'reason' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
@@ -28,26 +29,41 @@ class ReportController extends Controller
             'photo_id' => $photoId,
             'reason' => $reason,
         ]);
+
+        if (!$request->ajax()) {
+            return redirect()->back()->with('success', 'Foto berhasil dilaporkan.');
+        }
     
-        return redirect()->route('photos.show', $photoId)->with('success', 'Foto berhasil dilaporkan.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto berhasil dilaporkan.',
+        ]);
     }
 
     public function reportComment(Request $request, $commentId)
     {
+        
         $validated = $request->validate([
             'reason' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
         ]);
-
+    
         $reason = $validated['reason'] === 'Lainnya' ? $validated['description'] : $validated['reason'];
-
+    
         Report::create([
             'user_id' => Auth::id(),
             'comment_id' => $commentId,
             'reason' => $reason,
         ]);
 
-        return redirect()->back()->with('success', 'Komentar berhasil dilaporkan.');
+        if (!$request->ajax()) {
+            return redirect()->back()->with('success', 'Komentar berhasil dilaporkan.');
+        }
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Komentar berhasil dilaporkan.',
+        ]);
     }
 
     public function reportReply(Request $request, $replyId)
@@ -65,7 +81,14 @@ class ReportController extends Controller
             'reason' => $reason,
         ]);
 
-        return redirect()->back()->with('success', 'Balasan berhasil dilaporkan.');
+        if (!$request->ajax()) {
+            return redirect()->back()->with('success', 'Balasan berhasil dilaporkan.');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Balasan berhasil dilaporkan.',
+        ]);
     }
 
     public function reportUser(Request $request, $userId)
@@ -74,17 +97,22 @@ class ReportController extends Controller
             'reason' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
         ]);
-    
+
         $reason = $validated['reason'] === 'Lainnya' ? $validated['description'] : $validated['reason'];
-    
+
         Report::create([
             'user_id' => Auth::id(),
             'reported_user_id' => $userId,
             'reason' => $reason,
         ]);
-    
-        $reportedUser = User::findOrFail($userId);
-    
-        return redirect()->route('user.showProfile', ['username' => $reportedUser->username])->with('success', 'Pengguna berhasil dilaporkan.');
+
+        if (!$request->ajax()) {
+            return redirect()->back()->with('success', 'Pengguna berhasil dilaporkan.');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengguna berhasil dilaporkan.',
+        ]);
     }
 }

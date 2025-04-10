@@ -417,8 +417,13 @@ body.modal-open {
                     <i class="bi bi-share text-dark fw-bold fs-5"></i>
                 </button>
                 @if (!Auth::check() || Auth::id() !== $photo->user_id)
-                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportModal-{{ $photo->id }}" {{ Auth::check() ? '' : 'disabled' }}>
+                <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportPhotoModal-{{ $photo->id }}" {{ Auth::check() ? '' : 'disabled' }}>
                     <i class="bi bi-flag text-dark fw-bold fs-5"></i>
+                </button>
+                @endif
+                @if(Auth::check() && Auth::id() === $photo->user_id)
+                <button type="button" class="btn btn-link p-0 me-3" id="delete-photo-button">
+                    <i class="bi bi-trash text-dark fw-bold fs-5"></i>
                 </button>
                 @endif
             </div>            
@@ -444,7 +449,7 @@ body.modal-open {
                 
                     <a href="{{ route('user.showProfile', $photo->user->username) }}" class="fw-bold me-2">{{ $photo->user->username }}</a>
                     @if($photo->user->verified)
-                        <i class="ti-medall-alt me-2" style="color: gold;"></i>
+                        <i class="ti-crown me-2" style="color: gold;"></i>
                     @endif 
                     @if($photo->user->role === 'pro')
                         <i class="ti-star me-2" style="color: gold;"></i>
@@ -453,7 +458,7 @@ body.modal-open {
                     <!-- Tombol Follow -->
                     @if(Auth::check())
                         @if(Auth::id() !== $photo->user->id)
-                            <button class="btn btn-sm {{ Auth::user()->isFollowing($photo->user) ? 'btn-dark' : 'btn-success' }} ms-3 follow-button" 
+                            <button class="btn btn-sm {{ Auth::user()->isFollowing($photo->user) ? 'btn-danger' : 'btn-success' }} ms-3 follow-button" 
                                     data-user-id="{{ $photo->user->id }}"
                                     data-following="{{ Auth::user()->isFollowing($photo->user) ? 'true' : 'false' }}">
                                 {{ Auth::user()->isFollowing($photo->user) ? 'Unfollow' : 'Follow' }}
@@ -496,7 +501,7 @@ body.modal-open {
                                             </a>
                                         </strong>
                                         @if($comment->user->verified)
-                                            <i class="ti-medall-alt" style="color: gold;"></i>
+                                            <i class="ti-crown me-2" style="color: gold;"></i>
                                         @endif 
                                         @if($comment->user->role === 'pro')
                                             <i class="ti-star" style="color: gold;"></i>
@@ -583,7 +588,7 @@ body.modal-open {
                                                             </a>
                                                         </strong>
                                                         @if($reply->user->verified)
-                                                            <i class="ti-medall-alt" style="color: gold;"></i>
+                                                            <i class="ti-crown me-2" style="color: gold;"></i>
                                                         @endif 
                                                         @if($reply->user->role === 'pro')
                                                             <i class="ti-star" style="color: gold;"></i>
@@ -720,8 +725,8 @@ body.modal-open {
     </div>
 </div>
 
-<!-- Modal Report Photo-->
-<div class="modal fade" id="reportModal-{{ $photo->id }}" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel-{{ $photo->id }}" aria-hidden="true">
+<!-- Modal Report Photo -->
+<div class="modal fade" id="reportPhotoModal-{{ $photo->id }}" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel-{{ $photo->id }}" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -729,44 +734,40 @@ body.modal-open {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="reportForm" method="POST" action="{{ route('photo.report', $photo->id) }}">
+                <form id="reportForm-photo-{{ $photo->id }}" method="POST" action="{{ route('photo.report', $photo->id) }}">
                     @csrf
                     <div class="form-group">
                         <label for="reason">Alasan Melaporkan</label>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input"name="reason" id="reason1"
-                                value="Konten tidak pantas">
+                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $photo->id }}" value="Konten tidak pantas">
                                 Konten tidak pantas
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input" name="reason" id="reason2" 
-                                value="Spam">
+                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $photo->id }}" value="Spam">
                                 Spam
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input"name="reason" id="reason3" 
-                                value="Pelanggaran hak cipta">
+                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $photo->id }}" value="Pelanggaran hak cipta">
                                 Pelanggaran hak cipta
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input" name="reason" id="reason4"
-                                value="Lainnya">
+                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $photo->id }}" value="Lainnya">
                                 Lainnya
                             </label>
                         </div>
                     </div>
-                    <div class="form-group" id="photo-description-group" style="display: none;">
-                        <label for="photo-description">Alasan</label>
-                        <textarea class="form-control" id="photo-description" name="description" rows="3"></textarea>
+                    <div class="form-group mt-3" id="description-group-photo-{{ $photo->id }}" style="display: none;">
+                        <label for="description-photo-{{ $photo->id }}">Alasan</label>
+                        <textarea class="form-control" id="description-photo-{{ $photo->id }}" name="description" rows="3"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-danger">Laporkan</button>
+                    <button type="submit" class="btn btn-danger mt-3">Laporkan</button>
                 </form>
             </div>
         </div>
@@ -774,53 +775,49 @@ body.modal-open {
 </div>
 
 @foreach($photo->comments as $comment)
-<!-- Modal Report Komentar-->
-<div class="modal fade" id="reportCommentModal-{{ $comment->id }}" tabindex="-1" role="dialog" aria-labelledby="reportCommentModalLabel-{{ $comment->id }}" aria-hidden="true">
+<!-- Modal Report Comment -->
+<div class="modal fade" id="reportCommentModal-{{ $comment->id }}" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel-{{ $comment->id }}" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="reportCommentModalLabel-{{ $comment->id }}">Laporkan Komentar</h5>
+                <h5 class="modal-title" id="reportModalLabel-{{ $comment->id }}">Laporkan Komentar</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="reportForm" method="POST" action="{{ route('comment.report', $comment->id) }}">
+                <form id="reportForm-comment-{{ $comment->id }}" method="POST" action="{{ route('comment.report', $comment->id) }}">
                     @csrf
                     <div class="form-group">
                         <label for="reason">Alasan Melaporkan</label>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input"name="reason" id="reason1"
-                                value="Konten tidak pantas">
+                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $comment->id }}" value="Konten tidak pantas">
                                 Konten tidak pantas
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input" name="reason" id="reason2" 
-                                value="Spam">
+                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $comment->id }}" value="Spam">
                                 Spam
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input"name="reason" id="reason3" 
-                                value="Pelanggaran hak cipta">
+                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $comment->id }}" value="Pelanggaran hak cipta">
                                 Pelanggaran hak cipta
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input" name="reason" id="reason4"
-                                value="Lainnya">
+                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $comment->id }}" value="Lainnya">
                                 Lainnya
                             </label>
                         </div>
                     </div>
-                    <div class="form-group" id="comment-description-group" style="display: none;">
-                        <label for="comment-description">Alasan</label>
-                        <textarea class="form-control" id="comment-description" name="description" rows="3"></textarea>
+                    <div class="form-group mt-3" id="description-group-photo-{{ $comment->id }}" style="display: none;">
+                        <label for="description-photo-{{ $comment->id }}">Alasan</label>
+                        <textarea class="form-control" id="description-photo-{{ $comment->id }}" name="description" rows="3"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-danger">Laporkan</button>
+                    <button type="submit" class="btn btn-danger mt-3">Laporkan</button>
                 </form>
             </div>
         </div>
@@ -829,58 +826,54 @@ body.modal-open {
 
 @foreach($comment->replies as $reply)
 
-<!-- Modal Report Replies-->
-<div class="modal fade" id="reportReplyModal-{{ $reply->id }}" tabindex="-1" role="dialog" aria-labelledby="reportReplyModalLabel-{{ $reply->id }}" aria-hidden="true">
+<!-- Modal Report Reply -->
+<div class="modal fade" id="reportReplyModal-{{ $reply->id }}" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel-{{ $reply->id }}" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="reportReplyModalLabel-{{ $reply->id }}">Laporkan Balasan</h5>
+                <h5 class="modal-title" id="reportModalLabel-{{ $reply->id }}">Laporkan Balasan</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="reportForm" method="POST" action="{{ route('reply.report', $reply->id) }}">
+                <form id="reportForm-reply-{{ $reply->id }}" method="POST" action="{{ route('reply.report', $reply->id) }}">
                     @csrf
                     <div class="form-group">
                         <label for="reason">Alasan Melaporkan</label>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input"name="reason" id="reason1"
-                                value="Konten tidak pantas">
+                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $reply->id }}" value="Konten tidak pantas">
                                 Konten tidak pantas
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input" name="reason" id="reason2" 
-                                value="Spam">
+                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $reply->id }}" value="Spam">
                                 Spam
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input"name="reason" id="reason3" 
-                                value="Pelanggaran hak cipta">
+                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $reply->id }}" value="Pelanggaran hak cipta">
                                 Pelanggaran hak cipta
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                              <input type="radio" class="form-check-input" name="reason" id="reason4"
-                                value="Lainnya">
+                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $reply->id }}" value="Lainnya">
                                 Lainnya
                             </label>
                         </div>
                     </div>
-                    <div class="form-group" id="reply-description-group" style="display: none;">
-                        <label for="reply-description">Alasan</label>
-                        <textarea class="form-control" id="reply-description" name="description" rows="3"></textarea>
+                    <div class="form-group mt-3" id="description-group-photo-{{ $reply->id }}" style="display: none;">
+                        <label for="description-photo-{{ $reply->id }}">Alasan</label>
+                        <textarea class="form-control" id="description-photo-{{ $reply->id }}" name="description" rows="3"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-danger">Laporkan</button>
+                    <button type="submit" class="btn btn-danger mt-3">Laporkan</button>
                 </form>
             </div>
         </div>
     </div>
-</div>
+</div>  
 @endforeach
 @endforeach
 
@@ -1165,28 +1158,31 @@ document.addEventListener("DOMContentLoaded", function () {
     // Buka modal zoom
     @if (Auth::check())
     document.getElementById('open-modal').addEventListener('click', () => {
-        modal.style.display = 'flex';
-        const photoCanvas = document.getElementById('photoCanvas');
-        modalImg.src = photoCanvas.dataset.src;
-        
-        // Reset transform
-        currentScale = 1;
-        posX = 0;
-        posY = 0;
-        updateTransform();
-        
-        // Tambahkan event listeners
-        modalImg.addEventListener('wheel', handleWheel, { passive: false });
-        modalImg.addEventListener('mousedown', handleMouseDown);
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-        
-        // Inisialisasi gesture touch
-        initHammer();
-        
-        // Cegah scrolling body
-        document.body.classList.add('modal-open');
-    });
+    modal.style.display = 'flex';
+    const photoCanvas = document.getElementById('photoCanvas');
+    modalImg.src = photoCanvas.dataset.src;
+
+    // Tambahkan watermark ke modal zoom
+    drawWatermarkOnModal();
+
+    // Reset transform
+    currentScale = 1;
+    posX = 0;
+    posY = 0;
+    updateTransform();
+
+    // Tambahkan event listeners
+    modalImg.addEventListener('wheel', handleWheel, { passive: false });
+    modalImg.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    // Inisialisasi gesture touch
+    initHammer();
+
+    // Cegah scrolling body
+    document.body.classList.add('modal-open');
+});
     @endif
 
     // Tutup modal zoom
@@ -1259,7 +1255,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ? `<img src="/storage/photo_profile/${user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30">`
         : `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="30" height="30"/>`;
     
-    const verifiedIcon = user.verified ? '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
+    const verifiedIcon = user.verified ? '<i class="ti-crown" style="color: gold;"></i>' : '';
     const proIcon = user.role === 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : '';
     const photoOwnerBadge = isPhotoOwner ? '<span class="text">• Pembuat</span>' : '';
     
@@ -1324,7 +1320,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ? `<img src="/storage/photo_profile/${user.profile_photo}" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25">`
         : `<img src="/images/foto profil.jpg" alt="Profile Picture" class="rounded-circle me-2" width="25" height="25"/>`;
 
-    const verifiedIcon = user.verified ? '<i class="ti-medall-alt" style="color: gold;"></i>' : '';
+    const verifiedIcon = user.verified ? '<i class="ti-crown" style="color: gold;"></i>' : '';
     const proIcon = user.role === 'pro' ? '<i class="ti-star" style="color: gold;"></i>' : '';
     const photoOwnerBadge = isPhotoOwner ? '<span class="text">• Pembuat</span>' : '';
 
@@ -1383,13 +1379,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Form komentar utama
 const commentForm = document.getElementById('commentForm');
+
 if (commentForm) {
     commentForm.addEventListener('submit', async function(e) {
+        // Fix biar yang ke handle cuma form komentar aja
+        if (e.target !== commentForm) return;
+
         e.preventDefault();
-        
+
         const formData = new FormData(commentForm);
-        const commentText = formData.get('comment');
-        
+
         try {
             const response = await fetch(commentForm.action, {
                 method: 'POST',
@@ -1399,21 +1398,18 @@ if (commentForm) {
                 },
                 body: formData
             });
-            
-            if (!response.ok) throw new Error('Network response was not ok');
-            
+
+            if (!response.ok) throw new Error('Gagal menambahkan komentar');
+
             const data = await response.json();
-            
+
             if (data.success) {
-                // Reset form
                 commentForm.reset();
-                
-                // Buat dan tambahkan komentar baru
+
                 const commentContainer = document.querySelector('.comment-container');
                 const newComment = createCommentElement(data.comment, data.comment.user, true);
                 commentContainer.insertAdjacentHTML('beforeend', newComment);
-                
-                // SweetAlert sukses
+
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
@@ -1421,28 +1417,16 @@ if (commentForm) {
                     toast: true,
                     position: 'top-end',
                     showConfirmButton: false,
-                    timer: 3000,
-                    background: '#32bd40',
-                    iconColor: '#fff',
-                    color: '#fff',
-                    timerProgressBar: true
+                    timer: 3000
                 });
             }
         } catch (error) {
-            console.error('Error submitting comment:', error);
-            // SweetAlert error
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: 'Gagal menambahkan komentar. Silakan coba lagi.',
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000
-            });
+            console.error(error);
+            Swal.fire('Error', error.message, 'error');
         }
     });
 }
+
 
 // Fungsi untuk handle reply button (delegasi event)
 document.addEventListener('click', function(e) {
@@ -1655,103 +1639,103 @@ function showErrorAlert(message) {
     // ==================== FITUR LAINNYA ====================
 
     // Fungsi untuk menampilkan/menyembunyikan input deskripsi alasan lainnya
-    function setupReportModals() {
-        // Event delegation for all report modals
-        document.addEventListener('change', function(e) {
-            if (e.target && e.target.name === 'reason') {
-                const modal = e.target.closest('.modal');
-                if (!modal) return;
+    // function setupReportModals() {
+    //     // Event delegation for all report modals
+    //     document.addEventListener('change', function(e) {
+    //         if (e.target && e.target.name === 'reason') {
+    //             const modal = e.target.closest('.modal');
+    //             if (!modal) return;
                 
-                const isOther = e.target.value === "Lainnya";
-                let descriptionGroup, textarea;
+    //             const isOther = e.target.value === "Lainnya";
+    //             let descriptionGroup, textarea;
                 
-                if (modal.id.startsWith('reportModal-')) {
-                    descriptionGroup = document.getElementById('photo-description-group');
-                    textarea = document.getElementById('photo-description');
-                } else if (modal.id.startsWith('reportCommentModal-')) {
-                    descriptionGroup = document.getElementById('comment-description-group');
-                    textarea = document.getElementById('comment-description');
-                } else if (modal.id.startsWith('reportReplyModal-')) {
-                    descriptionGroup = document.getElementById('reply-description-group');
-                    textarea = document.getElementById('reply-description');
-                }
+    //             if (modal.id.startsWith('reportModal-')) {
+    //                 descriptionGroup = document.getElementById('photo-description-group');
+    //                 textarea = document.getElementById('photo-description');
+    //             } else if (modal.id.startsWith('reportCommentModal-')) {
+    //                 descriptionGroup = document.getElementById('comment-description-group');
+    //                 textarea = document.getElementById('comment-description');
+    //             } else if (modal.id.startsWith('reportReplyModal-')) {
+    //                 descriptionGroup = document.getElementById('reply-description-group');
+    //                 textarea = document.getElementById('reply-description');
+    //             }
                 
-                if (descriptionGroup) {
-                    descriptionGroup.style.display = isOther ? 'block' : 'none';
-                    if (textarea) {
-                        textarea.required = isOther;
-                        if (isOther) {
-                            textarea.focus(); // Auto-focus when "Lainnya" is selected
-                        }
-                    }
-                }
-            }
-        });
+    //             if (descriptionGroup) {
+    //                 descriptionGroup.style.display = isOther ? 'block' : 'none';
+    //                 if (textarea) {
+    //                     textarea.required = isOther;
+    //                     if (isOther) {
+    //                         textarea.focus(); // Auto-focus when "Lainnya" is selected
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     });
 
-        // Form submission validation
-        document.querySelectorAll('[id^="reportModal-"], [id^="reportCommentModal-"], [id^="reportReplyModal-"]').forEach(modal => {
-            const form = modal.querySelector('form');
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    const selectedReason = form.querySelector('input[name="reason"]:checked');
-                    const isOther = selectedReason && selectedReason.value === "Lainnya";
-                    let textarea;
+    //     // Form submission validation
+    //     document.querySelectorAll('[id^="reportModal-"], [id^="reportCommentModal-"], [id^="reportReplyModal-"]').forEach(modal => {
+    //         const form = modal.querySelector('form');
+    //         if (form) {
+    //             form.addEventListener('submit', function(e) {
+    //                 const selectedReason = form.querySelector('input[name="reason"]:checked');
+    //                 const isOther = selectedReason && selectedReason.value === "Lainnya";
+    //                 let textarea;
                     
-                    if (modal.id.startsWith('reportModal-')) {
-                        textarea = document.getElementById('photo-description');
-                    } else if (modal.id.startsWith('reportCommentModal-')) {
-                        textarea = document.getElementById('comment-description');
-                    } else if (modal.id.startsWith('reportReplyModal-')) {
-                        textarea = document.getElementById('reply-description');
-                    }
+    //                 if (modal.id.startsWith('reportModal-')) {
+    //                     textarea = document.getElementById('photo-description');
+    //                 } else if (modal.id.startsWith('reportCommentModal-')) {
+    //                     textarea = document.getElementById('comment-description');
+    //                 } else if (modal.id.startsWith('reportReplyModal-')) {
+    //                     textarea = document.getElementById('reply-description');
+    //                 }
                     
-                    if (isOther && (!textarea || textarea.value.trim() === '')) {
-                        e.preventDefault();
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Harap isi alasan pelaporan',
-                            confirmButtonColor: '#3085d6',
-                        });
-                        textarea.focus();
-                    }
-                });
-            }
-        });
+    //                 if (isOther && (!textarea || textarea.value.trim() === '')) {
+    //                     e.preventDefault();
+    //                     Swal.fire({
+    //                         icon: 'error',
+    //                         title: 'Oops...',
+    //                         text: 'Harap isi alasan pelaporan',
+    //                         confirmButtonColor: '#3085d6',
+    //                     });
+    //                     textarea.focus();
+    //                 }
+    //             });
+    //         }
+    //     });
 
-        // Reset all report modals when closed
-        document.querySelectorAll('[id^="reportModal-"], [id^="reportCommentModal-"], [id^="reportReplyModal-"]').forEach(modal => {
-            modal.addEventListener('hidden.bs.modal', function() {
-                // Reset radio buttons
-                const radioButtons = modal.querySelectorAll('input[type="radio"]');
-                radioButtons.forEach(radio => {
-                    radio.checked = false;
-                });
+    //     // Reset all report modals when closed
+    //     document.querySelectorAll('[id^="reportModal-"], [id^="reportCommentModal-"], [id^="reportReplyModal-"]').forEach(modal => {
+    //         modal.addEventListener('hidden.bs.modal', function() {
+    //             // Reset radio buttons
+    //             const radioButtons = modal.querySelectorAll('input[type="radio"]');
+    //             radioButtons.forEach(radio => {
+    //                 radio.checked = false;
+    //             });
 
-                // Hide and clear description field
-                let descriptionGroup, textarea;
+    //             // Hide and clear description field
+    //             let descriptionGroup, textarea;
                 
-                if (modal.id.startsWith('reportModal-')) {
-                    descriptionGroup = document.getElementById('photo-description-group');
-                    textarea = document.getElementById('photo-description');
-                } else if (modal.id.startsWith('reportCommentModal-')) {
-                    descriptionGroup = document.getElementById('comment-description-group');
-                    textarea = document.getElementById('comment-description');
-                } else if (modal.id.startsWith('reportReplyModal-')) {
-                    descriptionGroup = document.getElementById('reply-description-group');
-                    textarea = document.getElementById('reply-description');
-                }
+    //             if (modal.id.startsWith('reportModal-')) {
+    //                 descriptionGroup = document.getElementById('photo-description-group');
+    //                 textarea = document.getElementById('photo-description');
+    //             } else if (modal.id.startsWith('reportCommentModal-')) {
+    //                 descriptionGroup = document.getElementById('comment-description-group');
+    //                 textarea = document.getElementById('comment-description');
+    //             } else if (modal.id.startsWith('reportReplyModal-')) {
+    //                 descriptionGroup = document.getElementById('reply-description-group');
+    //                 textarea = document.getElementById('reply-description');
+    //             }
 
-                if (descriptionGroup) {
-                    descriptionGroup.style.display = 'none';
-                }
-                if (textarea) {
-                    textarea.required = false;
-                    textarea.value = '';
-                }
-            });
-        });
-    }
+    //             if (descriptionGroup) {
+    //                 descriptionGroup.style.display = 'none';
+    //             }
+    //             if (textarea) {
+    //                 textarea.required = false;
+    //                 textarea.value = '';
+    //             }
+    //         });
+    //     });
+    // }
 
     // Fungsi untuk handle like/unlike foto
     function handleLikeButton() {
@@ -1885,6 +1869,93 @@ function showErrorAlert(message) {
         });
     }
 
+    async function handleReportForms() {
+    // Event listener untuk semua form report
+    document.querySelectorAll('form[id^="reportForm"]').forEach(form => {
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const actionUrl = this.action;
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Memproses...';
+
+        try {
+            const response = await fetch(actionUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            const contentType = response.headers.get('Content-Type');
+
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message,
+                        confirmButtonText: 'OK',
+                    });
+
+                    this.reset();
+                    const modal = bootstrap.Modal.getInstance(this.closest('.modal'));
+                    if (modal) modal.hide();
+                }
+            } else {
+                const text = await response.text();
+                console.error('Expect JSON but got:', text);
+                throw new Error('Unexpected response format.');
+            }
+
+        } catch (error) {
+            console.error('Error reporting comment:', error);
+            Swal.fire('Error!', error.message, 'error');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonText;
+        }
+    });
+});
+
+    // Event listener untuk alasan "Lainnya"
+    document.querySelectorAll('input[name="reason"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const form = this.closest('form');
+            const descriptionGroup = form.querySelector('.form-group[id^="description-group"]');
+            const descriptionInput = form.querySelector('textarea[name="description"]');
+
+            if (this.value === 'Lainnya') {
+                descriptionGroup.style.display = 'block';
+                descriptionInput.required = true;
+            } else {
+                descriptionGroup.style.display = 'none';
+                descriptionInput.required = false;
+            }
+        });
+    });
+
+    // Reset form saat modal ditutup
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', function() {
+            const form = this.querySelector('form');
+            if (form) {
+                form.reset();
+                const descriptionGroup = form.querySelector('[id^="description-group"]');
+                if (descriptionGroup) descriptionGroup.style.display = 'none';
+            }
+        });
+    });
+}
+
     // Render gambar ke canvas dengan watermark
     function renderImageWithWatermark() {
         const canvas = document.getElementById('photoCanvas');
@@ -1928,6 +1999,65 @@ function showErrorAlert(message) {
         };
     }
 
+    const deletePhotoButton = document.getElementById('delete-photo-button');
+
+
+    if (deletePhotoButton) {
+        deletePhotoButton.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Hapus Foto?',
+                text: "Apakah Anda yakin ingin menghapus foto ini? Tindakan ini tidak dapat dibatalkan.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Kirim permintaan penghapusan ke server
+                    fetch("{{ route('photos.destroy', $photo->id) }}", {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: data.message,
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                // Redirect ke halaman home
+                                window.location.href = "{{ route('home') }}";
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal!',
+                                text: data.message,
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal!',
+                            text: 'Terjadi kesalahan saat menghapus foto.',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                }
+            });
+        });
+    }
+
             
         // Handle follow buttons in the photo list
         document.querySelectorAll('.follow-button').forEach(button => {
@@ -1941,10 +2071,10 @@ function showErrorAlert(message) {
             if (following) {
                 button.textContent = 'Unfollow';
                 button.classList.remove('btn-success');
-                button.classList.add('btn-dark');
+                button.classList.add('btn-danger');
             } else {
                 button.textContent = 'Follow';
-                button.classList.remove('btn-dark');
+                button.classList.remove('btn-danger');
                 button.classList.add('btn-success');
             }
             button.setAttribute('data-following', following);
@@ -1985,6 +2115,54 @@ function showErrorAlert(message) {
             });
         }
 
+        // Fungsi untuk menggambar watermark pada modal zoom
+function drawWatermarkOnModal() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = modalImg.src;
+    img.crossOrigin = "anonymous";
+
+    img.onload = function () {
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // Gambar foto ke canvas
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Tambahkan watermark
+        const watermarkText = "MOTRET";
+        const fontSize = 25;
+        ctx.font = `${fontSize}px Arial`;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const stepX = 150;
+        const stepY = 100;
+        const angle = -30 * (Math.PI / 180);
+
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(angle);
+
+        for (let x = -canvas.width; x < canvas.width; x += stepX) {
+            for (let y = -canvas.height; y < canvas.height; y += stepY) {
+                ctx.fillText(watermarkText, x, y);
+            }
+        }
+
+        ctx.restore();
+
+        // Set hasil canvas ke modal image
+        modalImg.src = canvas.toDataURL();
+    };
+
+    img.onerror = function () {
+        console.error("Gagal memuat gambar untuk modal zoom.");
+    };
+}
+
     @if(!Auth::check() || (Auth::check() && (Auth::user()->role !== 'user' && Auth::user()->role !== 'pro')))
         function renderCanvasImgGuest() {  
             document.querySelectorAll('canvas.card-img').forEach(function (canvas) {
@@ -2015,13 +2193,16 @@ function showErrorAlert(message) {
     // Panggil semua fungsi yang diperlukan
     renderCanvasImgGuest();    
     @endif
-    setupReportModals();
+    //setupReportModals();
     handleLikeButton();
     handleAddToAlbum();
     handleCreateAlbum();
     blockRightClickAndInspect();
     renderImageWithWatermark();
     handleFollowUnfollow();
+    handleReportForms();
+    handleDeletePhoto();
+    drawWatermarkOnModal();
 });
 </script>
 @endpush

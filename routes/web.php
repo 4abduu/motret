@@ -112,11 +112,13 @@ Route::middleware(['auth', 'role:admin', 'logout_if_authenticated'])->group(func
     Route::get('/admin/albums/{album}/preview', [AdminUserController::class, 'previewAlbum'])->name('admin.albums.preview');
 
     //Saldo
-    Route::get('/admin/penarikan-saldo', [AdminBalanceController::class, 'indexPenarikan'])->name('admin.saldo.penarikan');
+    Route::get('/admin/saldo', [AdminBalanceController::class, 'index'])->name('admin.saldo');
+    Route::get('/admin/penarikan-saldo', [AdminBalanceController::class, 'withdrawals'])->name('admin.saldo.penarikan');
     Route::post('/admin/penarikan-saldo/{id}/acc', [AdminBalanceController::class, 'accPenarikan'])->name('admin.saldo.acc');
     Route::post('/admin/penarikan-saldo/{id}/reject', [AdminBalanceController::class, 'rejectPenarikan'])->name('admin.saldo.reject');
-    Route::get('/admin/riwayat-saldo', [AdminBalanceController::class, 'riwayatSaldoUser'])->name('admin.saldo.riwayat');
-    Route::get('/admin/riwayat-saldo/{id}', [AdminBalanceController::class, 'detailRiwayatSaldoUser'])->name('admin.saldo.detail');
+    Route::delete('/admin/penarikan-saldo/{id}/delete', [AdminBalanceController::class, 'deletePenarikan'])->name('admin.saldo.delete');    
+    Route::get('/admin/daftar-saldo', [AdminBalanceController::class, 'balanceUser'])->name('admin.saldo.daftar');
+    Route::get('/admin/riwayat-saldo/{userId}', [AdminBalanceController::class, 'historyBalance'])->name('admin.saldo.detail');
 });
 
  // Grup untuk User dan Pro
