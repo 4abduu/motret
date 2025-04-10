@@ -45,6 +45,7 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->m
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register')->middleware('logout_if_authenticated');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+Route::post('/check-username-register', [AuthController::class, 'checkUsername'])->name('check.usernameRegister');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/guest', [AuthController::class, 'guest'])->name('guest');
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');

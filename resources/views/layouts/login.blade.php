@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
     <link rel="shortcut icon" href="{{ asset('images/Motret logo kecil.png') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         /* Reset CSS */
         html, body {
@@ -180,6 +181,7 @@
         }
 
     </style>
+    @stack('link')
 </head>
 <body>
     <div class="container-scroller">
@@ -193,17 +195,6 @@
                     </div>
                     
                     <div class="col-lg-6 d-flex justify-content-center">
-                        @if ($errors->any())
-                        <div id="error-alert" class="alert alert-danger alert-dismissible fade show custom-alert" role="alert">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                                <span id="warning-countdown" class="float-end"></span>
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        @endif
                         @yield('content')
                     </div>
                 </div>
@@ -259,6 +250,7 @@
     <script src="{{ asset('assets/js/settings.js') }}"></script>
     <script src="{{ asset('assets/js/todolist.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     @stack('scripts')
 </body>

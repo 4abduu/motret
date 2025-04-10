@@ -73,64 +73,125 @@ class PhotoController extends Controller
         return view('photos.edit', compact('photo'));
     }
 
+    // public function storePhoto(Request $request)
+    // {
+    //     try {
+    //         $validated = $request->validate([
+    //             'title' => 'required|string|max:255',
+    //             'description' => 'required|string|max:255',
+    //             'photo' => 'required|image|mimes:jpeg,png,jpg',
+    //             'hashtags' => 'required|string',
+    //             'premium' => 'boolean',
+    //             'status' => 'in:1,0',
+    //         ]);
+    
+    //             // Cek apakah foto dengan judul yang sama sudah diupload oleh user yang sama dalam waktu 5 menit terakhir
+    //                 $recentPhoto = Photo::where('user_id', Auth::id())
+    //                 ->where('title', $validated['title'])
+    //                 ->where('created_at', '>=', now()->subMinutes(5))
+    //                 ->first();
+    
+    //             if ($recentPhoto) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Anda sudah mengupload foto dengan judul yang sama dalam 5 menit terakhir.'
+    //             ], 400);
+    //             }
+        
+    //         $path = $request->file('photo')->store('photos', 'public');
+        
+    //         // Buat versi buram dari foto
+
+        
+    //         Photo::create([
+    //             'user_id' => Auth::id(),
+    //             'title' => $validated['title'],
+    //             'description' => $validated['description'],
+    //             'path' => $path,
+    //             'hashtags' => json_encode(explode(',', $validated['hashtags'])),
+    //             'premium' => $request->input('premium', false),
+    //             'status' => $request->input('status', true),
+    //         ]);
+        
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Foto berhasil diupload.',
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Gagal mengupload foto: ' . $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function storePhoto(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'description' => 'required|string|max:255',
-                'photo' => 'required|image|mimes:jpeg,png,jpg',
-                'hashtags' => 'required|string',
-                'premium' => 'boolean',
-                'status' => 'in:1,0',
-            ]);
-    
-                // Cek apakah foto dengan judul yang sama sudah diupload oleh user yang sama dalam waktu 5 menit terakhir
-                    $recentPhoto = Photo::where('user_id', Auth::id())
-                    ->where('title', $validated['title'])
-                    ->where('created_at', '>=', now()->subMinutes(5))
-                    ->first();
-    
-                if ($recentPhoto) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah mengupload foto dengan judul yang sama dalam 5 menit terakhir.'
-                ], 400);
-                }
-        
-            $path = $request->file('photo')->store('photos', 'public');
-        
-            // Buat versi buram dari foto
-            $lowResDir = storage_path('app/public/low_res_photos');
-            if (!file_exists($lowResDir)) {
-                mkdir($lowResDir, 0775, true);
-            }
-            $lowResPath = $lowResDir . '/' . basename($path);
-            $image = Image::make(storage_path('app/public/' . $path));
-            $image->blur(50);
-            $image->save($lowResPath);
-        
-            Photo::create([
-                'user_id' => Auth::id(),
-                'title' => $validated['title'],
-                'description' => $validated['description'],
-                'path' => $path,
-                'hashtags' => json_encode(explode(',', $validated['hashtags'])),
-                'premium' => $request->input('premium', false),
-                'status' => $request->input('status', true),
-            ]);
-        
-            return response()->json([
-                'success' => true,
-                'message' => 'Foto berhasil diupload.',
-            ], 200);
-        } catch (\Exception $e) {
+{
+    try {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'photo' => 'required|image|mimes:jpeg,png,jpg|max:5120', // Maksimal 5MB
+            'hashtags' => 'required|string',
+            'premium' => 'boolean',
+            'status' => 'in:1,0',
+        ]);
+
+        // Cek duplikat judul dalam 5 menit terakhir
+        $recentPhoto = Photo::where('user_id', Auth::id())
+            ->where('title', $validated['title'])
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->first();
+
+        if ($recentPhoto) {
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mengupload foto: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Kamu sudah upload foto ini sebelumnya!',
+            ], 409);
         }
+
+        $photoPath = $request->file('photo')->store('photos', 'public');
+
+        $lowResDir = storage_path('app/public/low_res_photos');
+        if (!file_exists($lowResDir)) {
+            mkdir($lowResDir, 0775, true);
+        }
+        $lowResPath = $lowResDir . '/' . basename($photoPath);
+        $image = Image::make(storage_path('app/public/' . $photoPath));
+        $image->blur(50);
+        $image->save($lowResPath);
+
+        // Normalisasi hashtags jadi array JSON
+        $hashtags = json_decode($validated['hashtags']);
+        if (!is_array($hashtags)) {
+            $hashtags = [$validated['hashtags']];
+        }
+
+
+        Photo::create([
+            'user_id'     => Auth::id(),
+            'title'       => $validated['title'],
+            'description' => $validated['description'],
+            'photo'       => $photoPath,
+            'hashtags'    => json_encode($hashtags),
+            'premium'     => $validated['premium'] ?? false,
+            'status'      => $validated['status'] ?? 1,
+            'path'        => $photoPath,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto berhasil diupload!',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan saat upload foto.',
+            'error'   => $e->getMessage(),
+        ], 500);
     }
+}
+
 
     public function downloadPhoto(Request $request, $id)
     {

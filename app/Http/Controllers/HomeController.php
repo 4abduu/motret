@@ -20,7 +20,8 @@ class HomeController extends Controller
                              ->where('status', true)
                              ->where('updated_at', '>=', now()->subWeek());
                    });
-        })->get();
+        })->inRandomOrder()
+          ->get();
 
         $mostViewedPhotos = Photo::where('banned', false)->where('premium', false)->where('status', true)->orderBy('views', 'desc')->take(10)->get();
         $mostLikedPhotos = Photo::withCount('likes')->where('banned', false)->where('premium', false)->where('status', true)->orderBy('likes_count', 'desc')->take(10)->get();

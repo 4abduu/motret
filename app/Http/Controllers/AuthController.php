@@ -23,24 +23,25 @@ class AuthController extends Controller
 {
     public function index()
     {
-        return view('home');
+        //
     }
 
+    // menampilkan halaman login
     public function showLoginForm()
     {
         return view('auth.login');
     }
-
+    // menampilkan halaman daftar
     public function showRegisterForm()
     {
         return view('auth.register');
     }
-
+    // redirect ke google login
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->with(['prompt' => 'select_account'])->redirect();
     }
-
+    // fungsi untuk menghandle login
     public function login(Request $request)
     {
         Log::info('Login attempt', ['request' => $request->only('email')]);
@@ -66,16 +67,18 @@ class AuthController extends Controller
             Log::info('Login successful', ['user_id' => $user->id, 'role' => $user->role]);
     
             if ($user->role === 'admin') {
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.dashboard')->with('login_success', 'Login berhasil! Selamat datang admin.');
             } else {
-                return redirect()->route('home');
+                return redirect()->route('home')->with('login_success', 'Login berhasil! Selamat datang, ' . $user->username);
             }
         }
     
         Log::warning('Login failed', ['email/username' => $request->email]);
-        return back()->withErrors(['email' => 'Email/Username atau password salah.']);
+        return back()
+        ->withInput($request->only('email'))
+        ->withErrors(['email' => 'Email/Username atau password salah.']); 
     }
-
+    // fungsi untuk menghandle daftar
     public function register(Request $request)
     {
         $messages = [
@@ -93,17 +96,7 @@ class AuthController extends Controller
             'password.min' => 'Password minimal harus 8 karakter.',
             'password.letters' => 'Password harus mengandung huruf.',
             'password.numbers' => 'Password harus mengandung angka.',
-            'profile_photo.image' => 'Foto profil harus berupa gambar.',
-            'profile_photo.mimes' => 'Foto profil harus berformat jpeg, png, atau jpg.',
         ];
-    
-        $profilePhotoPath = null;
-        if ($request->hasFile('profile_photo')) {
-            $profilePhotoPath = $request->file('profile_photo')->storeAs(
-                'public/photo_profile',
-                Str::random(40) . '.' . $request->file('profile_photo')->getClientOriginalExtension()
-            );
-        }
     
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -116,19 +109,23 @@ class AuthController extends Controller
             ],
             'email' => 'required|email|unique:users,email',
             'password' => ['required', 'confirmed', PasswordRule::min(8)->letters()->numbers()],
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg',
         ], $messages);
-    
-        $user = User::create([
-            'name' => $validated['name'],
-            'username' => $validated['username'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'profile_photo' => $profilePhotoPath ? basename($profilePhotoPath) : null,
-        ]);
-    
-        Auth::login($user);
-        return redirect()->route('home');
+
+        try {
+            $user = User::create([
+                'name' => $validated['name'],
+                'username' => $validated['username'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
+        
+            Auth::login($user);
+            return redirect()->route('login')->with('register_success', 'Register berhasil! Silahkan login.');
+        } catch (\Exception $e) {
+            return back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->withErrors(['general' => 'Registrasi gagal. Silakan cek data Anda.']);
+        }
     }
 
     public function logout(Request $request)
@@ -136,7 +133,8 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/');
+        return redirect()->route('home')->with('logout_success', 'Berhasil logout');
+
     }
     
     public function guest()
@@ -180,7 +178,7 @@ class AuthController extends Controller
                 Auth::login($user);
             }
     
-            return redirect()->route('home');
+            return redirect()->route('home')->with('login_success', 'Login berhasil! Selamat datang, ' . $user->username);
         } catch (Exception $e) {
             return redirect()->route('login')->with('error', 'Something went wrong, please try again.');
         }
@@ -306,5 +304,17 @@ class AuthController extends Controller
         DB::table('password_reset_tokens')->where('email', $user->email)->delete();
 
         return redirect()->route('user.settings')->with('success', 'Email berhasil diubah.');
+    }
+
+    public function checkUsername(Request $request)
+    {
+        $username = trim($request->username);
+        if (!preg_match('/^[a-z0-9._]+$/', $username)) {
+            return response()->json(['exists' => true]); // Anggap username tidak valid sebagai sudah ada
+        }
+        Log::info('Checking username:', ['username' => $username]); // Log input username
+        $exists = User::where('username', 'LIKE', $username)->exists();
+        Log::info('Username exists:', ['exists' => $exists]); // Log hasil query
+        return response()->json(['exists' => $exists]);
     }
 }

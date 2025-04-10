@@ -391,4 +391,41 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 </script>
+
+@if(session('login_success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: '{{ session('login_success') }}',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            toast: true,
+            background: '#32bd40',
+            color: '#fff',
+            iconColor: '#fff'
+        });
+    });
+</script>
+@endif
+
+
+@if(session('logout_success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: '{{ session('logout_success') }}',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            toast: true,
+            background: '#32bd40',
+            color: '#fff',
+            iconColor: '#fff'
+        });
+    });
+</script>
+@endif
 @endpush

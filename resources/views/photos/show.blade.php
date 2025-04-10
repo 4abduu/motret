@@ -430,10 +430,22 @@ body.modal-open {
             <div class="mt-4 text-start comment-container">
                 <h3 class="mb-4 text-start">{{ $photo->title }}</h3>
                 <h5 class="text-start">{{ $photo->description }}</h5>
+                @php
+                    $rawHashtags = $photo->hashtags;
+
+                    // Coba decode dulu
+                    $hashtags = json_decode($rawHashtags);
+
+                    // Kalau hasil decode bukan array (berarti string biasa), convert aja jadi array
+                    if (!is_array($hashtags)) {
+                        $hashtags = [$rawHashtags];
+                    }
+                @endphp
+
                 <div class="most-searched-container mb-2">
                     <h4 class="most-searched-title">Hashtags:</h4>
                     <div class="most-searched-keywords">
-                        @foreach(json_decode($photo->hashtags) as $hashtag)
+                        @foreach($hashtags as $hashtag)
                             <a href="{{ route('search', ['query' => $hashtag]) }}" class="keyword-item badge bg-secondary text-decoration-none me-1">
                                 {{ $hashtag }}
                             </a>

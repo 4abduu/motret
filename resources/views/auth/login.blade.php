@@ -4,16 +4,12 @@
 <div class="container d-flex">
     <div class="row w-100">
         <div class="col-md-8">
-            @if (session('status'))
-                <div class="alert alert-danger" role="alert">
-                    {{ session('status') }}
-                </div>
-            @endif
             <form method="POST" action="{{ route('login.post') }}" class="forms-sample w-100">
                 @csrf
                 <div class="form-group">
                     <label for="exampleInputUsername1" class="custom-label">Username or Email</label>
-                    <input type="text" name="email" class="form-control" id="exampleInputUsername1" placeholder="Username or Email" required>
+                    <input type="text" name="email" class="form-control" id="exampleInputUsername1" 
+                           placeholder="Username or Email" value="{{ old('email') }}" required>
                 </div>
                 <div class="form-group position-relative">
                     <label for="exampleInputPassword1" class="custom-label">Password</label>
@@ -44,3 +40,45 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+@if(session('register_success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: '{{ session('register_success') }}',
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            toast: true,
+            background: '#32bd40',
+            color: '#fff',
+            iconColor: '#fff'
+        });
+    });
+</script>
+@endif
+@if($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Login Gagal',
+            text: '{{ $errors->first() }}',
+            confirmButtonColor: '#32bd40',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Reset hanya password
+                const passwordInput = document.querySelector('[name="password"]');
+                if (passwordInput) {
+                    passwordInput.value = '';
+                    passwordInput.style.borderColor = '';
+                    passwordInput.focus();
+                }
+            }
+        });
+    });
+</script>
+@endif
+@endpush

@@ -75,7 +75,7 @@
                                 <p><strong>Ketentuan foto:</strong></p>
                                 <ul>
                                     <li>Format: JPEG, PNG, JPG</li>
-                                    <!--<li>Ukuran maksimal: 2MB</li>-->
+                                    <li>Ukuran maksimal: 5MB</li>
                                 </ul>
                             </div>
                             <input type="file" name="photo" class="dropify" id="photo" required onchange="previewImage(event)">
@@ -96,12 +96,12 @@
                                     <textarea type="text" name="description" class="form-control" id="description" rows="3" placeholder="Deskripsi" required></textarea>
                                 </div>
                                 <div class="form-group">
-                                    <label for="hashtags" class="required-field">Hastag (tanpa #)</label>
-                                    <input type="text" name="hashtags" class="form-control" id="hashtags" placeholder="Contoh: landscape sunset nature" required>
+                                    <label for="hashtags" class="required-field">Tagar (tanpa #)</label>
+                                    <input type="text" name="hashtags" class="form-control" id="hashtags" placeholder="Contoh: landscape,sunset, nature" required>
                                 </div>
                                 @if (Auth::user()->verified)
                                 <div class="form-group">
-                                    <label for="premium" class="form-label">Premium</label>
+                                    <label for="premium" class="form-label">Status</label>
                                     <select class="form-select" id="premium" name="premium" required>
                                         <option value="0">Biasa</option>
                                         <option value="1">Premium</option>
@@ -113,11 +113,11 @@
                                     <label for="status" class="form-label">Visibilitas</label>
                                     <select class="form-select" id="status" name="status" required>
                                         <option value="1">Publik</option>
-                                        <option value="0">Privat</option>
+                                        <option value="0">Pribadi</option>
                                     </select>
                                 </div>
                                 @endif
-                                <button type="submit" class="btn btn-success text-white me-2">Upload</button>
+                                <button type="submit" class="btn btn-success text-white me-2">Unggah</button>
                             </form>
                         </div>
                     </div>
@@ -133,90 +133,141 @@
 <script>
 $(document).ready(function() {
     var drEvent = $('.dropify').dropify();
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
 
     // Event listener untuk input file
     document.getElementById('photo').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
+            // Validasi ekstensi file
             const validExtensions = ['image/jpeg', 'image/png', 'image/jpg'];
             if (!validExtensions.includes(file.type)) {
-                alert('Hanya file gambar (JPEG, PNG, JPG) yang diperbolehkan');
-                e.target.value = ''; // Clear input file
-                drEvent.data('dropify').clearElement(); // Reset Dropify
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Format tidak valid',
+                    text: 'Hanya file gambar (JPEG, PNG, JPG) yang diperbolehkan',
+                    confirmButtonText: 'OK',
+                });
+                e.target.value = '';
+                drEvent.data('dropify').clearElement();
+                return;
+            }
+
+            // Validasi ukuran file
+            if (file.size > MAX_FILE_SIZE) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ukuran file terlalu besar',
+                    text: 'Ukuran file maksimal adalah 5MB',
+                    confirmButtonText: 'OK',
+                });
+                e.target.value = '';
+                drEvent.data('dropify').clearElement();
+                return;
             }
         }
     });
 
     // Event Dropify ketika file di-drop
     drEvent.on('dropify.error.imageFormat', function(event, element) {
-        alert('Hanya file gambar (JPEG, PNG, JPG) yang diperbolehkan');
-        element.clearElement(); // Reset Dropify
-    });
-
-    // Form submission validation
-    document.querySelector('form').addEventListener('submit', function(e) {
-    e.preventDefault(); // Mencegah form dikirim secara default
-
-    const form = e.target;
-    const formData = new FormData(form);
-    const submitButton = form.querySelector('button[type="submit"]');
-
-    // Disable tombol submit untuk mencegah pengiriman ganda
-    submitButton.disabled = true;
-    submitButton.innerText = 'Uploading...';
-
-    fetch(form.action, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json',
-        },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Gagal mengunggah foto.');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Response Data:', data); // Log respons dari server
-
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: data.message || 'Foto berhasil diunggah.',
-                confirmButtonText: 'OK',
-            }).then(() => {
-                location.reload(); // Refresh halaman setelah klik OK
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: data.message || 'Terjadi kesalahan saat mengunggah foto.',
-                confirmButtonText: 'OK',
-            }).then(() => {
-                submitButton.disabled = false;
-                submitButton.innerText = 'Upload';
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error); // Log error
         Swal.fire({
             icon: 'error',
-            title: 'Oops...',
-            text: 'Terjadi kesalahan saat memproses permintaan.',
+            title: 'Format tidak valid',
+            text: 'Hanya file gambar (JPEG, PNG, JPG) yang diperbolehkan',
             confirmButtonText: 'OK',
-        }).then(() => {
-            submitButton.disabled = false;
-            submitButton.innerText = 'Upload';
+        });
+        element.clearElement();
+    });
+
+    // Validasi ukuran file saat di-drop
+    drEvent.on('dropify.error.fileSize', function(event, element) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Ukuran file terlalu besar',
+            text: 'Ukuran file maksimal adalah 5MB',
+            confirmButtonText: 'OK',
+        });
+        element.clearElement();
+    });
+
+    // Form submission with AJAX and SweetAlert2
+    $('form').on('submit', function(e) {
+        e.preventDefault();
+        
+        const form = this;
+        const formData = new FormData(form);
+        const fileInput = document.getElementById('photo');
+        const submitButton = $(form).find('button[type="submit"]');
+        
+        // Validasi file sebelum upload
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            if (file.size > MAX_FILE_SIZE) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ukuran file terlalu besar',
+                    text: 'Ukuran file maksimal adalah 5MB',
+                    confirmButtonText: 'OK',
+                });
+                return false;
+            }
+        }
+
+        // Disable submit button and show loading state
+        submitButton.prop('disabled', true);
+        submitButton.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...');
+
+        $.ajax({
+            url: $(form).attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: response.message || 'Foto berhasil diunggah.',
+                        confirmButtonText: 'OK',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "{{ route('home') }}";
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: response.message || 'Terjadi kesalahan saat mengunggah foto.',
+                        confirmButtonText: 'OK',
+                    });
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Terjadi kesalahan saat memproses permintaan.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                } else if (xhr.statusText) {
+                    errorMessage = xhr.statusText;
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: errorMessage,
+                    confirmButtonText: 'OK',
+                });
+            },
+            complete: function() {
+                submitButton.prop('disabled', false);
+                submitButton.text('Upload');
+            }
         });
     });
 });
-});
-
 </script>
 @endpush
