@@ -96,42 +96,48 @@ private function calculatePercentageChange($model, $sumColumn = null)
         return view('admin.balance.balanceList', compact('users'));
     }
 
-public function historyBalance(Request $request, $userId)
-{
-    $user = User::findOrFail($userId); // Ensure the user exists
-
-    $month = $request->input('month');
-    $year = $request->input('year');
-
-    $query = BalanceHistory::where('user_id', $user->id);
+    public function historyBalance(Request $request, $userId)
+    {
+        $user = User::findOrFail($userId);
     
-    // Apply filters only if provided
-    if ($year) {
-        $query->whereYear('created_at', $year);
+        $month = $request->input('month');
+        $year = $request->input('year');
+    
+        // Query utama untuk data riwayat
+        $mainQuery = BalanceHistory::where('user_id', $user->id);
+        
+        // Clone query untuk filter bulan/tahun
+        $filteredQuery = clone $mainQuery;
+    
+        if ($year) {
+            $mainQuery->whereYear('created_at', $year);
+        }
+        if ($month) {
+            $mainQuery->whereMonth('created_at', $month);
+        }
+    
+        // Clone query yang sudah difilter untuk hitung total
+        $totalIncomeQuery = clone $mainQuery;
+        $totalIncome = $totalIncomeQuery->where('type', 'income')->sum('amount');
+    
+        $totalWithdrawalQuery = clone $mainQuery;
+        $totalWithdrawal = $totalWithdrawalQuery->where('type', 'withdrawal')
+                                      ->where('status', 'success')
+                                      ->sum('amount');
+    
+        // Ambil data riwayat dari query utama yang sudah difilter bulan/tahun
+        $riwayat = $mainQuery->latest()->paginate(10);
+    
+        return view('admin.balance.balanceHistory', [
+            'riwayat'         => $riwayat,
+            'totalIncome'     => $totalIncome,
+            'totalWithdrawal' => $totalWithdrawal,
+            'currentBalance'  => $user->balance,
+            'month'           => $month,
+            'year'            => $year,
+            'user'            => $user,
+        ]);
     }
-    if ($month) {
-        $query->whereMonth('created_at', $month);
-    }
-
-    // Perhitungan total berdasarkan semua data yang sesuai filter
-    $totalIncome = $query->where('type', 'income')->sum('amount');
-    $totalWithdrawal = $query->where('type', 'withdrawal')
-                              ->where('status', 'success')
-                              ->sum('amount');
-
-    // Reset query untuk paginasi
-    $riwayat = $query->latest()->paginate(15);
-
-    return view('user.balance_history', [
-        'riwayat'         => $riwayat,
-        'totalIncome'     => $totalIncome,
-        'totalWithdrawal' => $totalWithdrawal,
-        'currentBalance'  => $user->balance, // Directly from user's balance
-        'month'           => $month,
-        'year'            => $year,
-        'user'            => $user, // Pass the user object to the view
-    ]);
-}
 
     public function accPenarikan($id)
     {

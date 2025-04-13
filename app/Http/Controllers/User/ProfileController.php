@@ -35,7 +35,8 @@ class ProfileController extends Controller
         
         $albums = Album::where('user_id', $user->id)
                        ->with(['photos' => function ($query) {
-                           $query->where('status', 1); // Ambil hanya foto publik dalam album
+                           $query->where('status', 1)
+                           ->where('premium', 0); // Ambil hanya foto publik dalam album
                        }])
                        ->get();
         
@@ -88,7 +89,7 @@ class ProfileController extends Controller
                 'website' => 'nullable|string|max:255',
                 'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             ]);
-
+            
             if ($request->hasFile('profile_photo')) {
                 // Hapus foto lama
                 if ($user->profile_photo) {
@@ -109,19 +110,25 @@ class ProfileController extends Controller
             $user->website = $validated['website'];
             $user->save();
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Profil berhasil diperbarui.',
-                'data' => [
-                    'user' => $user
-                ]
-            ]);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Profil berhasil diperbarui.',
+                    'data' => ['user' => $user]
+                ]);
+            }
+    
+            return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
         } catch (\Throwable $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal memperbarui profil.',
-                'error' => $e->getMessage(),
-            ], 500);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Gagal memperbarui profil.',
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
+    
+            return redirect()->back()->with('error', 'Gagal memperbarui profil.');
         }
     }
 

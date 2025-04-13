@@ -171,37 +171,37 @@ class SubscriptionController extends Controller
 
     public function transactions()
     {
-        $transactions = Transaction::all();
+        $transactions = Transaction::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.transactions', compact('transactions'));
     }
 
     public function systemPrices()
     {
-        $prices = SubscriptionPriceSystem::all();
+        $prices = SubscriptionPriceSystem::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.priceSubsSystem', compact('prices'));
     }
 
     public function userPrices()
     {
-        $prices = SubscriptionPriceUser::all();
+        $prices = SubscriptionPriceUser::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.priceSubsUser', compact('prices'));
     }
 
     public function userSubscriptions()
     {
-        $subscriptions = SubscriptionUser::all();
+        $subscriptions = SubscriptionUser::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.subsUser', compact('subscriptions'));
     }
 
     public function systemSubscriptions()
     {
-        $subscriptions = SubscriptionSystem::all();
+        $subscriptions = SubscriptionSystem::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.subsSystem', compact('subscriptions'));
     }
 
     public function comboSubscriptions()
     {
-        $subscriptions = SubscriptionCombo::all();
+        $subscriptions = SubscriptionCombo::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.subsCombo', compact('subscriptions'));
     }
 }

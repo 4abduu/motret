@@ -156,6 +156,7 @@ Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_a
     // Album
     Route::post('/albums', [UserAlbumController::class, 'store'])->name('albums.store');
     Route::put('/albums/{id}', [UserAlbumController::class, 'update'])->name('albums.update');
+    Route::get('/albums/{album}/edit', [UserAlbumController::class, 'edit'])->name('albums.edit');
     Route::delete('/albums/{id}', [UserAlbumController::class, 'destroy'])->name('albums.destroy');
     Route::post('/albums/{albumId}/photos/{photoId}/add', [UserAlbumController::class, 'addPhoto'])->name('albums.addPhoto');
     Route::put('/albums/{id}/updateTitle', [UserAlbumController::class, 'updateTitle']);

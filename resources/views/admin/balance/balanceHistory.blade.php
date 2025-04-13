@@ -3,9 +3,17 @@
     /* Base Styles */
     .history-container {
         background-color: #f8f9fa;
-        padding: 20px;
+        min-height: 100vh;
+        padding: 16px;
+    }
+    
+    .history-wrapper {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
         border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     }
     
     /* Header Styles */
@@ -13,11 +21,10 @@
         background: linear-gradient(135deg, #4CAF50, #2E7D32);
         color: white;
         padding: 18px 24px;
-        border-radius: 10px 10px 0 0;
         display: flex;
         align-items: center;
-        gap: 15px;
-        margin-bottom: 20px;
+        gap: 12px;
+        position: relative;
     }
     
     .back-button {
@@ -25,18 +32,24 @@
         border: none;
         color: white;
         font-size: 20px;
-        margin-right: 10px;
+        margin-right: 8px;
         cursor: pointer;
         display: flex;
         align-items: center;
     }
     
     .header-content {
+        display: flex;
+        align-items: center;
         flex-grow: 1;
     }
     
+    .history-header i {
+        font-size: 20px;
+    }
+    
     .history-header h2 {
-        font-size: 1.5rem;
+        font-size: 20px;
         font-weight: 600;
         margin: 0;
     }
@@ -44,122 +57,95 @@
     .user-info {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-top: 10px;
+        gap: 10px;
+        margin-top: 8px;
     }
     
     .user-avatar {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid white;
     }
     
     .user-name {
-        font-size: 1.1rem;
+        font-size: 16px;
         font-weight: 500;
     }
     
     /* Filter Styles */
     .filter-section {
-        background-color: white;
         padding: 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        background-color: white;
+        border-bottom: 1px solid #f0f0f0;
     }
     
     .filter-form {
         display: flex;
-        gap: 12px;
-        align-items: center;
+        gap: 10px;
     }
     
     .filter-select {
         flex: 1;
-        padding: 10px 12px;
+        padding: 10px;
         border: 1px solid #ddd;
         border-radius: 8px;
         font-size: 14px;
-        height: 42px;
     }
     
     .filter-button {
-        padding: 10px 20px;
+        padding: 10px 16px;
         background-color: #4CAF50;
         color: white;
         border: none;
         border-radius: 8px;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s;
     }
     
-    .filter-button:hover {
-        background-color: #3e8e41;
-    }
-    
-    .reset-button {
-        background-color: #f44336;
-    }
-    
-    .reset-button:hover {
-        background-color: #d32f2f;
-    }
-    
-    /* Summary Cards */
+    /* Summary Styles */
     .summary-cards {
         display: flex;
-        gap: 15px;
-        margin-bottom: 20px;
+        gap: 10px;
+        padding: 16px;
+        background-color: white;
+        border-bottom: 1px solid #f0f0f0;
     }
     
     .summary-card {
         flex: 1;
-        padding: 15px;
+        padding: 12px;
         border-radius: 8px;
         text-align: center;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
     
     .summary-income {
         background-color: #e8f5e9;
         color: #2e7d32;
-        border-left: 4px solid #2e7d32;
     }
     
     .summary-withdrawal {
         background-color: #ffebee;
         color: #c62828;
-        border-left: 4px solid #c62828;
     }
     
     .summary-net {
         background-color: #e3f2fd;
         color: #1565c0;
-        border-left: 4px solid #1565c0;
     }
     
     .summary-label {
-        font-size: 14px;
-        margin-bottom: 8px;
-        font-weight: 500;
+        font-size: 12px;
+        margin-bottom: 4px;
     }
     
     .summary-amount {
-        font-size: 1.2rem;
+        font-size: 16px;
         font-weight: 600;
     }
     
-    /* History List */
+    /* History Item Styles */
     .history-list {
         background-color: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
     
     .history-item {
@@ -172,14 +158,9 @@
         border-bottom: none;
     }
     
-    .history-item:hover {
-        background-color: rgba(76, 175, 80, 0.05);
-    }
-    
     .history-amount {
         font-weight: 600;
-        margin-bottom: 6px;
-        font-size: 1.1rem;
+        margin-bottom: 4px;
     }
     
     .income {
@@ -190,36 +171,23 @@
         color: #c62828;
     }
     
-    .pending {
-        color: #ff8f00;
-    }
-    
     .history-detail {
         font-size: 14px;
         color: #555;
-        margin-bottom: 6px;
-        line-height: 1.4;
+        margin-bottom: 4px;
     }
     
     .history-time {
-        font-size: 13px;
-        color: #888;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    
-    .history-time i {
         font-size: 12px;
+        color: #888;
     }
     
     .history-status {
         display: inline-block;
-        padding: 4px 10px;
-        border-radius: 12px;
+        padding: 2px 8px;
+        border-radius: 10px;
         font-size: 12px;
-        font-weight: 500;
-        margin-top: 6px;
+        margin-top: 4px;
     }
     
     .status-pending {
@@ -237,26 +205,12 @@
         color: #c62828;
     }
     
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-        color: #888;
-    }
-    
-    .empty-state i {
-        font-size: 40px;
-        margin-bottom: 15px;
-        color: #ddd;
-    }
-    
-    /* Pagination */
+    /* Pagination Styles */
     .history-pagination {
         display: flex;
         justify-content: center;
         padding: 20px;
         background-color: white;
-        border-radius: 0 0 8px 8px;
     }
     
     .pagination {
@@ -264,14 +218,17 @@
         list-style: none;
         padding: 0;
         margin: 0;
-        gap: 8px;
+    }
+    
+    .page-item {
+        margin: 0 4px;
     }
     
     .page-link {
         display: block;
-        padding: 8px 14px;
+        padding: 8px 12px;
         border: 1px solid #ddd;
-        border-radius: 6px;
+        border-radius: 4px;
         color: #4CAF50;
         text-decoration: none;
         transition: all 0.2s;
@@ -290,42 +247,56 @@
     .page-item.disabled .page-link {
         color: #aaa;
         pointer-events: none;
+        cursor: not-allowed;
     }
     
-    /* Responsive Styles */
-    @media (max-width: 768px) {
-        .history-header {
-            padding: 15px;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
+    /* Withdraw Button */
+    .withdraw-btn {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: 20px auto;
+        cursor: pointer;
+        text-decoration: none;
+        width: 50%; 
+        max-width: 300px; 
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 640px) {
+        .history-container {
+            padding: 8px;
         }
         
-        .user-info {
-            margin-top: 8px;
-        }
-        
-        .filter-form {
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .filter-select, .filter-button {
-            width: 100%;
+        .history-item {
+            padding: 12px 16px;
         }
         
         .summary-cards {
             flex-direction: column;
-            gap: 10px;
         }
         
-        .history-item {
-            padding: 12px 15px;
+        .filter-form {
+            flex-direction: column;
         }
         
-        .pagination {
-            flex-wrap: wrap;
-            justify-content: center;
+        .history-header {
+            padding: 16px 20px;
+        }
+        
+        .history-header h2 {
+            font-size: 18px;
+        }
+        
+        .back-button {
+            font-size: 18px;
         }
     }
 </style>
@@ -334,30 +305,34 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="history-container">
+<div class="history-container">
+    <div class="history-wrapper">
         <!-- Header -->
         <div class="history-header">
             <button class="back-button" onclick="window.history.back()">
                 <i class="fas fa-arrow-left"></i>
             </button>
             <div class="header-content">
-                <h2>
-                    <i class="fas fa-history me-2"></i>Riwayat Saldo
-                </h2>
-                <div class="user-info">
-                    @if($user->profile_photo_path)
-                        <img src="{{ asset('storage/' . $user->profile_photo_path) }}" 
-                             alt="{{ $user->name }}" 
-                             class="user-avatar">
-                    @else
-                        <div class="user-avatar bg-success d-flex align-items-center justify-content-center text-white">
-                            {{ strtoupper(substr($user->name, 0, 1)) }}
-                        </div>
-                    @endif
-                    <div class="user-name">{{ $user->name }}</div>
+                <div>
+                    <h2>
+                        <i class="fas fa-history"></i>
+                        Riwayat Saldo
+                    </h2>
+                    <div class="user-info">
+                        @if($user->profile_photo_path)
+                            <img src="{{ asset('storage/' . $user->profile_photo_path) }}" alt="{{ $user->name }}" class="user-avatar">
+                        @else
+                            <div class="user-avatar" style="background-color: #32bd40; color: white; display: flex; align-items: center; justify-content: center;">
+                                {{ strtoupper(substr($user->name, 0, 1)) }}
+                            </div>
+                        @endif
+                        <div class="user-name">{{ $user->name }}</div>
+                    </div>
                 </div>
             </div>
+            {{-- <a href="{{ route('withdrawal.balance') }}" class="withdraw-btn top-end">
+                <i class="fas fa-money-bill-wave"></i> Ajukan Penarikan
+            </a> --}}
         </div>
 
         <!-- Filter Section -->
@@ -366,7 +341,7 @@
                 <select name="month" class="filter-select">
                     <option value="">Semua Bulan</option>
                     @foreach(range(1, 12) as $m)
-                        <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>
+                        <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>
                             {{ date('F', mktime(0, 0, 0, $m, 1)) }}
                         </option>
                     @endforeach
@@ -375,16 +350,15 @@
                 <select name="year" class="filter-select">
                     <option value="">Semua Tahun</option>
                     @foreach(range(date('Y'), date('Y') - 5) as $y)
-                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                        <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
                     @endforeach
                 </select>
                 
                 <button type="submit" class="filter-button">
                     <i class="fas fa-filter"></i> Filter
                 </button>
-                
-                @if(request('month') || request('year'))
-                    <a href="{{ route('admin.saldo.detail', $user->id) }}" class="filter-button reset-button">
+                @if($month || $year)
+                    <a href="{{ route('admin.saldo.detail', $user->id) }}" class="filter-button" style="background-color: #f44336;">
                         <i class="fas fa-times"></i> Reset
                     </a>
                 @endif
@@ -394,12 +368,12 @@
         <!-- Summary Cards -->
         <div class="summary-cards">
             <div class="summary-card summary-income">
-                <div class="summary-label">Total Pemasukan</div>
+                <div class="summary-label">Pemasukan</div>
                 <div class="summary-amount">+ Rp {{ number_format($totalIncome, 0, ',', '.') }}</div>
             </div>
             
             <div class="summary-card summary-withdrawal">
-                <div class="summary-label">Total Penarikan</div>
+                <div class="summary-label">Penarikan Berhasil</div>
                 <div class="summary-amount">- Rp {{ number_format($totalWithdrawal, 0, ',', '.') }}</div>
             </div>
             
@@ -414,48 +388,37 @@
             @forelse($riwayat as $item)
             <div class="history-item">
                 @if($item->type == 'income')
-                <div class="history-amount income">
-                    <i class="fas fa-plus-circle me-2"></i>+ Rp {{ number_format($item->amount, 0, ',', '.') }}
-                </div>
-                <div class="history-detail">
-                    <i class="fas fa-info-circle me-2 text-muted"></i>
-                    Pemasukan dari {{ $item->note ?? 'Berlangganan' }}
-                </div>
+                <div class="history-amount income">+ Rp {{ number_format($item->amount, 0, ',', '.') }}</div>
+                <div class="history-detail">Pemasukan dari {{ $item->note ?? 'Berlangganan' }}</div>
                 @else
                     @if($item->status == 'pending')
-                        <div class="history-amount pending">
-                            <i class="fas fa-clock me-2"></i>Rp {{ number_format($item->amount, 0, ',', '.') }}
-                        </div>
-                    @elseif($item->status == 'success')
-                        <div class="history-amount withdrawal">
-                            <i class="fas fa-minus-circle me-2"></i>- Rp {{ number_format($item->amount, 0, ',', '.') }}
-                        </div>
+                        <div class="history-amount" style="color: #ff8f00;">Rp {{ number_format($item->amount, 0, ',', '.') }}</div>
                     @else
-                        <div class="history-amount withdrawal">
-                            <i class="fas fa-times-circle me-2"></i>- Rp {{ number_format($item->amount, 0, ',', '.') }}
-                        </div>
+                        <div class="history-amount withdrawal">- Rp {{ number_format($item->amount, 0, ',', '.') }}</div>
                     @endif
-                    
                     <div class="history-detail">
-                        <i class="fas fa-exchange-alt me-2 text-muted"></i>
                         Penarikan ke 
                         @if(str_contains($item->method, 'bank_'))
                             Bank {{ strtoupper(str_replace('bank_', '', $item->method)) }}
                         @else
                             {{ ucfirst($item->method) }}
                         @endif
-                        ({{ $item->destination }})
+                        dengan nomor {{ preg_replace('/(?<=\d{3})\d(?=\d{2})/', 'X', $item->destination) }}
+                        @if($item->destination_name)
+                            a/n {{ $item->destination_name }}
+                        @endif
                     </div>
+                    
+                    @if($item->status == 'rejected' && $item->rejection_reason)
+                    <div class="history-detail" style="color: #c62828;">
+                        Alasan penolakan: {{ $item->rejection_reason }}
+                    </div>
+                    @endif
                 @endif
-                
-                <div class="history-time">
-                    <i class="far fa-clock"></i>
-                    {{ $item->created_at->format('d M Y H:i') }}
-                </div>
-                
+                <div class="history-time">{{ $item->created_at->format('d M Y H:i') }}</div>
                 @if($item->type == 'withdrawal')
                 <span class="history-status status-{{ $item->status }}">
-                    @if($item->status == 'pending') Menunggu Konfirmasi
+                    @if($item->status == 'pending') Menunggu
                     @elseif($item->status == 'success') Berhasil
                     @else Ditolak
                     @endif
@@ -463,10 +426,8 @@
                 @endif
             </div>
             @empty
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <h4>Tidak ada riwayat transaksi</h4>
-                <p>Tidak ditemukan data transaksi untuk periode ini</p>
+            <div class="history-item" style="text-align: center; color: #888;">
+                Tidak ada riwayat transaksi
             </div>
             @endforelse
         </div>
@@ -482,7 +443,7 @@
                     </li>
                 @else
                     <li class="page-item">
-                        <a class="page-link" href="{{ $riwayat->previousPageUrl() }}{{ request('month') ? '&month='.request('month') : '' }}{{ request('year') ? '&year='.request('year') : '' }}" rel="prev">&laquo;</a>
+                        <a class="page-link" href="{{ $riwayat->previousPageUrl() }}{{ $month ? '&month='.$month : '' }}{{ $year ? '&year='.$year : '' }}" rel="prev">&laquo;</a>
                     </li>
                 @endif
 
@@ -494,7 +455,7 @@
                         </li>
                     @else
                         <li class="page-item">
-                            <a class="page-link" href="{{ $url }}{{ request('month') ? '&month='.request('month') : '' }}{{ request('year') ? '&year='.request('year') : '' }}">{{ $page }}</a>
+                            <a class="page-link" href="{{ $url }}{{ $month ? '&month='.$month : '' }}{{ $year ? '&year='.$year : '' }}">{{ $page }}</a>
                         </li>
                     @endif
                 @endforeach
@@ -502,7 +463,7 @@
                 {{-- Next Page Link --}}
                 @if($riwayat->hasMorePages())
                     <li class="page-item">
-                        <a class="page-link" href="{{ $riwayat->nextPageUrl() }}{{ request('month') ? '&month='.request('month') : '' }}{{ request('year') ? '&year='.request('year') : '' }}" rel="next">&raquo;</a>
+                        <a class="page-link" href="{{ $riwayat->nextPageUrl() }}{{ $month ? '&month='.$month : '' }}{{ $year ? '&year='.$year : '' }}" rel="next">&raquo;</a>
                     </li>
                 @else
                     <li class="page-item disabled">

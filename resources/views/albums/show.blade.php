@@ -707,11 +707,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    [fieldType === 'title' ? 'name' : 'description']: newValue
-                })
+                body: JSON.stringify(
+                    fieldType === 'title' ? { title: newValue } : { description: newValue }
+                )
             });
             
             const result = await response.json();
@@ -719,6 +720,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!response.ok) {
                 throw new Error(result.message || 'Gagal menyimpan perubahan');
             }
+
+            // Show success notification
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: fieldType === 'title' ? 'Judul album berhasil diperbarui' : 'Deskripsi album berhasil diperbarui',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: 'var(--primary-light)',
+                color: 'var(--dark-color)',
+                iconColor: 'var(--primary-color)'
+            });
             
             return result;
             
@@ -730,7 +746,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingDiv.remove();
         }
     }
-    
     function updateDescriptionDisplay(element, text) {
         const isMobile = window.innerWidth <= 768;
         const charLimit = isMobile ? 100 : 150;

@@ -36,7 +36,7 @@ class AlbumController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
-            'status' => 'in:0,1',
+            'status' => 'sometimes|in:0,1',
         ]);
 
         if ($validator->fails()) {
@@ -60,12 +60,14 @@ class AlbumController extends Controller
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Album berhasil dibuat!',
-                    'album' => $album
+                    'message' => 'Album berhasil dibuat',
+                    'album' => $album,
+                    'current_user_id' => Auth::id(),
+                    'current_user_role' => Auth::user()->role
                 ]);
             }
 
-            return redirect()->route('user.profile')->with('success', 'Album berhasil dibuat.');
+            return redirect()->route('user.profile')->with('success', 'Album berhasil dibuat');
 
         } catch (\Exception $e) {
             if ($request->expectsJson()) {
@@ -82,35 +84,77 @@ class AlbumController extends Controller
     public function update(Request $request, $id)
     {
         $album = Album::findOrFail($id);
-
-        $request->validate([
+        
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
-            'status' => 'in:0,1',
+            'status' => 'sometimes|in:0,1',
         ]);
-
-        $album->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'status' => $request->status
-        ]);
-
-        if ($request->expectsJson()) {
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+    
+        try {
+            $album->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'status' => $request->status ?? $album->status
+            ]);
+        
             return response()->json([
                 'success' => true,
-                'album' => $album
+                'album' => $album,
+                'current_user_role' => Auth::user()->role
             ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating album',
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
 
-        return redirect()->back()->with('success', 'Album berhasil diperbarui.');
+    public function edit($id)
+    {
+        $album = Album::findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'album' => $album,
+            'current_user_role' => Auth::user()->role
+        ]);
     }
 
     public function destroy($id)
     {
         $album = Album::findOrFail($id);
-        $album->delete();
+        if ($album->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
 
-        return response()->json(['success' => true]);
+        try {
+            $album->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Album berhasil dihapus'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menghapus album.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function addPhoto($albumId, $photoId)
@@ -156,9 +200,10 @@ class AlbumController extends Controller
     public function updateTitle(Request $request, $id)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required_without:name|string|max:255',
+            'name' => 'required_without:title|string|max:255',
         ]);
-
+    
         $album = Album::findOrFail($id);
         
         if ($album->user_id !== Auth::id()) {
@@ -167,10 +212,10 @@ class AlbumController extends Controller
                 'message' => 'Anda tidak memiliki akses ke album ini'
             ], 403);
         }
-
-        $album->name = $request->title;
+    
+        $album->name = $request->title ?? $request->name;
         $album->save();
-
+    
         return response()->json([
             'success' => true,
             'title' => $album->name

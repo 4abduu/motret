@@ -11,38 +11,6 @@
         padding: 1rem 1.5rem;
     }
     
-    /* Button Styles */
-    .action-btn {
-        margin: 0.25rem;
-        min-width: 36px;
-        height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-    }
-    
-    .action-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn-info {
-        background-color: #17a2b8;
-        border-color: #17a2b8;
-    }
-    
-    .btn-success {
-        background-color: #28a745;
-        border-color: #28a745;
-    }
-    
-    .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-    }
-    
     /* Badge Styles */
     .badge-pending {
         background-color: #ffc107;
@@ -153,11 +121,11 @@
         .table tbody td:last-child {
             border-bottom: none;
         }
-        
-        .action-buttons {
-            justify-content: flex-end;
-        }
     }
+    .dt-length {
+            margin-left: 20px;
+            padding-bottom: 10px;
+        }
 </style>
 @endpush
 
@@ -175,14 +143,12 @@
 </div>
 
 <div class="row">
-    <div class="col-12">
+    <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">
-            <div class="card-header card-header-custom">
-                <h4 class="mb-0">Daftar Permintaan Penarikan</h4>
-            </div>
             <div class="card-body">
+                <h4 class="card-title">Daftar Permintaan Penarikan Saldo</h4>
                 <div class="table-responsive">
-                    <table id="withdrawalsTable" class="table table-hover" style="width:100%">
+                    <table id="example" class="table table-hover" style="width:100%">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -192,7 +158,7 @@
                                 <th>Tujuan</th>
                                 <th>Status</th>
                                 <th>Tanggal</th>
-                                <th class="text-end">Aksi</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -233,32 +199,30 @@
                                 </td>
                                 <td data-label="Tanggal">{{ $withdrawal->created_at->format('d M Y H:i') }}</td>
                                 <td>
-                                    <div class="d-flex justify-content-end action-buttons">
                                         <button class="btn btn-info btn-icon action-btn" data-bs-toggle="modal" 
                                             data-bs-target="#detailModal{{ $withdrawal->id }}" title="Detail">
-                                            <i class="ti-info-alt"></i>
+                                            <i class="ti-info" style="color: white;"></i>
                                         </button>
 
                                         @if($withdrawal->status == 'pending')
                                             <button class="btn btn-success btn-icon action-btn approve-btn" 
                                                     data-id="{{ $withdrawal->id }}" 
                                                     title="Setujui">
-                                                <i class="ti-check"></i>
+                                                <i class="ti-check" style="color: white;"></i>
                                             </button>
                                             
                                             <button class="btn btn-danger btn-icon action-btn reject-btn" 
                                                     data-id="{{ $withdrawal->id }}" 
                                                     title="Tolak">
-                                                <i class="ti-close"></i>
+                                                <i class="ti-close" style="color: white;"></i>
                                             </button>
                                         @endif
 
                                         <button class="btn btn-danger btn-icon action-btn delete-btn" 
                                                 data-id="{{ $withdrawal->id }}" 
                                                 title="Hapus">
-                                            <i class="ti-trash"></i>
+                                            <i class="ti-trash" style="color: white;"></i>
                                         </button>
-                                    </div>
                                 </td>
                             </tr>
 
@@ -374,21 +338,6 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize DataTable
-    $('#withdrawalsTable').DataTable({
-        responsive: true,
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ data per halaman",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            paginate: {
-                first: "Pertama",
-                last: "Terakhir",
-                next: "Selanjutnya",
-                previous: "Sebelumnya"
-            }
-        }
-    });
 
     // SweetAlert2 configuration
     const Toast = Swal.mixin({

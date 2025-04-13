@@ -260,7 +260,12 @@
             toast: true,
             background: '#32bd40',
             color: '#fff',
-            iconColor: '#fff'
+            iconColor: '#fff',
+            didOpen: (toast) => {
+                toast.addEventListener('click', () => {
+                    Swal.close();
+                })
+            }
         });
     });
 </script>

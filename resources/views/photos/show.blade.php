@@ -476,10 +476,6 @@ body.modal-open {
                                 {{ Auth::user()->isFollowing($photo->user) ? 'Unfollow' : 'Follow' }}
                             </button>
                         @endif
-                    @else
-                        <button class="btn btn-sm btn-success ms-3" onclick="window.location.href='{{ route('login') }}'">
-                            Follow
-                        </button>
                     @endif
                 </p>
                 
@@ -752,25 +748,37 @@ body.modal-open {
                         <label for="reason">Alasan Melaporkan</label>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $photo->id }}" value="Konten tidak pantas">
-                                Konten tidak pantas
+                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $photo->id }}" value="Konten Dewasa / Tidak Pantas">
+                                Konten Dewasa / Tidak Pantas
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $photo->id }}" value="Spam">
-                                Spam
+                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $photo->id }}" value="Mengandung Kekerasan">
+                                Mengandung Kekerasan
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $photo->id }}" value="Pelanggaran hak cipta">
-                                Pelanggaran hak cipta
+                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $photo->id }}" value="Pelanggaran Hak Cipta">
+                                Pelanggaran Hak Cipta
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $photo->id }}" value="Lainnya">
+                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $photo->id }}" value="Informasi Pribadi Tanpa Izin">
+                                Informasi Pribadi Tanpa Izin
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="reason" id="reason5-{{ $photo->id }}" value="Spam / Promosi Berlebihan">
+                                Spam / Promosi Berlebihan
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="reason" id="reason6-{{ $photo->id }}" value="Lainnya">
                                 Lainnya
                             </label>
                         </div>
@@ -802,25 +810,37 @@ body.modal-open {
                         <label for="reason">Alasan Melaporkan</label>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $comment->id }}" value="Konten tidak pantas">
-                                Konten tidak pantas
+                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $comment->id }}" value="Mengandung Ujaran Kebencian">
+                                Mengandung Ujaran Kebencian
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $comment->id }}" value="Spam">
-                                Spam
+                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $comment->id }}" value="Kata-kata Kasar / Toxic">
+                                Kata-kata Kasar / Toxic
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $comment->id }}" value="Pelanggaran hak cipta">
-                                Pelanggaran hak cipta
+                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $comment->id }}" value="Mengandung SARA / Rasis">
+                                Mengandung SARA / Rasis
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $comment->id }}" value="Lainnya">
+                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $comment->id }}" value="Spam / Promosi Berlebihan">
+                                Spam / Promosi Berlebihan
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="reason" id="reason5-{{ $comment->id }}" value="Tidak Relevan / Mengganggu">
+                                Tidak Relevan / Mengganggu
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="reason" id="reason6-{{ $comment->id }}" value="Lainnya">
                                 Lainnya
                             </label>
                         </div>
@@ -853,25 +873,37 @@ body.modal-open {
                         <label for="reason">Alasan Melaporkan</label>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $reply->id }}" value="Konten tidak pantas">
-                                Konten tidak pantas
+                                <input type="radio" class="form-check-input" name="reason" id="reason1-{{ $reply->id }}" value="Mengandung Ujaran Kebencian">
+                                Mengandung Ujaran Kebencian
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $reply->id }}" value="Spam">
-                                Spam
+                                <input type="radio" class="form-check-input" name="reason" id="reason2-{{ $reply->id }}" value="Kata-kata Kasar / Toxic">
+                                Kata-kata Kasar / Toxic
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $reply->id }}" value="Pelanggaran hak cipta">
-                                Pelanggaran hak cipta
+                                <input type="radio" class="form-check-input" name="reason" id="reason3-{{ $reply->id }}" value="Mengandung SARA / Rasis">
+                                Mengandung SARA / Rasis
                             </label>
                         </div>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $reply->id }}" value="Lainnya">
+                                <input type="radio" class="form-check-input" name="reason" id="reason4-{{ $reply->id }}" value="Spam / Promosi Berlebihan">
+                                Spam / Promosi Berlebihan
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="reason" id="reason5-{{ $reply->id }}" value="Tidak Relevan / Mengganggu">
+                                Tidak Relevan / Mengganggu
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input type="radio" class="form-check-input" name="reason" id="reason6-{{ $reply->id }}" value="Lainnya">
                                 Lainnya
                             </label>
                         </div>
@@ -1881,92 +1913,115 @@ function showErrorAlert(message) {
         });
     }
 
-    async function handleReportForms() {
-    // Event listener untuk semua form report
-    document.querySelectorAll('form[id^="reportForm"]').forEach(form => {
-    form.addEventListener('submit', async function (event) {
+async function handleReportForms() {
+// Event listener untuk semua form report
+document.querySelectorAll('form[id^="reportForm"]').forEach(form => {
+    form.addEventListener('submit', async function(event) {
         event.preventDefault();
 
         const formData = new FormData(this);
         const actionUrl = this.action;
-        const submitButton = this.querySelector('button[type="submit"]');
-        const originalButtonText = submitButton.innerHTML;
-
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Memproses...';
+        const modalElement = this.closest('.modal');
+        const modal = bootstrap.Modal.getInstance(modalElement);
 
         try {
             const response = await fetch(actionUrl, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
-                body: formData
+                body: formData,
             });
 
-            const contentType = response.headers.get('Content-Type');
+            const data = await response.json();
 
-            if (contentType && contentType.includes('application/json')) {
-                const data = await response.json();
-
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: data.message,
-                        confirmButtonText: 'OK',
-                    });
-
-                    this.reset();
-                    const modal = bootstrap.Modal.getInstance(this.closest('.modal'));
-                    if (modal) modal.hide();
-                }
-            } else {
-                const text = await response.text();
-                console.error('Expect JSON but got:', text);
-                throw new Error('Unexpected response format.');
+            if (!response.ok) {
+                throw new Error(data.message || `HTTP error! Status: ${response.status}`);
             }
 
+            if (data.success) {
+                // Reset form
+                this.reset();
+
+                // Tutup modal dan bersihkan backdrop
+                if (modal) {
+                    modal.hide();
+                    document.body.classList.remove('modal-open');
+                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                    backdrops.forEach(backdrop => backdrop.remove());
+                    document.body.style.overflow = 'auto';
+                    document.body.style.paddingRight = '0';
+                }
+
+                // Tampilkan SweetAlert dan reload setelah klik OK
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: data.message,
+                    confirmButtonText: 'OK',
+                }).then(() => {
+                    location.reload(); // Reload page
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: data.message || 'Terjadi kesalahan.',
+                    confirmButtonText: 'OK',
+                });
+            }
         } catch (error) {
-            console.error('Error reporting comment:', error);
-            Swal.fire('Error!', error.message, 'error');
-        } finally {
-            submitButton.disabled = false;
-            submitButton.innerHTML = originalButtonText;
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: error.message || 'Terjadi kesalahan saat memproses permintaan.',
+                confirmButtonText: 'OK',
+            });
+        }
+    });
+
+    // Reset form ketika modal ditutup
+    const modalElement = form.closest('.modal');
+    if (modalElement) {
+        modalElement.addEventListener('hidden.bs.modal', function() {
+            form.reset();
+        });
+    }
+});
+
+// Event listener untuk alasan "Lainnya"
+document.querySelectorAll('input[name="reason"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+        const form = this.closest('form');
+        const descriptionGroup = form.querySelector('.form-group[id^="description-group"]');
+        const descriptionInput = form.querySelector('textarea[name="description"]');
+
+        if (this.value === 'Lainnya') {
+            descriptionGroup.style.display = 'block';
+            descriptionInput.required = true;
+        } else {
+            descriptionGroup.style.display = 'none';
+            descriptionInput.required = false;
         }
     });
 });
 
-    // Event listener untuk alasan "Lainnya"
-    document.querySelectorAll('input[name="reason"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            const form = this.closest('form');
-            const descriptionGroup = form.querySelector('.form-group[id^="description-group"]');
-            const descriptionInput = form.querySelector('textarea[name="description"]');
-
-            if (this.value === 'Lainnya') {
-                descriptionGroup.style.display = 'block';
-                descriptionInput.required = true;
-            } else {
-                descriptionGroup.style.display = 'none';
-                descriptionInput.required = false;
-            }
-        });
+// Pastikan modal di-cleanup dengan benar saat ditutup
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('hidden.bs.modal', function () {
+        document.body.classList.remove('modal-open');
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
+        document.body.style.overflow = 'auto';
+        document.body.style.paddingRight = '0';
     });
-
-    // Reset form saat modal ditutup
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('hidden.bs.modal', function() {
-            const form = this.querySelector('form');
-            if (form) {
-                form.reset();
-                const descriptionGroup = form.querySelector('[id^="description-group"]');
-                if (descriptionGroup) descriptionGroup.style.display = 'none';
-            }
-        });
-    });
+});
 }
+
+handleReportForms();
 
     // Render gambar ke canvas dengan watermark
     function renderImageWithWatermark() {
@@ -2212,7 +2267,6 @@ function drawWatermarkOnModal() {
     blockRightClickAndInspect();
     renderImageWithWatermark();
     handleFollowUnfollow();
-    handleReportForms();
     handleDeletePhoto();
     drawWatermarkOnModal();
 });

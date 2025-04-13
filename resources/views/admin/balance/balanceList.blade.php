@@ -74,7 +74,6 @@
                                 <th>Nama Pengguna</th>
                                 <th>Email</th>
                                 <th>Saldo</th>
-                                <th>Status</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -86,22 +85,13 @@
                                 <td>{{ $user->email }}</td>
                                 <td>Rp {{ number_format($user->balance, 0, ',', '.') }}</td>
                                 <td>
-                                    <div class="badge 
-                                        @if($user->status == 'active') badge-success
-                                        @elseif($user->status == 'pending') badge-warning
-                                        @else badge-danger
-                                        @endif">
-                                        {{ ucfirst($user->status) }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex">
-                                        <a href="{{ route('admin.saldo.detail', $user->id) }}" 
-                                           class="btn btn-info btn-icon action-btn" 
-                                           title="Riwayat Saldo">
-                                            <i class="ti-info-alt" style="color: white;"></i>
-                                        </a>
-                                    </div>
+                                    <button 
+                                        type="button"
+                                        class="btn btn-info btn-icon action-btn"
+                                        title="Riwayat Saldo"
+                                        onclick="window.location.href='{{ route('admin.saldo.detail', $user->id) }}'">
+                                        <i class="ti-info" style="color: white;"></i>
+                                    </button>
                                 </td>
                             </tr>
                             @endforeach

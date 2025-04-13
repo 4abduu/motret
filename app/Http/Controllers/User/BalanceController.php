@@ -100,30 +100,39 @@ class BalanceController extends Controller
         $month = $request->input('month');
         $year = $request->input('year');
     
-        $query = BalanceHistory::where('user_id', $user->id);
+        // Query utama untuk data riwayat
+        $mainQuery = BalanceHistory::where('user_id', $user->id);
         
-        // Apply filters only if provided
+        // Clone query untuk filter bulan/tahun
+        $filteredQuery = clone $mainQuery;
+    
+        // Terapkan filter bulan/tahun pada query utama
         if ($year) {
-            $query->whereYear('created_at', $year);
+            $mainQuery->whereYear('created_at', $year);
         }
         if ($month) {
-            $query->whereMonth('created_at', $month);
+            $mainQuery->whereMonth('created_at', $month);
         }
     
-        // Perhitungan total berdasarkan semua data yang sesuai filter
-        $totalIncome = $query->where('type', 'income')->sum('amount');
-        $totalWithdrawal = $query->where('type', 'withdrawal')
-                                  ->where('status', 'success')
-                                  ->sum('amount');
+        // Clone query yang sudah difilter untuk hitung total
+        $totalIncomeQuery = clone $mainQuery;
+        $totalIncome = $totalIncomeQuery->where('type', 'income')->sum('amount');
     
-        // Reset query untuk paginasi
-        $riwayat = $query->latest()->paginate(15);
+        $totalWithdrawalQuery = clone $mainQuery;
+        $totalWithdrawal = $totalWithdrawalQuery->where('type', 'withdrawal')
+                                      ->where('status', 'success')
+                                      ->sum('amount');
+    
+        // Ambil data riwayat dari query utama yang sudah difilter bulan/tahun
+        $riwayat = $mainQuery->latest()->paginate(10);
+    
+        Log::info('Balance History Data: ', $riwayat->toArray());
     
         return view('user.balance_history', [
             'riwayat'         => $riwayat,
             'totalIncome'     => $totalIncome,
             'totalWithdrawal' => $totalWithdrawal,
-            'currentBalance'  => $user->balance, // Directly from user's balance
+            'currentBalance'  => $user->balance,
             'month'           => $month,
             'year'            => $year,
         ]);

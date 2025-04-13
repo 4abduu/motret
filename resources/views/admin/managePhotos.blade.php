@@ -71,7 +71,7 @@
                                     </td>
                                     <td>
                                         <button class="btn btn-warning btn-icon" data-bs-toggle="modal" data-bs-target="#editPhotoModal{{ $photo->id }}"><i class="ti-pencil-alt" style="color: white;"></i></button>
-                                        <button class="btn btn-info btn-icon" data-bs-toggle="modal" data-bs-target="#detailPhotoModal{{ $photo->id }}"><i class="ti-info-alt" style="color: white;"></i></button>
+                                        <button class="btn btn-info btn-icon" data-bs-toggle="modal" data-bs-target="#detailPhotoModal{{ $photo->id }}"><i class="ti-info" style="color: white;"></i></button>
                                         <button class="btn btn-danger btn-icon delete-photo-btn" data-id="{{ $photo->id }}"><i class="ti-trash" style="color: white;"></i></button>
                                     </td>
                                 </tr>

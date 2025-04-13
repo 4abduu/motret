@@ -99,21 +99,21 @@
                                     <label for="hashtags" class="required-field">Tagar (tanpa #)</label>
                                     <input type="text" name="hashtags" class="form-control" id="hashtags" placeholder="Contoh: landscape,sunset, nature" required>
                                 </div>
-                                @if (Auth::user()->verified)
-                                <div class="form-group">
-                                    <label for="premium" class="form-label">Status</label>
-                                    <select class="form-select" id="premium" name="premium" required>
-                                        <option value="0">Biasa</option>
-                                        <option value="1">Premium</option>
-                                    </select>
-                                </div>
-                                @endif
                                 @if (Auth::user()->role === 'pro')
                                 <div class="form-group">
                                     <label for="status" class="form-label">Visibilitas</label>
                                     <select class="form-select" id="status" name="status" required>
                                         <option value="1">Publik</option>
                                         <option value="0">Pribadi</option>
+                                    </select>
+                                </div>
+                                @endif
+                                @if (Auth::user()->verified)
+                                <div class="form-group">
+                                    <label for="premium" class="form-label">Status</label>
+                                    <select class="form-select" id="premium" name="premium" required>
+                                        <option value="0">Biasa</option>
+                                        <option value="1">Premium</option>
                                     </select>
                                 </div>
                                 @endif
@@ -268,6 +268,24 @@ $(document).ready(function() {
             }
         });
     });
+
+    function togglePremiumVisibility() {
+        const visibility = $('#status').val();
+        if (visibility == '0') {
+            // Pribadi
+            $('#premium').closest('.form-group').hide();
+            $('#premium').prop('disabled', true); // biar nggak terkirim
+        } else {
+            // Publik
+            $('#premium').closest('.form-group').show();
+            $('#premium').prop('disabled', false);
+        }
+    }
+
+    // trigger pas pertama kali load & saat berubah
+    $('#status').on('change', togglePremiumVisibility);
+    togglePremiumVisibility();
+
 });
 </script>
 @endpush
