@@ -36,6 +36,11 @@ class AuthController extends Controller
     {
         return view('auth.register');
     }
+
+    public function showAuthGoogle()
+    {
+        return view('auth.google');
+    }
     // redirect ke google login
     public function redirectToGoogle()
     {
@@ -153,29 +158,7 @@ class AuthController extends Controller
                 // Jika user sudah ada, login
                 Auth::login($user);
             } else {
-                // Buat username dari nama depan email (sebelum @)
-                $username = explode('@', $googleUser->getEmail())[0];
-    
-                // Jika username sudah ada, tambah angka increment
-                $originalUsername = $username;
-                $counter = 1;
-                while (User::where('username', $username)->exists()) {
-                    $username = $originalUsername . $counter;
-                    $counter++;
-                }
-    
-                // Buat user baru
-                $user = User::create([
-                    'username' => $username, 
-                    'name' => $googleUser->getName(),
-                    'email' => $googleUser->getEmail(),
-                    'google_id' => $googleUser->getId(),
-                    'password' => bcrypt('password123'), 
-                    'role' => 'user', 
-                ]);
-    
-                // Login user baru
-                Auth::login($user);
+                return view('auth.google', compact('googleUser'));
             }
     
             return redirect()->route('home')->with('login_success', 'Login berhasil! Selamat datang, ' . $user->username);

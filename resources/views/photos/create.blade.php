@@ -190,6 +190,26 @@ $(document).ready(function() {
         element.clearElement();
     });
 
+    // Handle premium and visibility logic
+    function handleStatusLogic() {
+        const premiumValue = $('#premium').val();
+        const statusValue = $('#status').val();
+        
+        // Jika premium dipilih, set visibilitas ke publik (1) dan nonaktifkan
+        if (premiumValue === '1') {
+            $('#status').val('1').prop('disabled', true);
+        } 
+        // Jika visibilitas pribadi (0), set premium ke biasa (0) dan nonaktifkan
+        else if (statusValue === '0') {
+            $('#premium').val('0').prop('disabled', true);
+        }
+        // Jika bukan keduanya, aktifkan semua
+        else {
+            $('#status').prop('disabled', false);
+            $('#premium').prop('disabled', false);
+        }
+    }
+
     // Form submission with AJAX and SweetAlert2
     $('form').on('submit', function(e) {
         e.preventDefault();
@@ -269,23 +289,11 @@ $(document).ready(function() {
         });
     });
 
-    function togglePremiumVisibility() {
-        const visibility = $('#status').val();
-        if (visibility == '0') {
-            // Pribadi
-            $('#premium').closest('.form-group').hide();
-            $('#premium').prop('disabled', true); // biar nggak terkirim
-        } else {
-            // Publik
-            $('#premium').closest('.form-group').show();
-            $('#premium').prop('disabled', false);
-        }
-    }
-
-    // trigger pas pertama kali load & saat berubah
-    $('#status').on('change', togglePremiumVisibility);
-    togglePremiumVisibility();
-
+    // Event listeners for premium and status changes
+    $('#premium, #status').on('change', handleStatusLogic);
+    
+    // Initialize the logic on page load
+    handleStatusLogic();
 });
 </script>
 @endpush

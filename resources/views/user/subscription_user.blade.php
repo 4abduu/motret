@@ -704,7 +704,9 @@
                     timer: 3000,
                     timerProgressBar: true,
                     willClose: () => {
-                        window.location.reload();
+                        localStorage.setItem('activeTab', 'subscription');
+
+                        window.location.href = data.redirect_url;
                     }
                 });
             } else {
@@ -760,7 +762,9 @@
                     timer: 3000,
                     timerProgressBar: true,
                     willClose: () => {
-                        window.location.reload();
+                        localStorage.setItem('activeTab', 'subscription');
+
+                        window.location.href = data.redirect_url;
                     }
                 });
             } else {

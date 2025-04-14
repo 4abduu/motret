@@ -166,6 +166,11 @@ class User extends Authenticatable
         return $this->hasMany(BalanceHistory::class);
     }
 
+    public function isSubscribedTo(User $user)
+    {
+        return $this->subscriptions()->where('target_user_id', $user->id)->exists();
+    }
+
     public function syncBalance()
     {
         $total = DB::table('langganan_pengguna')

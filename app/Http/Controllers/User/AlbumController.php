@@ -50,13 +50,15 @@ class AlbumController extends Controller
         }
 
         try {
-            $album = Album::create([
+            $albumData = [
                 'user_id' => Auth::id(),
                 'name' => $request->name,
                 'description' => $request->description,
-                'status' => $request->status ?? 0
-            ]);
-
+                'status' => Auth::user()->role === 'pro' ? ($request->status ?? 1) : 1
+            ];
+    
+            $album = Album::create($albumData);
+    
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => true,
@@ -66,9 +68,9 @@ class AlbumController extends Controller
                     'current_user_role' => Auth::user()->role
                 ]);
             }
-
+    
             return redirect()->route('user.profile')->with('success', 'Album berhasil dibuat');
-
+    
         } catch (\Exception $e) {
             if ($request->expectsJson()) {
                 return response()->json([

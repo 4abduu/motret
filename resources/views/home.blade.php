@@ -395,46 +395,65 @@ document.addEventListener("DOMContentLoaded", function () {
 @if(session('login_success'))
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'success',
-            title: '{{ session('login_success') }}',
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            toast: true,
-            background: '#32bd40',
-            color: '#fff',
-            iconColor: '#fff',
-            didOpen: (toast) => {
-                toast.addEventListener('click', () => {
-                    Swal.close();
-                })
-            }
-        });
+        // Cek apakah alert sudah ditampilkan sebelumnya
+        if (!localStorage.getItem('loginAlertShown')) {
+            Swal.fire({
+                icon: 'success',
+                title: '{{ session('login_success') }}',
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                toast: true,
+                background: '#32bd40',
+                color: '#fff',
+                iconColor: '#fff',
+                didOpen: (toast) => {
+                    toast.addEventListener('click', () => {
+                        Swal.close();
+                    })
+                }
+            });
+            // Set flag di localStorage
+            localStorage.setItem('loginAlertShown', 'true');
+            
+            // Hapus flag saat user navigasi ke halaman lain
+            window.addEventListener('beforeunload', function() {
+                localStorage.removeItem('loginAlertShown');
+            });
+        }
     });
 </script>
 @endif
 
-
 @if(session('logout_success'))
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'success',
-            title: '{{ session('logout_success') }}',
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            toast: true,
-            background: '#32bd40',
-            color: '#fff',
-            iconColor: '#fff',
-            didOpen: (toast) => {
-                toast.addEventListener('click', () => {
-                    Swal.close();
-                })
-            }
-        });
+        // Cek apakah alert sudah ditampilkan sebelumnya
+        if (!localStorage.getItem('logoutAlertShown')) {
+            Swal.fire({
+                icon: 'success',
+                title: '{{ session('logout_success') }}',
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                toast: true,
+                background: '#32bd40',
+                color: '#fff',
+                iconColor: '#fff',
+                didOpen: (toast) => {
+                    toast.addEventListener('click', () => {
+                        Swal.close();
+                    })
+                }
+            });
+            // Set flag di localStorage
+            localStorage.setItem('logoutAlertShown', 'true');
+            
+            // Hapus flag saat user navigasi ke halaman lain
+            window.addEventListener('beforeunload', function() {
+                localStorage.removeItem('logoutAlertShown');
+            });
+        }
     });
 </script>
 @endif

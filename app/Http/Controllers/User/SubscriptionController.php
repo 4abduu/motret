@@ -51,160 +51,6 @@ class SubscriptionController extends Controller
     /**
      * Display subscription page
      */
-    // public function index()
-    // {
-    //     $user = Auth::user();
-        
-    //     $systemSubscription = SubscriptionSystem::where('user_id', $user->id)
-    //         ->where('end_date', '>', now())
-    //         ->first();
-    
-    //     $comboSubscription = SubscriptionCombo::where('user_id', $user->id)
-    //         ->where('end_date', '>', now())
-    //         ->first();
-    
-    //     // Calculate existingDuration based on whichever subscription has the later end date
-    //     $existingDuration = 0;
-    //     $endDate = null;
-        
-    //     if ($systemSubscription && $comboSubscription) {
-    //         $endDate = Carbon::parse($systemSubscription->end_date) > Carbon::parse($comboSubscription->end_date) 
-    //             ? $systemSubscription->end_date 
-    //             : $comboSubscription->end_date;
-    //     } elseif ($systemSubscription) {
-    //         $endDate = $systemSubscription->end_date;
-    //     } elseif ($comboSubscription) {
-    //         $endDate = $comboSubscription->end_date;
-    //     }
-        
-    //     if ($endDate) {
-    //         $existingDuration = $this->calculateAccurateRemainingMonths($endDate);
-    //     }
-    
-    //     return view('user.subscription', [
-    //         'prices' => SubscriptionPriceSystem::all(),
-    //         'hasActiveSubscription' => $systemSubscription || $comboSubscription,
-    //         'hasComboSubscription' => $comboSubscription !== null,
-    //         'existingDuration' => $existingDuration,
-    //         'duration' => $endDate ? $this->getDurationText($endDate) : null,
-    //         'endDateFormatted' => $endDate ? Carbon::parse($endDate)->format('d F Y') : null,
-    //         'comboDuration' => $comboSubscription ? $this->getDurationText(Carbon::parse($comboSubscription->end_date)) : null,
-    //         'systemEndDateFormatted' => $comboSubscription ? Carbon::parse($comboSubscription->end_date)->format('d F Y') : null,
-    //     ]);
-    // }
-
-    /**
-     * Show subscription options for a user
-     */
-    // public function showSubscriptionOptions($username)
-    // {
-    //     Log::info('Displaying subscription options for user: ' . $username . ' by: ' . Auth::id());
-    //     try {
-    //         $targetUser = User::where('username', $username)->firstOrFail();
-    //         $data = $this->getUserSubscriptionData(Auth::id(), $targetUser->id);
-            
-    //         $data['user'] = $targetUser;
-    //         $data['subscriptionPrices'] = SubscriptionPriceUser::where('user_id', $targetUser->id)->firstOrFail();
-    //         $data['systemPrices'] = [
-    //             '1_month'  => SubscriptionPriceSystem::where('duration', '1_month')->value('price'),
-    //             '3_months' => SubscriptionPriceSystem::where('duration', '3_months')->value('price'),
-    //             '6_months' => SubscriptionPriceSystem::where('duration', '6_months')->value('price'),
-    //             '1_year'   => SubscriptionPriceSystem::where('duration', '1_year')->value('price'),
-    //         ];
-            
-
-    //         return view('user.subscription_user', $data);
-    //     } catch (\Exception $e) {
-    //         Log::error('Error showing subscription options: ' . $e->getMessage());
-    //         return back()->with('error', 'Failed to load subscription options');
-    //     }
-    // }
-
-    // Di method showSubscriptionOptions() untuk langganan user
-    // subs user combo v2
-    // public function showSubscriptionOptions($username)
-    // {
-    //     $targetUser = User::where('username', $username)->firstOrFail();
-    //     $user = Auth::user();
-    
-    //     // Initialize variables
-    //     $userSubscription = null;
-    //     $comboSubscription = null;
-    //     $existingDuration = 0;
-    //     $endDateFormatted = null;
-    //     $userEndDateFormatted = null;
-    //     $systemEndDateFormatted = null;
-    //     $durationComboText = 'N/A';
-    //     $durationUserText = 'N/A';
-    
-    //     // Get subscriptions
-    //     $userSubscription = SubscriptionUser::where('user_id', $user->id)
-    //         ->where('target_user_id', $targetUser->id)
-    //         ->where('end_date', '>', now())
-    //         ->first();
-    
-    //     $comboSubscription = SubscriptionCombo::where('user_id', $user->id)
-    //         ->where('target_user_id', $targetUser->id)
-    //         ->where('end_date', '>', now())
-    //         ->first();
-    
-    //     // Calculate existing duration
-    //     if ($userSubscription || $comboSubscription) {
-    //         $latestEndDate = null;
-    //         if ($userSubscription && $comboSubscription) {
-    //             $latestEndDate = Carbon::parse($userSubscription->end_date) > Carbon::parse($comboSubscription->end_date) 
-    //                 ? $userSubscription->end_date 
-    //                 : $comboSubscription->end_date;
-    //         } elseif ($userSubscription) {
-    //             $latestEndDate = $userSubscription->end_date;
-    //         } else {
-    //             $latestEndDate = $comboSubscription->end_date;
-    //         }
-            
-    //         $existingDuration = $this->calculateAccurateRemainingMonths($latestEndDate);
-    //         $durationUserText = $this->getDurationText($latestEndDate);
-    //         $endDateFormatted = Carbon::parse($latestEndDate)->format('d F Y');
-    //     }
-    
-    //     // For combo subscriptions, get system end date
-    //     if ($comboSubscription) {
-    //         $systemEndDate = SubscriptionSystem::where('user_id', $user->id)
-    //             ->value('end_date');
-    //         $systemEndDateFormatted = $systemEndDate ? Carbon::parse($systemEndDate)->format('d F Y') : 'N/A';
-    //         $durationComboText = $this->getDurationText($comboSubscription->end_date);
-    //     }
-    
-    //     // Get subscription prices
-    //     $subscriptionPrices = SubscriptionPriceUser::where('user_id', $targetUser->id)->first();
-        
-    //     // Get system prices
-    //     $systemPrices = [
-    //         '1_month' => SubscriptionPriceSystem::where('duration', '1_month')->value('price'),
-    //         '3_months' => SubscriptionPriceSystem::where('duration', '3_months')->value('price'),
-    //         '6_months' => SubscriptionPriceSystem::where('duration', '6_months')->value('price'),
-    //         '1_year' => SubscriptionPriceSystem::where('duration', '1_year')->value('price'),
-    //     ];
-    
-    //     return view('user.subscription_user', [
-    //         'user' => $targetUser,
-    //         'subscriptionPrices' => $subscriptionPrices,
-    //         'systemPrices' => $systemPrices,
-    //         'hasActiveSubscription' => $userSubscription || $comboSubscription,
-    //         'hasComboSubscription' => $comboSubscription !== null,
-    //         'existingDuration' => $existingDuration,
-    //         'durationComboText' => $durationComboText,
-    //         'durationUserText' => $durationUserText,
-    //         'endDateFormatted' => $endDateFormatted,
-    //         'userEndDateFormatted' => $userEndDateFormatted,
-    //         'systemEndDateFormatted' => $systemEndDateFormatted,
-    //         'comboSubscription' => $comboSubscription,
-    //     ]);
-    // }
-
-    // Update the index method for system subscription page
-// In SubscriptionController
-
-// Update the index method for system subscription page
 public function index()
 {
     $user = Auth::user();
@@ -486,7 +332,7 @@ public function showSubscriptionOptions($username)
                 }
             });
 
-            return response()->json(['status' => 'success']);
+            return response()->json(['status' => 'success', 'redirect_url' => route('home')]);
 
         } catch (\Exception $e) {
             Log::error('Transaction status check failed: ' . $e->getMessage());
@@ -514,11 +360,13 @@ public function showSubscriptionOptions($username)
                 }
             });
 
+            $transaction = Transaction::with('targetUser')->where('order_id', $status->order_id)->firstOrFail();
+
             return response()->json([
                 'status' => 'success',
-                'redirect_url' => route('user.profile')
+                'redirect_url' => route('user.showProfile', ['username' => $transaction->targetUser->username])
             ]);
-
+    
         } catch (\Exception $e) {
             Log::error('User transaction status check failed: ' . $e->getMessage());
             return response()->json([
@@ -548,9 +396,11 @@ public function showSubscriptionOptions($username)
                 }
             });
 
+            $transaction = Transaction::with('targetUser')->where('order_id', $status->order_id)->firstOrFail();
+
             return response()->json([
                 'status' => 'success',
-                'redirect_url' => route('user.profile')
+                'redirect_url' => route('user.showProfile', ['username' => $transaction->targetUser->username])
             ]);
 
         } catch (\Exception $e) {

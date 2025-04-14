@@ -39,4 +39,9 @@ class Transaction extends Model
     {
         return Transaction::count();
     }
+
+    public function targetUser()
+    {
+        return $this->belongsTo(User::class, 'target_user_id');
+    }
 }

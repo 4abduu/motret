@@ -334,6 +334,73 @@
             font-size: 13px !important;
         }
     }
+    .subscription-btn {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+  
+  /* Visual Design */
+  background: var(--primary-color);
+  color: white;
+  padding: 14px 32px;
+  border-radius: 50px;
+  border: none;
+  
+  /* Typography */
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  
+  /* Effects */
+  box-shadow: 0 4px 12px rgba(50, 189, 64, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+/* Hover State */
+.subscription-btn:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(50, 189, 64, 0.4);
+}
+
+/* Active State */
+.subscription-btn:active {
+  transform: translateY(0);
+}
+
+/* Icon Animation */
+.subscription-btn i {
+  transition: transform 0.3s ease;
+}
+
+.subscription-btn:hover i {
+  transform: scale(1.1) rotate(-10deg);
+}
+
+/* Ripple Effect */
+.subscription-btn::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 1%, transparent 1%) center/15000%;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.subscription-btn:active::after {
+  opacity: 1;
+  background-size: 100%;
+  transition: background-size 0s;
+}
 </style>
 @endpush
 
@@ -798,9 +865,9 @@
                                         @if (Auth::check() && Auth::user()->role === 'pro')
                                             <div class="form-group mb-3">
                                                 <label for="status" class="form-label">Visibilitas</label>
-                                                <select class="form-select" id="status" name="status" required>
-                                                    <option value="1" {{ $album->status == 1 ? 'selected' : '' }}>Publik</option>
-                                                    <option value="0" {{ $album->status == 0 ? 'selected' : '' }}>Privat</option>
+                                                <select class="form-select" id="status" name="status">
+                                                    <option value="1" selected>Publik</option>
+                                                    <option value="0" {{ Auth::user()->role === 'pro' && $album->status == 0 ? 'selected' : '' }}>Privat</option>
                                                 </select>
                                             </div>
                                         @endif
@@ -940,8 +1007,8 @@
                     <!-- Subscriber View -->
                     <div class="subscriber-view">
                         <h3 class="mt-5 mb-4">Langganan</h3>
-                        @if(Auth::user()->subscriptions($user->id))
-                            <!-- Already Subscribed View -->
+                        @if(Auth::user()->isSubscribedTo($user))
+                        <!-- Already Subscribed View -->
                             <div class="subscription-active">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <button class="btn btn-outline-success btn-sm" 
@@ -1006,35 +1073,13 @@
                                                 <i class="bi bi-lock-fill" style="font-size: 3rem; color: #6c757d;"></i>
                                                 <h4 class="mt-3">Konten Eksklusif</h4>
                                                 <p class="text-muted">Berlangganan untuk mengakses semua foto premium dari {{ $user->name }}</p>
-                                                
-                                                <div class="pricing-options mt-4">
-                                                    <div class="row g-3">
-                                                        @foreach($subscriptionPlans as $plan)
-                                                            <div class="col-md-4">
-                                                                <div class="card h-100 {{ $plan['recommended'] ? 'border-primary' : '' }}">
-                                                                    <div class="card-body text-center">
-                                                                        @if($plan['recommended'])
-                                                                            <span class="badge bg-primary mb-2">Rekomendasi</span>
-                                                                        @endif
-                                                                        <h5 class="card-title">{{ $plan['name'] }}</h5>
-                                                                        <h3 class="my-3">Rp{{ number_format($plan['price'], 0, ',', '.') }}</h3>
-                                                                        <p class="small text-muted">per {{ $plan['duration'] }}</p>
-                                                                        <ul class="list-unstyled small text-start my-3">
-                                                                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Akses semua foto eksklusif</li>
-                                                                            <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Download konten premium</li>
-                                                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i> Dukungan prioritas</li>
-                                                                        </ul>
-                                                                        <a href="{{ route('subscription.subscribe', ['username' => $user->username, 'plan' => $plan['id']]) }}" 
-                                                                           class="btn {{ $plan['recommended'] ? 'btn-primary' : 'btn-outline-primary' }} w-100">
-                                                                            Langganan Sekarang
-                                                                        </a>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                                
+                            
+                                                <a href="{{ route('subscription.options', ['username' => $user->username]) }}" 
+                                                    class="subscription-btn">
+                                                    <i class="bi bi-gem"></i>
+                                                    <span>Berlangganan Sekarang</span>
+                                                 </a>
+                            
                                                 <div class="mt-4 small text-muted">
                                                     <p><i class="bi bi-info-circle me-2"></i> Pembayaran aman melalui sistem kami</p>
                                                 </div>
@@ -1042,7 +1087,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div>                            
                         @endif
                     </div>
                 @endif
@@ -1072,7 +1117,7 @@
                 </div>
             @endif
         </div>
-</div>
+    </div>
 </div>
 
 <!-- Modal Daftar Langganan -->
@@ -1172,8 +1217,8 @@
                         @if (Auth::check() && Auth::user()->role === 'pro')
                             <div class="mb-3">
                                 <label for="albumStatus" class="form-label">Visibilitas</label>
-                                <select class="form-select" id="albumStatus" name="status" required>
-                                    <option value="1">Publik</option>
+                                <select class="form-select" id="albumStatus" name="status">
+                                    <option value="1" selected>Publik</option>
                                     <option value="0">Privat</option>
                                 </select>
                             </div>
@@ -1351,6 +1396,16 @@
         const currentUserId = "{{ Auth::id() }}";
         const profileUserId = "{{ $user->id }}";
         
+        const activeTab = localStorage.getItem('activeTab');
+        if (activeTab) {
+            const tabTrigger = document.querySelector(`a[data-bs-toggle="tab"][href="#${activeTab}"]`);
+            if (tabTrigger) {
+                const tab = new bootstrap.Tab(tabTrigger);
+                tab.show();
+            }
+            localStorage.removeItem('activeTab'); // bersihkan setelah digunakan
+        }
+
         // Initialize Bootstrap dropdowns
         const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
         const dropdownList = dropdownElementList.map(function(dropdownToggleEl) {
