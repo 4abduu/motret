@@ -756,12 +756,7 @@ protected function processSuccessfulPayment($transaction, $status)
         ->when(in_array($type, ['user', 'combo']), function ($query) use ($transaction) {
             $query->where('target_user_id', $transaction->target_user_id);
         })
-        ->where(function($query) {
-            $query->where('end_date', '>=', Carbon::now()->subDay())
-                ->orWhereHas('transaction', function($q) {
-                    $q->where('created_at', '>=', Carbon::now()->subMinutes(5));
-                });
-        })
+        ->where('end_date', '>', Carbon::now())
         ->orderBy('end_date', 'desc')
         ->get();
 
@@ -800,9 +795,30 @@ protected function processSuccessfulPayment($transaction, $status)
             'subscription_ends_at' => $endDate
         ]);
     }
-    
+
+    // Kondisional untuk pesan
+    $isNewSubscription = !$latestActiveSubscription; // Jika tidak ada langganan aktif sebelumnya
+    $message = '';
+
+    if ($type === 'system') {
+        $message = $isNewSubscription
+            ? "Selamat! Anda telah mengaktifkan langganan sistem sampai " . $endDate->format('d F Y')
+            : "Selamat! Anda telah memperpanjang langganan sistem sampai " . $endDate->format('d F Y');
+    } elseif ($type === 'user') {
+        $message = $isNewSubscription
+            ? "Selamat! Anda telah mengaktifkan langganan ke pengguna sampai " . $endDate->format('d F Y')
+            : "Selamat! Anda telah memperpanjang langganan ke pengguna sampai " . $endDate->format('d F Y');
+    } elseif ($type === 'combo') {
+        $message = $isNewSubscription
+            ? "Selamat! Anda telah mengaktifkan langganan kombo sampai " . $endDate->format('d F Y')
+            : "Selamat! Anda telah memperpanjang langganan kombo sampai " . $endDate->format('d F Y');
+    }
+
+    // Simpan pesan ke session
+    session()->flash('subscription_message', $message);
+
     $this->createNotification($transaction, $endDate);
-    
+
     Log::info("Subscription {$type} created/updated", [
         'transaction_id' => $transaction->id,
         'end_date' => $endDate->format('Y-m-d')

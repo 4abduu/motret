@@ -2477,4 +2477,18 @@
         });
     });
 </script>
+@if(session('subscription_message'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Subscription Activated!',
+            text: '{{ session('subscription_message') }}',
+            confirmButtonColor: '#32bd40',
+            timer: 5000,
+            timerProgressBar: true,
+        });
+    });
+</script>
+@endif
 @endpush
