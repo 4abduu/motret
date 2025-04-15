@@ -26,6 +26,17 @@ class PhotoController extends Controller
         return view('user.photos', compact('photos', 'albums'));
     }    
 
+    public function morePhotos()
+    {
+        // Ambil foto yang paling banyak dilihat (diurutkan berdasarkan views)
+        $mostViewedPhotos = Photo::where('status', true) // hanya foto yang statusnya aktif
+                                ->where('banned', false) // tidak dibanned
+                                ->orderBy('views', 'desc')
+                                ->paginate(20);
+        
+        return view('photos.more', compact('mostViewedPhotos'));
+    }
+
     public function showPhoto($id)
     {
         if (Auth::check() && Auth::user()->role === 'admin') {

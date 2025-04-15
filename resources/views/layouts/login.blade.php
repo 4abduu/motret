@@ -199,13 +199,11 @@
                     </div>
                 </div>
             </div>
-            <footer class="footer">
+            {{-- <footer class="footer">
                 <div class="footer-bottom">
                     <span>Copyright © 2025 Motret. All rights reserved.</span>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Privacy Policy</a>
                 </div>
-            </footer>
+            </footer> --}}
         </div>
     </div>
     <script src="{{ asset('assets/vendors/js/vendor.bundle.base.js') }}"></script>

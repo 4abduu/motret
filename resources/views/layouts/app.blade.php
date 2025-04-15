@@ -175,8 +175,6 @@
                 <footer class="footer">
                     <div class="footer-bottom">
                         <span>Copyright © 2025 Motret. All rights reserved.</span>
-                        <a href="#">Terms of Service</a>
-                        <a href="#">Privacy Policy</a>
                     </div>
                 </footer>
             </div>

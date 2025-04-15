@@ -40,6 +40,9 @@ Route::middleware(['auth', 'logout_if_authenticated', 'redirect.if.admin'])->gro
 Route::get('/foto/{id}', [UserPhotoController::class, 'showPhoto'])->name('photos.show');
 Route::post('/foto/{id}/download', [UserPhotoController::class, 'downloadPhoto'])->name('photos.download');
 
+// Rute untuk halaman "Lihat Lebih Banyak"
+Route::get('/photos/more', [UserPhotoController::class, 'morePhotos'])->name('photos.more');
+
 // Routes untuk login, register, dan logout
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login')->middleware('logout_if_authenticated');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');

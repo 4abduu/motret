@@ -58,6 +58,11 @@
             padding: 15px;
         }
     }
+    .form-select:not(:disabled) {
+        background-color: white;
+        color: #212529;
+        cursor: pointer;
+    }
   </style>
 @endpush
 
