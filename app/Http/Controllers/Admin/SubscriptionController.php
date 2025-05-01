@@ -15,6 +15,20 @@ use Carbon\Carbon;
 
 class SubscriptionController extends Controller
 {
+    /**
+     * Menginisialisasi middleware untuk mengautentikasi admin.
+     */
+    public function __construct()
+    {
+        $this->middleware('role:admin');
+    }
+
+    /**
+     * Menampilkan halaman utama manajemen langganan.
+     * Mengambil data statistik, persentase perubahan, dan aktivitas terbaru.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         // Ambil jumlah data untuk card stats
@@ -124,6 +138,12 @@ class SubscriptionController extends Controller
         ));
     }
 
+    /**
+     * Menghitung persentase perubahan data dalam 7 hari terakhir dibandingkan dengan 7 hari sebelumnya.
+     *
+     * @param string $model Nama model yang akan dihitung.
+     * @return string Persentase perubahan dalam format string (misalnya "+50%" atau "-25%").
+     */
     private function calculatePercentageChange($model)
     {
         // Hitung jumlah data 7 hari terakhir
@@ -151,11 +171,24 @@ class SubscriptionController extends Controller
         }
     }
 
+    /**
+     * Menampilkan daftar harga langganan sistem.
+     *
+     * @return \Illuminate\View\View
+     */
     public function priceSystem(){
         $prices = SubscriptionPriceSystem::all();
         return view('admin.subscriptions.subsSystem', compact('prices'));
     }
 
+    /**
+     * Memperbarui harga langganan sistem berdasarkan ID.
+     * Memvalidasi input dan memperbarui data di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi informasi harga.
+     * @param int $id ID harga langganan.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updatePriceSystem(Request $request, $id)
     {
         $request->validate([
@@ -169,36 +202,72 @@ class SubscriptionController extends Controller
         return redirect()->back()->with('success', 'Harga langganan sistem berhasil diubah.');
     }
 
+    /**
+     * Menampilkan daftar transaksi langganan.
+     * Data diurutkan berdasarkan tanggal pembuatan secara descending.
+     *
+     * @return \Illuminate\View\View
+     */
     public function transactions()
     {
         $transactions = Transaction::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.transactions', compact('transactions'));
     }
 
+    /**
+     * Menampilkan daftar harga langganan pengguna.
+     * Data diurutkan berdasarkan tanggal pembuatan secara descending.
+     *
+     * @return \Illuminate\View\View
+     */
     public function systemPrices()
     {
         $prices = SubscriptionPriceSystem::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.priceSubsSystem', compact('prices'));
     }
 
+    /**
+     * Menampilkan daftar harga langganan pengguna.
+     * Data diurutkan berdasarkan tanggal pembuatan secara descending.
+     *
+     * @return \Illuminate\View\View
+     */
     public function userPrices()
     {
         $prices = SubscriptionPriceUser::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.priceSubsUser', compact('prices'));
     }
 
+    /**
+     * Menampilkan daftar langganan pengguna.
+     * Data diurutkan berdasarkan tanggal pembuatan secara descending.
+     *
+     * @return \Illuminate\View\View
+     */
     public function userSubscriptions()
     {
         $subscriptions = SubscriptionUser::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.subsUser', compact('subscriptions'));
     }
 
+    /**
+     * Menampilkan daftar langganan sistem.
+     * Data diurutkan berdasarkan tanggal pembuatan secara descending.
+     *
+     * @return \Illuminate\View\View
+     */
     public function systemSubscriptions()
     {
         $subscriptions = SubscriptionSystem::orderBy('created_at', 'desc')->get();
         return view('admin.subscriptions.subsSystem', compact('subscriptions'));
     }
 
+    /**
+     * Menampilkan daftar langganan kombo.
+     * Data diurutkan berdasarkan tanggal pembuatan secara descending.
+     *
+     * @return \Illuminate\View\View
+     */
     public function comboSubscriptions()
     {
         $subscriptions = SubscriptionCombo::orderBy('created_at', 'desc')->get();

@@ -216,7 +216,7 @@ $(document).ready(function() {
     }
 
     // Form submission with AJAX and SweetAlert2
-    $('form').on('submit', function(e) {
+    $('form').not('#search-form').on('submit', function(e) {
         e.preventDefault();
         
         const form = this;

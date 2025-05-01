@@ -11,9 +11,19 @@ use Symfony\Component\HttpFoundation\Response;
 class RedirectIfAuthenticated
 {
     /**
-     * Handle an incoming request.
+     * Menangani permintaan masuk.
+     * 
+     * Langkah-langkah:
+     * 1. Memeriksa apakah pengguna sudah terautentikasi untuk setiap guard yang diberikan.
+     * 2. Jika pengguna sudah terautentikasi:
+     *    - Jika peran pengguna adalah "admin", diarahkan ke dashboard admin.
+     *    - Jika peran pengguna adalah "user" atau "pro", diarahkan ke halaman utama.
+     * 3. Jika pengguna belum terautentikasi, permintaan diteruskan ke middleware berikutnya.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Illuminate\Http\Request $request Permintaan HTTP yang masuk.
+     * @param \Closure $next Middleware berikutnya.
+     * @param string ...$guards Daftar guard yang akan diperiksa.
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {

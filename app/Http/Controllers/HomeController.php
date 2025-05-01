@@ -8,6 +8,22 @@ use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+
+    /**
+     * Menampilkan halaman utama situs dengan berbagai kumpulan data foto.
+     *
+     * Data yang ditampilkan meliputi:
+     * - Foto acak yang aktif dan tidak premium
+     * - Foto dengan jumlah tampilan terbanyak
+     * - Foto dengan jumlah suka terbanyak
+     * - Foto dengan jumlah unduhan terbanyak
+     * - Kata kunci pencarian yang paling sering digunakan
+     *
+     * Semua data difilter agar hanya menampilkan foto yang tidak diblokir,
+     * tidak premium, dan memiliki status aktif.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $photos = Photo::where(function ($query) {

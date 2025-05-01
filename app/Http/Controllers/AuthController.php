@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password as PasswordRule;  // Mengganti nama alias
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\DB;
@@ -16,37 +15,58 @@ use Exception;
 use Carbon\Carbon;
 use App\Mail\PasswordResetMail;
 use App\Mail\EmailVerificationMail;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    public function index()
-    {
-        //
-    }
 
-    // menampilkan halaman login
+    /**
+     * Menampilkan halaman login.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showLoginForm()
     {
         return view('auth.login');
     }
-    // menampilkan halaman daftar
+
+    /**
+     * Menampilkan halaman register.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showRegisterForm()
     {
         return view('auth.register');
     }
 
+    /**
+     * Menampilkan halaman login dengan Google.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showAuthGoogle()
     {
         return view('auth.google');
     }
-    // redirect ke google login
+
+    /**
+     * Menampilkan halaman login dengan Google.
+     *
+     * @return \Illuminate\View\View
+     */
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->with(['prompt' => 'select_account'])->redirect();
     }
-    // fungsi untuk menghandle login
+
+    /**
+     * Memproses login pengguna.
+     * Memvalidasi input, memeriksa kredensial, dan mengarahkan pengguna berdasarkan peran.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan login.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function login(Request $request)
     {
         Log::info('Login attempt', ['request' => $request->only('email')]);
@@ -83,7 +103,14 @@ class AuthController extends Controller
         ->withInput($request->only('email'))
         ->withErrors(['email' => 'Email/Username atau password salah.']); 
     }
-    // fungsi untuk menghandle daftar
+
+    /**
+     * Memproses registrasi pengguna baru.
+     * Memvalidasi input, membuat akun baru, dan mengarahkan pengguna ke halaman login.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan registrasi.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function register(Request $request)
     {
         $messages = [
@@ -133,6 +160,13 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Memproses logout pengguna.
+     * Menghapus sesi pengguna dan mengarahkan ke halaman utama.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan logout.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function logout(Request $request)
     {
         Auth::logout();
@@ -142,12 +176,23 @@ class AuthController extends Controller
 
     }
     
+    /**
+     * Mengarahkan pengguna sebagai tamu ke halaman utama.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function guest()
     {
         Auth::logout();
         return redirect()->route('home');
     }
 
+    /**
+     * Memproses callback dari Google setelah login.
+     * Login pengguna jika akun sudah ada, atau menampilkan halaman untuk melengkapi data.
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     */
     public function handleGoogleCallback()
     {
         try {
@@ -167,11 +212,23 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Menampilkan halaman untuk mengubah password.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showForgotPasswordForm()
     {
         return view('auth.forgot-password');
     }
     
+    /**
+     * Mengirimkan tautan reset password ke email pengguna.
+     * Memvalidasi input dan membuat token reset password.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan reset password.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function sendResetLink(Request $request)
     {
         $request->validate([
@@ -203,11 +260,24 @@ class AuthController extends Controller
         return redirect()->route('password.reset')->with('status', 'Kode verifikasi telah dikirim ke email Anda.');
     }
     
+    /**
+     * Menampilkan halaman reset password.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan reset password.
+     * @return \Illuminate\View\View
+     */
     public function showResetPasswordForm(Request $request)
     {
         return view('auth.reset-password', ['request' => $request]);
     }
     
+    /**
+     * Memproses reset password pengguna.
+     * Memvalidasi token reset password dan memperbarui password pengguna.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan reset password.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function resetPassword(Request $request)
     {
         $request->validate([
@@ -237,6 +307,13 @@ class AuthController extends Controller
         return redirect()->route('login')->with('status', 'Password berhasil diubah.');
     }
 
+    /**
+     * Mengirimkan kode verifikasi email ke email pengguna.
+     * Memvalidasi email lama dan membuat token verifikasi.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan verifikasi email.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function sendEmailVerification(Request $request)
     {
         $validated = $request->validate([
@@ -264,6 +341,13 @@ class AuthController extends Controller
     
         return response()->json(['success' => true, 'message' => 'Kode verifikasi telah dikirim ke email Anda.']);
     }
+
+    /**
+     * Memverifikasi kode verifikasi email dan memperbarui email pengguna.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan verifikasi email.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function verifyEmailCode(Request $request)
     {
         $validated = $request->validate([
@@ -289,6 +373,13 @@ class AuthController extends Controller
         return redirect()->route('user.settings')->with('success', 'Email berhasil diubah.');
     }
 
+    /**
+     * Memeriksa apakah username sudah digunakan.
+     * Memvalidasi format username dan memeriksa keberadaannya di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan pengecekan username.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkUsername(Request $request)
     {
         $username = trim($request->username);

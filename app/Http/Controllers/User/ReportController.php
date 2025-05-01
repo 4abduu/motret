@@ -11,10 +11,25 @@ use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
+    /**
+     * Constructor untuk mengatur middleware.
+     * Middleware `auth` diterapkan untuk semua fungsi dalam controller ini.
+     */
     public function __construct()
     {
         $this->middleware('auth');
     }
+
+    /**
+     * Menangani laporan terhadap sebuah foto oleh user.
+     *
+     * Melakukan validasi input, menyimpan laporan ke database,
+     * dan merespons sesuai jenis request (JSON atau redirect).
+     *
+     * @param \Illuminate\Http\Request $request Request yang berisi data alasan pelaporan.
+     * @param int $photoId ID foto yang dilaporkan.
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
     public function reportPhoto(Request $request, $photoId)
     {
         $validated = $request->validate([
@@ -44,6 +59,16 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * Menangani laporan terhadap sebuah komentar oleh user.
+     *
+     * Melakukan validasi input, menyimpan laporan ke database,
+     * dan merespons sesuai jenis request (JSON atau redirect).
+     *
+     * @param \Illuminate\Http\Request $request Request yang berisi data alasan pelaporan.
+     * @param int $commentId ID komentar yang dilaporkan.
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
     public function reportComment(Request $request, $commentId)
     {
 
@@ -74,6 +99,16 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * Menangani laporan terhadap sebuah balasan komentar oleh user.
+     *
+     * Melakukan validasi input, menyimpan laporan ke database,
+     * dan merespons sesuai jenis request (JSON atau redirect).
+     *
+     * @param \Illuminate\Http\Request $request Request yang berisi data alasan pelaporan.
+     * @param int $replyId ID balasan yang dilaporkan.
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
     public function reportReply(Request $request, $replyId)
     {
         $validated = $request->validate([
@@ -103,6 +138,16 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * Menangani laporan terhadap pengguna oleh user.
+     *
+     * Melakukan validasi input, menyimpan laporan ke database,
+     * dan merespons sesuai jenis request (JSON atau redirect).
+     *
+     * @param \Illuminate\Http\Request $request Request yang berisi data alasan pelaporan.
+     * @param int $userId ID pengguna yang dilaporkan.
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
     public function reportUser(Request $request, $userId)
     {
         $validated = $request->validate([

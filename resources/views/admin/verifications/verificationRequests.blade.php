@@ -2,6 +2,15 @@
 
 @section('title', 'Permintaan Verifikasi')
 
+@push('link')
+<style>
+    .dt-length {
+            margin-left: 20px;
+            padding-bottom: 10px;
+        }
+</style>
+@endpush
+
 @section('content')
 
 <div class="row">
@@ -23,6 +32,7 @@
                     <table id="example" class="table table-striped" style="width:100%">
                         <thead>
                             <tr>
+                                <th>No</th>
                                 <th>Nama Lengkap</th>
                                 <th>Username</th>
                                 <th>Alasan</th>
@@ -32,8 +42,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($verificationRequests as $request)
+                            @foreach($verificationRequests as $index => $request)
                                 <tr>
+                                    <td>{{ $index + 1 }}</td>
                                     <td>{{ $request->full_name }}</td>
                                     <td>{{ $request->username }}</td>
                                     <td>{{ $request->reason }}</td>

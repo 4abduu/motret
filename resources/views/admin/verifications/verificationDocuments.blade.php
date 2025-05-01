@@ -103,6 +103,10 @@
 body.modal-open {
     overflow: hidden;
 }
+.dt-length {
+            margin-left: 20px;
+            padding-bottom: 10px;
+        }
 </style>
 @endpush
 

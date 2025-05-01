@@ -14,10 +14,7 @@ use App\Http\Controllers\Admin\BalanceController as AdminBalanceController;
 use App\Http\Controllers\User\BalanceController as UserBalanceController;
 use App\Http\Controllers\User\SubscriptionController as UserSubscriptionController;
 use App\Http\Controllers\User\AlbumController as UserAlbumController;
-use App\Http\Controllers\User\CommentController as UserCommentController;
-use App\Http\Controllers\User\FollowController as UserFollowController;
-use App\Http\Controllers\User\LikeController as UserLikeController;
-use App\Http\Controllers\User\NotifController as UserNotifController;
+use App\Http\Controllers\User\LCFNController as UserLCFNController;
 use App\Http\Controllers\User\PhotoController as UserPhotoController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
 use App\Http\Controllers\User\ReportController as UserReportController;
@@ -137,14 +134,14 @@ Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_a
     Route::get('/photos/{id}/edit', [UserPhotoController::class, 'editPhoto'])->name('photos.edit');
     Route::put('/photos/{id}', [UserPhotoController::class, 'updatePhoto'])->name('photos.update');
     Route::delete('/photos/{id}', [UserPhotoController::class, 'destroyPhoto'])->name('photos.destroy');
-    Route::post('/photos/{photo}/like', [UserLikeController::class, 'like'])->name('photos.like');
-    Route::post('/photos/{photo}/unlike', [UserLikeController::class, 'unlike'])->name('photos.unlike');
-    Route::post('/photos/{photo}/comments', [UserCommentController::class, 'store'])->name('photos.comments.store');
+    Route::post('/photos/{photo}/like', [UserLCFNController::class, 'like'])->name('photos.like');
+    Route::post('/photos/{photo}/unlike', [UserLCFNController::class, 'unlike'])->name('photos.unlike');
+    Route::post('/photos/{photo}/comments', [UserLCFNController::class, 'storeComment'])->name('photos.comments.store');
     
     // Komentar & Balasan
-    Route::delete('/comments/{id}', [UserCommentController::class, 'destroy'])->name('comments.destroy');
-    Route::post('/comments/{comment}/reply', [UserCommentController::class, 'storeReply'])->name('comments.reply');
-    Route::delete('/replies/{id}', [UserCommentController::class, 'destroyReply'])->name('reply.destroy');
+    Route::delete('/comments/{id}', [UserLCFNController::class, 'destroyComment'])->name('comments.destroy');
+    Route::post('/comments/{comment}/reply', [UserLCFNController::class, 'storeReply'])->name('comments.reply');
+    Route::delete('/replies/{id}', [UserLCFNController::class, 'destroyReply'])->name('reply.destroy');
     
     // Pelaporan
     Route::post('/photo/{id}/report', [UserReportController::class, 'reportPhoto'])->name('photo.report');
@@ -153,8 +150,8 @@ Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_a
     Route::post('/user/{id}/report', [UserReportController::class, 'reportUser'])->name('user.report');
     
     // Pengikut
-    Route::post('/users/{id}/follow', [UserFollowController::class, 'follow'])->name('user.follow');
-    Route::post('/users/{id}/unfollow', [UserFollowController::class, 'unfollow'])->name('user.unfollow');
+    Route::post('/users/{id}/follow', [UserLCFNController::class, 'follow'])->name('user.follow');
+    Route::post('/users/{id}/unfollow', [UserLCFNController::class, 'unfollow'])->name('user.unfollow');
     
     // Album
     Route::post('/albums', [UserAlbumController::class, 'store'])->name('albums.store');
@@ -168,9 +165,7 @@ Route::middleware(['auth', 'role:user,pro', 'prevent.admin.access', 'logout_if_a
     Route::post('/albums/{albumId}/removePhoto/{photoId}', [UserAlbumController::class, 'removePhoto']);
 
     // Notifikasi
-    Route::get('/notifications', [UserNotifController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{id}/read', [UserNotifController::class, 'markAsRead'])->name('notifications.markAsRead');
-    Route::get('/fetch-notifications', [UserNotifController::class, 'fetchNotifications'])->name('notifications.fetch');
+    Route::get('/notifications', [UserLCFNController::class, 'notification'])->name('notifications.index');
 
     // Pengaturan
     Route::get('/settings', [UserSettingController::class, 'index'])->name('user.settings');

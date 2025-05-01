@@ -30,6 +30,15 @@
                     </select>
                 </div>
                 @endif
+                @if (Auth::user()->verified)
+                <div class="form-group">
+                    <label for="premium" class="form-label">Status</label>
+                    <select class="form-select" id="premium" name="premium" required>
+                        <option value="0" {{ $photo->premium === '0' ? 'selected' : '' }}>Biasa</option>
+                        <option value="1" {{ $photo->premium === '1' ? 'selected' : '' }}>Premium</option>
+                    </select>
+                </div>
+                @endif
                 <button type="submit" class="btn btn-success text-white me-2">Ubah Foto</button>
             </form>
           </div>
@@ -37,3 +46,44 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const premiumSelect = document.getElementById('premium');
+    const statusSelect = document.getElementById('status');
+
+    function handleStatusLogic() {
+        const premiumValue = premiumSelect ? premiumSelect.value : null;
+        const statusValue = statusSelect ? statusSelect.value : null;
+
+        // Jika premium dipilih, set visibilitas ke publik (1) dan nonaktifkan
+        if (premiumValue === '1') {
+            if (statusSelect) {
+                statusSelect.value = '1';
+                statusSelect.disabled = true;
+            }
+        } 
+        // Jika visibilitas pribadi (0), set premium ke biasa (0) dan nonaktifkan
+        else if (statusValue === '0') {
+            if (premiumSelect) {
+                premiumSelect.value = '0';
+                premiumSelect.disabled = true;
+            }
+        } 
+        // Jika bukan keduanya, aktifkan semua
+        else {
+            if (statusSelect) statusSelect.disabled = false;
+            if (premiumSelect) premiumSelect.disabled = false;
+        }
+    }
+
+    // Event listeners for changes
+    if (premiumSelect) premiumSelect.addEventListener('change', handleStatusLogic);
+    if (statusSelect) statusSelect.addEventListener('change', handleStatusLogic);
+
+    // Initialize logic on page load
+    handleStatusLogic();
+});
+</script>
+@endpush

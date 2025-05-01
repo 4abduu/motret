@@ -216,7 +216,7 @@
             text-decoration: underline;
         }
 </style>
-
+@if($photos->count() > 0)
 <div class="container mb-4">
     <div class="most-searched-container">
         <h4 class="most-searched-title mb-2">Kata kunci yang sering dicari: </h4>
@@ -233,7 +233,7 @@
 <div class="container-fluid mb-4">
     <div class="d-flex justify-content-between align-items-baseline mb-3"> <!-- Ubah align-items-center ke align-items-baseline -->
         <h4 class="mb-0">Foto yang paling banyak dilihat</h4> <!-- Hapus mb-3 dan ganti dengan mb-0 -->
-        <a href="{{ route('photos.more') }}" class="section-link d-flex align-items-center"> <!-- Tambahkan d-flex align-items-center -->
+        <a href="{{ route('photos.more', ['type' => 'most_viewed']) }}" class="section-link d-flex align-items-center">
             Lihat lebih banyak <i class="bi bi-arrow-right ms-2"></i> <!-- Tambahkan ms-2 untuk spacing -->
         </a>
     </div>
@@ -257,7 +257,7 @@
 <div class="container-fluid mb-5"> <!-- Ubah mb-4 ke mb-5 untuk jarak antar section -->
     <div class="d-flex justify-content-between align-items-baseline mb-3"> <!-- align-items-baseline -->
         <h4 class="mb-0">Foto yang paling banyak disukai</h4> <!-- mb-0 -->
-        <a href="{{ route('photos.more') }}" class="section-link d-flex align-items-center">
+        <a href="{{ route('photos.more', ['type' => 'most_liked']) }}" class="section-link d-flex align-items-center">
             Lihat lebih banyak <i class="bi bi-arrow-right ms-2"></i> <!-- ms-2 -->
         </a>
     </div>
@@ -282,7 +282,7 @@
 <div class="container-fluid mb-5"> <!-- Konsisten mb-5 -->
     <div class="d-flex justify-content-between align-items-baseline mb-3"> <!-- align-items-baseline -->
         <h4 class="mb-0">Foto yang paling banyak diunduh</h4> <!-- mb-0 -->
-        <a href="{{ route('photos.more') }}" class="section-link d-flex align-items-center">
+        <a href="{{ route('photos.more', ['type' => 'most_downloaded']) }}" class="section-link d-flex align-items-center">
             Lihat lebih banyak <i class="bi bi-arrow-right ms-2"></i> <!-- ms-2 -->
         </a>
     </div>
@@ -325,6 +325,45 @@
         </div>
     </div>
 </div>
+
+@else
+<div class="container-fluid d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="text-center px-4" style="max-width: 600px;">
+        <!-- Modern illustration-style icon -->
+        <div class="mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+        </div>
+        
+        <!-- Title with subtle gradient text -->
+        <h3 class="mb-3 fw-semibold" style="font-size: 1.8rem; color: #333; letter-spacing: -0.5px;">
+            Belum Ada Foto Tersedia
+        </h3>
+        
+        <!-- Description text -->
+        @if(Auth::check() && (Auth::user()->role === 'user' || Auth::user()->role === 'pro'))
+        <p class="text-muted mb-4" style="font-size: 1.1rem; line-height: 1.6;">
+            Silakan kembali nanti atau unggah foto pertama Anda untuk memulai koleksi!
+        </p>
+        @else
+        <p class="text-muted mb-4" style="font-size: 1.1rem; line-height: 1.6;">
+            Silakan kembali nanti untuk melihat foto-foto menarik yang akan datang!
+        </p>
+        @endif
+        
+        <!-- CTA Button with animation -->
+            @if(Auth::check() && (Auth::user()->role === 'user' || Auth::user()->role === 'pro'))
+                <a href="{{ route('photos.create') }}" class="btn btn-success px-4 py-3 rounded-pill shadow-sm" 
+                   style="font-weight: 500; transition: all 0.3s ease;">
+                    <i class="bi bi-cloud-arrow-up-fill me-2"></i> Unggah Foto Pertama Sekarang!
+                </a>
+            @endif
+    </div>
+</div>
+@endif
 
 @endsection
 

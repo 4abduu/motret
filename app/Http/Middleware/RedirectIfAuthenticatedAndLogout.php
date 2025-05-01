@@ -9,6 +9,18 @@ use Carbon\Carbon;
 
 class RedirectIfAuthenticatedAndLogout
 {
+    /**
+     * Menangani status banned pada pengguna yang sedang login.
+     *
+     * Middleware ini memeriksa apakah pengguna yang sedang login dibanned. 
+     * - Jika pengguna dibanned secara permanen, mereka akan logout dan diarahkan ke halaman login dengan pesan alasan banned.
+     * - Jika pengguna dibanned sementara, sistem akan memeriksa apakah waktu banned telah berakhir. Jika sudah, status banned akan dihapus dan pengguna dapat melanjutkan sesi.
+     * - Jika pengguna tidak dibanned, permintaan akan diteruskan ke proses berikutnya.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure $next
+     * @return mixed
+     */
     public function handle(Request $request, Closure $next)
     {
         if (Auth::check()) {

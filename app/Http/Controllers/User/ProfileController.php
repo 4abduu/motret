@@ -15,11 +15,21 @@ use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
+
+    /**
+     * Constructor untuk mengatur middleware.
+     * Middleware `auth` diterapkan kecuali untuk fungsi `showProfile`.
+     */
     public function __construct()
     {
         $this->middleware('auth')->except(['showProfile']);
     }
 
+    /**
+     * Menampilkan halaman profil pengguna.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $user = Auth::user();
@@ -47,6 +57,12 @@ class ProfileController extends Controller
         return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice', 'subscribers'));
     }
     
+    /**
+     * Menampilkan halaman profil pengguna berdasarkan username.
+     *
+     * @param string $username
+     * @return \Illuminate\View\View
+     */
     public function showProfile($username)
     {
         if (Auth::check() && Auth::user()->role === 'admin') {
@@ -77,7 +93,11 @@ class ProfileController extends Controller
         return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'isSubscribed', 'hasSubscriptionPrice', 'subscribers'));
     }
     
-
+    /**
+     * Memproses edit profil pengguna.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateProfile(Request $request)
     {
         try {
@@ -132,6 +152,11 @@ class ProfileController extends Controller
         }
     }
 
+    /**
+     * Menghapus foto profil pengguna.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function deleteProfilePhoto()
     {
         $user = Auth::user();
@@ -145,12 +170,25 @@ class ProfileController extends Controller
         return redirect()->route('user.profile')->with('success', 'Foto profil berhasil dihapus.');
     }
 
+    /**
+     * Memeriksa apakah username sudah digunakan.
+     * Memvalidasi format username dan memeriksa keberadaannya di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan pengecekan username.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkUsername(Request $request)
     {
         $exists = User::where('username', $request->username)->exists();
         return response()->json(['exists' => $exists]);
     }
 
+    /**
+     * Memeriksa apakah email sudah digunakan dan memeriksa keberadaannya di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan pengecekan username.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkEmail(Request $request)
     {
         $exists = User::where('email', $request->email)->exists();

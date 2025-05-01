@@ -12,14 +12,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('users:download_reset_at')->everyMinute();
         $schedule->command('subscriptions:check-expired')->everyMinute();
         $schedule->command('users:unban')->everyMinute();
         $schedule->command('banned:delete')->everyMinute();
         $schedule->command('withdraw:auto-reject')->everyMinute();
     }
     
-
     /**
      * Register the commands for the application.
      */

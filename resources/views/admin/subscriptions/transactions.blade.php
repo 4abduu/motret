@@ -26,6 +26,7 @@
                     <table id="example" class="table table-striped" style="width:100%">
                         <thead>
                             <tr>
+                                <th>No</th>
                                 <th>ID</th>
                                 <th>User</th>
                                 <th>Order ID</th>
@@ -38,8 +39,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($transactions as $transaction)
+                            @foreach($transactions as $index => $transaction)
                             <tr>
+                                <td>{{ $index + 1 }}</td>
                                 <td>{{ $transaction->id }}</td>
                                 <td>{{ $transaction->user->name }}</td>
                                 <td>{{ $transaction->order_id }}</td>

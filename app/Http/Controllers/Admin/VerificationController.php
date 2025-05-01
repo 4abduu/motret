@@ -9,17 +9,45 @@ use App\Models\Notif;
 
 class VerificationController extends Controller
 {
+    /**
+     * Menginisialisasi middleware untuk mengautentikasi admin.
+     */
+    public function __construct()
+    {
+        $this->middleware('role:admin');
+    }
+
+    /**
+     * Menampilkan daftar semua permintaan verifikasi.
+     * Memuat data pengguna dan dokumen terkait.
+     * Mengurutkan data berdasarkan terbaru.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
-        $verificationRequests = VerificationRequest::with('user', 'documents')->get();
+        $verificationRequests = VerificationRequest::with('user', 'documents')->orderBy('created_at', 'desc')->get();
         return view('admin.verifications.verificationRequests', compact('verificationRequests'));
     }
+
+    /**
+     * Menampilkan dokumen terkait permintaan verifikasi tertentu.
+     *
+     * @param int $id ID permintaan verifikasi.
+     * @return \Illuminate\View\View
+     */
     public function showVerificationDocuments($id)
     {
         $verificationRequest = VerificationRequest::with('documents')->findOrFail($id);
         return view('admin.verifications.verificationDocuments', compact('verificationRequest'));
     }
 
+    /**
+     * Menghapus permintaan verifikasi dan dokumen terkait.
+     *
+     * @param int $id ID permintaan verifikasi.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteVerificationRequest($id)
     {
         try {
@@ -42,6 +70,13 @@ class VerificationController extends Controller
         }
     }
 
+    /**
+     * Menolak permintaan verifikasi dengan pesan.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan.
+     * @param int $id ID permintaan verifikasi.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function rejectVerificationRequest(Request $request, $id)
     {
         $request->validate([
@@ -65,7 +100,12 @@ class VerificationController extends Controller
         return redirect()->route('admin.verificationRequests')->with('success', 'Permintaan verifikasi telah ditolak.');
     }
 
-    
+    /**
+     * Menyetujui permintaan verifikasi.
+     *
+     * @param int $id ID permintaan verifikasi.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function approveVerificationRequest($id)
     {
         $verificationRequest = VerificationRequest::findOrFail($id);

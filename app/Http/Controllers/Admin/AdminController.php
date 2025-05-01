@@ -14,6 +14,21 @@ use Carbon\Carbon;
 
 class AdminController extends Controller
 {
+
+    /**
+     * Menginisialisasi middleware untuk mengautentikasi admin.
+     */
+    public function __construct()
+    {
+        $this->middleware('role:admin');
+    }
+
+    /**
+     * Menampilkan dashboard admin.
+     * Mengambil data statistik, persentase perubahan, data pertumbuhan, dan aktivitas terbaru.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         // Ambil data dari database
@@ -73,6 +88,12 @@ class AdminController extends Controller
         ));
     }
 
+    /**
+     * Menghitung persentase perubahan data dalam 7 hari terakhir dibandingkan dengan 7 hari sebelumnya.
+     *
+     * @param string $model Nama model yang akan dihitung.
+     * @return string Persentase perubahan dalam format string (misalnya "+50%" atau "-25%").
+     */
     private function calculatePercentageChange($model)
     {
         // Hitung jumlah data 7 hari terakhir
@@ -101,7 +122,12 @@ class AdminController extends Controller
     }
     
 
-    // Data pertumbuhan user (7 hari terakhir)
+    /**
+     * Mengambil data pertumbuhan pengguna dalam 7 hari terakhir.
+     * Data ini digunakan untuk membuat grafik pertumbuhan pengguna.
+     *
+     * @return array Data pertumbuhan pengguna, termasuk label tanggal dan jumlah pengguna baru.
+     */
     private function getUserGrowthData()
     {
         $labels = [];
@@ -118,7 +144,12 @@ class AdminController extends Controller
         ];
     }
 
-    // Data upload foto (7 hari terakhir)
+    /**
+     * Mengambil data unggahan foto dalam 7 hari terakhir.
+     * Data ini digunakan untuk membuat grafik unggahan foto.
+     *
+     * @return array Data unggahan foto, termasuk label tanggal dan jumlah foto yang diunggah.
+     */
     private function getPhotoUploadData()
     {
         $labels = [];

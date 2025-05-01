@@ -8,6 +8,20 @@ use Carbon\Carbon;
 
 class ReportController extends Controller
 {
+    /**
+     * Menginisialisasi middleware untuk mengautentikasi admin.
+     */
+    public function __construct()
+    {
+        $this->middleware('role:admin');
+    }
+
+    /**
+     * Menampilkan halaman utama manajemen laporan.
+     * Mengambil jumlah laporan berdasarkan jenis, persentase perubahan, dan aktivitas terbaru.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         // Ambil jumlah report berdasarkan jenis
@@ -42,6 +56,12 @@ class ReportController extends Controller
         ));
     }
 
+    /**
+     * Menghitung persentase perubahan data dalam 7 hari terakhir dibandingkan dengan 7 hari sebelumnya.
+     *
+     * @param string $model Nama model yang akan dihitung.
+     * @return string Persentase perubahan dalam format string (misalnya "+50%" atau "-25%").
+     */
     private function calculatePercentageChange($model)
     {
         // Hitung jumlah data 7 hari terakhir
@@ -69,12 +89,22 @@ class ReportController extends Controller
         }
     }
 
+    /**
+     * Menampilkan laporan pengguna.
+     *
+     * @return \Illuminate\View\View
+     */
     public function reportUsers()
     {
         $reportUsers = Report::whereNotNull('reported_user_id')->get();
         return view('admin.reports.reportUsers', compact('reportUsers'));
     }
 
+    /**
+     * Menampilkan laporan komentar dan balasan.
+     *
+     * @return \Illuminate\View\View
+     */
     public function reportComments()
     {
         $reportComments = Report::whereNotNull('comment_id')->get();
@@ -82,12 +112,24 @@ class ReportController extends Controller
         return view('admin.reports.reportComments', compact('reportComments', 'reportReplies'));
     }
 
+    /**
+     * Menampilkan laporan foto.
+     *
+     * @return \Illuminate\View\View
+     */
     public function reportPhotos()
     {
         $reportPhotos = Report::whereNotNull('photo_id')->get();
         return view('admin.reports.reportPhotos', compact('reportPhotos'));
     }
 
+    /**
+     * Menghapus laporan tertentu.
+     * Menghapus laporan dari database berdasarkan ID.
+     *
+     * @param int $id ID laporan.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteReport($id)
     {
         $report = Report::findOrFail($id);

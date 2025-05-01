@@ -22,6 +22,10 @@ use Carbon\Carbon;
 
 class SubscriptionController extends Controller
 {
+    /**
+     * Jenis langganan yang tersedia.
+     * @var array
+     */
     protected $subscriptionTypes = [
         'system' => [
             'model' => SubscriptionSystem::class,
@@ -40,6 +44,9 @@ class SubscriptionController extends Controller
         ]
     ];
 
+    /**
+     * Mengatur konfigurasi Midtrans untuk transaksi pembayaran.
+     */
     public function __construct()
     {
         Config::$serverKey = config('services.midtrans.server_key');
@@ -49,156 +56,179 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * Display subscription page
+     * Menampilkan halaman langganan sistem untuk pengguna.
+     * Mengambil data langganan aktif (sistem dan combo) dan menghitung durasi langganan yang tersisa.
+     *
+     * @return \Illuminate\View\View
      */
-public function index()
-{
-    $user = Auth::user();
-    
-    // Get active subscriptions
-    $systemSubscription = SubscriptionSystem::where('user_id', $user->id)
-        ->where('end_date', '>', now())
-        ->first();
-
-    $comboSubscription = SubscriptionCombo::where('user_id', $user->id)
-        ->where('end_date', '>', now())
-        ->first();
-
-    // Determine source and duration
-    $source = $comboSubscription ? 'combo' : ($systemSubscription ? 'system' : null);
-    $endDate = null;
-    $durationText = '0 Bulan';
-    
-    // Calculate combined end date
-    if ($systemSubscription || $comboSubscription) {
-        $systemEndDate = $systemSubscription ? Carbon::parse($systemSubscription->end_date) : null;
-        $comboEndDate = $comboSubscription ? Carbon::parse($comboSubscription->end_date) : null;
+    public function index()
+    {
+        $user = Auth::user();
         
-        $endDate = $systemEndDate && $comboEndDate 
-            ? $systemEndDate->greaterThan($comboEndDate) ? $systemEndDate : $comboEndDate
-            : ($systemEndDate ?? $comboEndDate);
+        // Get active subscriptions
+        $systemSubscription = SubscriptionSystem::where('user_id', $user->id)
+            ->where('end_date', '>', now())
+            ->first();
+
+        $comboSubscription = SubscriptionCombo::where('user_id', $user->id)
+            ->where('end_date', '>', now())
+            ->first();
+
+        // Determine source and duration
+        $source = $comboSubscription ? 'combo' : ($systemSubscription ? 'system' : null);
+        $endDate = null;
+        $durationText = '0 Bulan';
+        
+        // Calculate combined end date
+        if ($systemSubscription || $comboSubscription) {
+            $systemEndDate = $systemSubscription ? Carbon::parse($systemSubscription->end_date) : null;
+            $comboEndDate = $comboSubscription ? Carbon::parse($comboSubscription->end_date) : null;
             
-        $durationText = $this->getDurationText($endDate);
+            $endDate = $systemEndDate && $comboEndDate 
+                ? $systemEndDate->greaterThan($comboEndDate) ? $systemEndDate : $comboEndDate
+                : ($systemEndDate ?? $comboEndDate);
+                
+            $durationText = $this->getDurationText($endDate);
+        }
+
+        return view('user.subscription', [
+            'prices' => SubscriptionPriceSystem::all(),
+            'hasActiveSubscription' => $systemSubscription || $comboSubscription,
+            'hasComboSubscription' => $comboSubscription !== null,
+            'source' => $source,
+            'duration' => $durationText,
+            'endDateFormatted' => $endDate ? $endDate->format('d F Y') : null,
+            'existingDuration' => $endDate ? $this->calculateAccurateRemainingMonths($endDate) : 0,
+            'systemEndDate' => $systemSubscription ? $systemSubscription->end_date : null,
+            'systemEndDateFormatted' => $systemSubscription ? Carbon::parse($systemSubscription->end_date)->format('d F Y') : null,
+            'comboEndDate' => $comboSubscription ? $comboSubscription->end_date : null,
+            'comboEndDateFormatted' => $comboSubscription ? Carbon::parse($comboSubscription->end_date)->format('d F Y') : null,
+        ]);
     }
 
-    return view('user.subscription', [
-        'prices' => SubscriptionPriceSystem::all(),
-        'hasActiveSubscription' => $systemSubscription || $comboSubscription,
-        'hasComboSubscription' => $comboSubscription !== null,
-        'source' => $source,
-        'duration' => $durationText,
-        'endDateFormatted' => $endDate ? $endDate->format('d F Y') : null,
-        'existingDuration' => $endDate ? $this->calculateAccurateRemainingMonths($endDate) : 0,
-        'systemEndDate' => $systemSubscription ? $systemSubscription->end_date : null,
-        'systemEndDateFormatted' => $systemSubscription ? Carbon::parse($systemSubscription->end_date)->format('d F Y') : null,
-        'comboEndDate' => $comboSubscription ? $comboSubscription->end_date : null,
-        'comboEndDateFormatted' => $comboSubscription ? Carbon::parse($comboSubscription->end_date)->format('d F Y') : null,
-    ]);
-}
-
     /**
-     * Show subscription options for a user
+     * Menampilkan opsi langganan untuk pengguna tertentu.
+     * Mengambil data langganan aktif (user, combo, dan sistem) untuk pengguna target.
+     *
+     * @param string $username Username pengguna target.
+     * @return \Illuminate\View\View
      */
-// Di method showSubscriptionOptions()
-public function showSubscriptionOptions($username)
-{
-    $targetUser = User::where('username', $username)->firstOrFail();
-    $user = Auth::user();
-    
-    // Get active user subscription
-    $userSubscription = SubscriptionUser::where('user_id', $user->id)
-        ->where('target_user_id', $targetUser->id)
-        ->where('end_date', '>', now())
-        ->orderBy('end_date', 'desc')
-        ->first();
+    public function showSubscriptionOptions($username)
+    {
+        $targetUser = User::where('username', $username)->firstOrFail();
+        $user = Auth::user();
+        
+        // Get active user subscription
+        $userSubscription = SubscriptionUser::where('user_id', $user->id)
+            ->where('target_user_id', $targetUser->id)
+            ->where('end_date', '>', now())
+            ->orderBy('end_date', 'desc')
+            ->first();
 
-    // Get active combo subscription
-    $comboSubscription = SubscriptionCombo::where('user_id', $user->id)
-        ->where('target_user_id', $targetUser->id)
-        ->where('end_date', '>', now())
-        ->orderBy('end_date', 'desc')
-        ->first();
+        // Get active combo subscription
+        $comboSubscription = SubscriptionCombo::where('user_id', $user->id)
+            ->where('target_user_id', $targetUser->id)
+            ->where('end_date', '>', now())
+            ->orderBy('end_date', 'desc')
+            ->first();
 
-    // Get active system subscription
-    $systemSubscription = SubscriptionSystem::where('user_id', $user->id)
-        ->where('end_date', '>', now())
-        ->orderBy('end_date', 'desc')
-        ->first();
+        // Get active system subscription
+        $systemSubscription = SubscriptionSystem::where('user_id', $user->id)
+            ->where('end_date', '>', now())
+            ->orderBy('end_date', 'desc')
+            ->first();
 
-    // Calculate existing duration for each subscription type
-    $userExistingDuration = $userSubscription 
-        ? $this->calculateAccurateRemainingMonths($userSubscription->end_date) 
-        : 0;
+        // Calculate existing duration for each subscription type
+        $userExistingDuration = $userSubscription 
+            ? $this->calculateAccurateRemainingMonths($userSubscription->end_date) 
+            : 0;
 
-    $comboExistingDuration = $comboSubscription 
-        ? $this->calculateAccurateRemainingMonths($comboSubscription->end_date) 
-        : 0;
+        $comboExistingDuration = $comboSubscription 
+            ? $this->calculateAccurateRemainingMonths($comboSubscription->end_date) 
+            : 0;
 
-    $systemExistingDuration = $systemSubscription 
-        ? $this->calculateAccurateRemainingMonths($systemSubscription->end_date) 
-        : 0;
+        $systemExistingDuration = $systemSubscription 
+            ? $this->calculateAccurateRemainingMonths($systemSubscription->end_date) 
+            : 0;
 
-    $userDuration = $userSubscription 
-        ? $this->getDurationText($userSubscription->end_date) 
-        : 0;
-    
-    $systemDuration = $systemSubscription
-        ? $this->getDurationText($systemSubscription->end_date) 
-        : 0;
+        $userDuration = $userSubscription 
+            ? $this->getDurationText($userSubscription->end_date) 
+            : 0;
+        
+        $systemDuration = $systemSubscription
+            ? $this->getDurationText($systemSubscription->end_date) 
+            : 0;
 
-    $comboDuration = $comboSubscription
-        ? $this->getDurationText($comboSubscription->end_date) 
-        : 0;
+        $comboDuration = $comboSubscription
+            ? $this->getDurationText($comboSubscription->end_date) 
+            : 0;
 
-    // Determine the maximum duration between system and user subscriptions
-    $maxDuration = max($systemExistingDuration, $userExistingDuration, $comboExistingDuration);
+        // Determine the maximum duration between system and user subscriptions
+        $maxDuration = max($systemExistingDuration, $userExistingDuration, $comboExistingDuration);
 
-    // Prepare data for view
-    $data = [
-        'user' => $targetUser,
-        'subscriptionPrices' => SubscriptionPriceUser::where('user_id', $targetUser->id)->first(),
-        'systemPrices' => [
-            '1_month' => SubscriptionPriceSystem::where('duration', '1_month')->value('price'),
-            '3_months' => SubscriptionPriceSystem::where('duration', '3_months')->value('price'),
-            '6_months' => SubscriptionPriceSystem::where('duration', '6_months')->value('price'),
-            '1_year' => SubscriptionPriceSystem::where('duration', '1_year')->value('price'),
-        ],
-        'hasActiveSubscription' => $userSubscription || $comboSubscription || $systemSubscription,
-        'hasComboSubscription' => $comboSubscription !== null,
-        'hasUserSubscription' => $userSubscription !== null,
-        'hasSystemSubscription' => $systemSubscription !== null,
-        'userExistingDuration' => $userExistingDuration,
-        'comboExistingDuration' => $comboExistingDuration,
-        'systemExistingDuration' => $systemExistingDuration,
-        'maxDuration' => $maxDuration, // New variable for maximum duration
-        'userDuration' => $userDuration,
-        'systemDuration' => $systemDuration,
-        'comboDuration' => $comboDuration,
-        'userSubscription' => $userSubscription,
-        'comboSubscription' => $comboSubscription,
-        'systemSubscription' => $systemSubscription,
-    ];
+        // Prepare data for view
+        $data = [
+            'user' => $targetUser,
+            'subscriptionPrices' => SubscriptionPriceUser::where('user_id', $targetUser->id)->first(),
+            'systemPrices' => [
+                '1_month' => SubscriptionPriceSystem::where('duration', '1_month')->value('price'),
+                '3_months' => SubscriptionPriceSystem::where('duration', '3_months')->value('price'),
+                '6_months' => SubscriptionPriceSystem::where('duration', '6_months')->value('price'),
+                '1_year' => SubscriptionPriceSystem::where('duration', '1_year')->value('price'),
+            ],
+            'hasActiveSubscription' => $userSubscription || $comboSubscription || $systemSubscription,
+            'hasComboSubscription' => $comboSubscription !== null,
+            'hasUserSubscription' => $userSubscription !== null,
+            'hasSystemSubscription' => $systemSubscription !== null,
+            'userExistingDuration' => $userExistingDuration,
+            'comboExistingDuration' => $comboExistingDuration,
+            'systemExistingDuration' => $systemExistingDuration,
+            'maxDuration' => $maxDuration, // New variable for maximum duration
+            'userDuration' => $userDuration,
+            'systemDuration' => $systemDuration,
+            'comboDuration' => $comboDuration,
+            'userSubscription' => $userSubscription,
+            'comboSubscription' => $comboSubscription,
+            'systemSubscription' => $systemSubscription,
+        ];
 
-    // Add formatted dates and durations
-    if ($userSubscription) {
-        $data['userEndDateFormatted'] = Carbon::parse($userSubscription->end_date)->format('d F Y');
-        $data['userDurationText'] = $this->getDurationText($userSubscription->end_date);
+        // Add formatted dates and durations
+        if ($userSubscription) {
+            $data['userEndDateFormatted'] = Carbon::parse($userSubscription->end_date)->format('d F Y');
+            $data['userDurationText'] = $this->getDurationText($userSubscription->end_date);
+        }
+
+        if ($comboSubscription) {
+            $data['comboEndDateFormatted'] = Carbon::parse($comboSubscription->end_date)->format('d F Y');
+            $data['comboDurationText'] = $this->getDurationText($comboSubscription->end_date);
+        }
+
+        if ($systemSubscription) {
+            $data['systemEndDateFormatted'] = Carbon::parse($systemSubscription->end_date)->format('d F Y');
+            $data['systemDurationText'] = $this->getDurationText($systemSubscription->end_date);
+        }
+
+        return view('user.subscription_user', $data);
     }
 
-    if ($comboSubscription) {
-        $data['comboEndDateFormatted'] = Carbon::parse($comboSubscription->end_date)->format('d F Y');
-        $data['comboDurationText'] = $this->getDurationText($comboSubscription->end_date);
-    }
-
-    if ($systemSubscription) {
-        $data['systemEndDateFormatted'] = Carbon::parse($systemSubscription->end_date)->format('d F Y');
-        $data['systemDurationText'] = $this->getDurationText($systemSubscription->end_date);
-    }
-
-    return view('user.subscription_user', $data);
-}
     /**
-     * Create a new system transaction
+    * Menampilkan halaman manajemen langganan untuk pengguna.
+    * Mengambil data harga langganan pengguna saat ini.
+    *
+    * @return \Illuminate\View\View
+    */
+    public function manage()
+    {
+        $subscriptionPrices = SubscriptionPriceUser::where('user_id', Auth::id())->first();
+        return view('user.manage_subscription', compact('subscriptionPrices'));
+    }
+
+    /**
+     * Membuat transaksi baru untuk langganan sistem.
+     * Memvalidasi durasi langganan dan memproses pembayaran melalui Midtrans.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi subscription_price_id.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function createTransaction(Request $request)
     {
@@ -235,7 +265,12 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Subscribe to a user
+     * Membuat transaksi langganan untuk pengguna tertentu.
+     * Memvalidasi durasi langganan dan memproses pembayaran melalui Midtrans.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi paket langganan.
+     * @param string $username Username pengguna target.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function subscribeOn(Request $request, $username)
     {
@@ -275,7 +310,12 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Subscribe to combo package
+     * Membuat transaksi langganan combo (gabungan sistem dan user).
+     * Memproses pembayaran melalui Midtrans.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi harga combo, durasi, dan harga sistem/user.
+     * @param string $username Username pengguna target.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function subscribeCombo(Request $request, $username)
     {
@@ -306,7 +346,11 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Check transaction status
+     * Memeriksa status transaksi langganan sistem melalui Midtrans.
+     * Memperbarui status transaksi di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi order_id.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function checkTransactionStatus(Request $request)
     {
@@ -341,7 +385,11 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Check transaction status for user subscriptions
+     * Memeriksa status transaksi langganan pengguna melalui Midtrans.
+     * Memperbarui status transaksi di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi order_id.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function checkTransactionStatusUser(Request $request)
     {
@@ -377,7 +425,11 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Check transaction status for combo subscriptions
+     * Memeriksa status transaksi langganan combo melalui Midtrans.
+     * Memperbarui status transaksi di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi order_id.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function checkTransactionStatusCombo(Request $request)
     {
@@ -413,7 +465,11 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Save user subscription prices
+     * Menyimpan harga langganan pengguna.
+     * Memvalidasi dan memperbarui harga langganan di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi harga langganan.
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function saveSubsUser(Request $request)
     {
@@ -445,7 +501,10 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Get system subscription data
+     * Mengambil data langganan sistem aktif untuk pengguna tertentu.
+     *
+     * @param int $userId ID pengguna.
+     * @return array Data langganan sistem.
      */
     protected function getSystemSubscriptionData($userId)
     {
@@ -481,7 +540,11 @@ public function showSubscriptionOptions($username)
 
 
     /**
-     * Get user subscription data
+     * Mengambil data langganan pengguna aktif untuk pengguna tertentu.
+     *
+     * @param int $userId ID pengguna.
+     * @param int $targetUserId ID pengguna target.
+     * @return array Data langganan pengguna.
      */
     protected function getUserSubscriptionData($userId, $targetUserId)
     {
@@ -536,7 +599,10 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Calculate remaining months from end date
+     * Menghitung sisa bulan dari tanggal akhir langganan.
+     *
+     * @param string $endDate Tanggal akhir langganan.
+     * @return int Jumlah bulan yang tersisa.
      */
     protected function calculateRemainingMonths($endDate)
     {
@@ -558,7 +624,12 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Validate system subscription duration
+     * Memvalidasi durasi langganan sistem.
+     * Memastikan durasi baru lebih panjang dari sisa durasi aktif.
+     *
+     * @param int $userId ID pengguna.
+     * @param string $duration Durasi langganan.
+     * @return array Hasil validasi.
      */
     protected function validateSystemSubscriptionDuration($userId, $duration)
     {
@@ -589,7 +660,13 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Validate user subscription duration
+     * Memvalidasi durasi langganan pengguna.
+     * Memastikan durasi baru lebih panjang dari sisa durasi aktif.
+     *
+     * @param int $userId ID pengguna.
+     * @param string $duration Durasi langganan.
+     * @param int $targetUserId ID pengguna target.
+     * @return array Hasil validasi.
      */
     protected function validateUserSubscriptionDuration($userId, $duration, $targetUserId)
     {
@@ -641,7 +718,13 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Validate combo subscription duration
+     * Memvalidasi durasi langganan combo.
+     * Memastikan durasi baru lebih panjang dari sisa durasi aktif.
+     *
+     * @param int $userId ID pengguna.
+     * @param string $duration Durasi langganan.
+     * @param int $targetUserId ID pengguna target.
+     * @return array Hasil validasi.
      */
     protected function validateComboSubscriptionDuration($userId, $duration, $targetUserId)
     {
@@ -683,7 +766,14 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Process payment with Midtrans
+     * Memproses pembayaran melalui Midtrans.
+     * Membuat transaksi baru dan mengembalikan token Snap Midtrans.
+     *
+     * @param \App\Models\User $user Pengguna yang melakukan pembayaran.
+     * @param int $amount Jumlah pembayaran.
+     * @param string $type Jenis langganan (system, user, combo).
+     * @param array $metadata Metadata tambahan untuk transaksi.
+     * @return \Illuminate\Http\JsonResponse
      */
     protected function processPayment($user, $amount, $type, $metadata = [])
     {
@@ -719,7 +809,10 @@ public function showSubscriptionOptions($username)
     }
 
     /**
-     * Update transaction record
+     * Memperbarui status transaksi di database berdasarkan status dari Midtrans.
+     *
+     * @param \App\Models\Transaction $transaction Transaksi yang akan diperbarui.
+     * @param object $status Status transaksi dari Midtrans.
      */
     protected function updateTransaction($transaction, $status)
     {
@@ -730,239 +823,260 @@ public function showSubscriptionOptions($username)
             'fraud_status' => $status->fraud_status,
         ]);
     }
-    public function manage()
+
+    /**
+     * Memproses pembayaran yang berhasil.
+     * Memperbarui atau membuat langganan baru berdasarkan transaksi.
+     *
+     * @param \App\Models\Transaction $transaction Transaksi yang berhasil.
+     * @param object $status Status transaksi dari Midtrans.
+     */
+    protected function processSuccessfulPayment($transaction, $status)
     {
-        $subscriptionPrices = SubscriptionPriceUser::where('user_id', Auth::id())->first();
-        return view('user.manage_subscription', compact('subscriptionPrices'));
-    }
-/**
- * Process successful payment
- */
-protected function processSuccessfulPayment($transaction, $status)
-{
-    $type = $transaction->type;
-    $config = $this->subscriptionTypes[$type];
-    
-    // Get duration based on type
-    $duration = $this->getDurationFromPayment($transaction, $status, $type);
+        $type = $transaction->type;
+        $config = $this->subscriptionTypes[$type];
+        
+        // Get duration based on type
+        $duration = $this->getDurationFromPayment($transaction, $status, $type);
 
-    // Handle combo subscription separately
-    if ($type === 'combo') {
-        return $this->handleComboSubscription($transaction, $duration, $status);
-    }
+        // Handle combo subscription separately
+        if ($type === 'combo') {
+            return $this->handleComboSubscription($transaction, $duration, $status);
+        }
 
-    // Existing logic for system/user subscriptions
-    $existingSubscriptions = $config['model']::where('user_id', $transaction->user_id)
-        ->when(in_array($type, ['user', 'combo']), function ($query) use ($transaction) {
-            $query->where('target_user_id', $transaction->target_user_id);
-        })
-        ->where('end_date', '>', Carbon::now())
-        ->orderBy('end_date', 'desc')
-        ->get();
+        // Existing logic for system/user subscriptions
+        $existingSubscriptions = $config['model']::where('user_id', $transaction->user_id)
+            ->when(in_array($type, ['user', 'combo']), function ($query) use ($transaction) {
+                $query->where('target_user_id', $transaction->target_user_id);
+            })
+            ->where('end_date', '>', Carbon::now())
+            ->orderBy('end_date', 'desc')
+            ->get();
 
-    $latestActiveSubscription = $existingSubscriptions->first();
+        $latestActiveSubscription = $existingSubscriptions->first();
 
-    $endDate = $latestActiveSubscription 
-        ? Carbon::parse($latestActiveSubscription->end_date)->addMonths($duration)
-        : Carbon::now()->addMonths($duration);
+        $endDate = $latestActiveSubscription 
+            ? Carbon::parse($latestActiveSubscription->end_date)->addMonths($duration)
+            : Carbon::now()->addMonths($duration);
 
-    $subscriptionData = [
-        'user_id' => $transaction->user_id,
-        'price' => $transaction->gross_amount,
-        'start_date' => $latestActiveSubscription ? $latestActiveSubscription->start_date : Carbon::now(),
-        'end_date' => $endDate,
-        'transaction_id' => $transaction->id,
-    ];
-    
-    if (in_array($type, ['user', 'combo'])) {
-        $subscriptionData['target_user_id'] = $transaction->target_user_id;
-    }
+        $subscriptionData = [
+            'user_id' => $transaction->user_id,
+            'price' => $transaction->gross_amount,
+            'start_date' => $latestActiveSubscription ? $latestActiveSubscription->start_date : Carbon::now(),
+            'end_date' => $endDate,
+            'transaction_id' => $transaction->id,
+        ];
+        
+        if (in_array($type, ['user', 'combo'])) {
+            $subscriptionData['target_user_id'] = $transaction->target_user_id;
+        }
 
-    $subscription = $config['model']::updateOrCreate(
-        ['id' => $latestActiveSubscription ? $latestActiveSubscription->id : null],
-        $subscriptionData
-    );
+        $subscription = $config['model']::updateOrCreate(
+            ['id' => $latestActiveSubscription ? $latestActiveSubscription->id : null],
+            $subscriptionData
+        );
 
-    // Process balance for user subscriptions
-    if (in_array($type, ['user', 'combo'])) {
-        $this->addCreatorBalance($transaction, $type);
-    }
-    
-    // Update user role if system/combo
-    if (in_array($type, ['system', 'combo'])) {
-        $transaction->user->update([
-            'role' => 'pro',
-            'subscription_ends_at' => $endDate
+        // Process balance for user subscriptions
+        if (in_array($type, ['user', 'combo'])) {
+            $this->addCreatorBalance($transaction, $type);
+        }
+        
+        // Update user role if system/combo
+        if (in_array($type, ['system', 'combo'])) {
+            $transaction->user->update([
+                'role' => 'pro',
+                'subscription_ends_at' => $endDate
+            ]);
+        }
+
+        // Kondisional untuk pesan
+        $isNewSubscription = !$latestActiveSubscription; // Jika tidak ada langganan aktif sebelumnya
+        $message = '';
+
+        if ($type === 'system') {
+            $message = $isNewSubscription
+                ? "Selamat! Anda telah mengaktifkan langganan sistem sampai " . $endDate->format('d F Y')
+                : "Selamat! Anda telah memperpanjang langganan sistem sampai " . $endDate->format('d F Y');
+        } elseif ($type === 'user') {
+            $message = $isNewSubscription
+                ? "Selamat! Anda telah mengaktifkan langganan ke pengguna sampai " . $endDate->format('d F Y')
+                : "Selamat! Anda telah memperpanjang langganan ke pengguna sampai " . $endDate->format('d F Y');
+        } elseif ($type === 'combo') {
+            $message = $isNewSubscription
+                ? "Selamat! Anda telah mengaktifkan langganan kombo sampai " . $endDate->format('d F Y')
+                : "Selamat! Anda telah memperpanjang langganan kombo sampai " . $endDate->format('d F Y');
+        }
+
+        // Simpan pesan ke session
+        session()->flash('subscription_message', $message);
+
+        $this->createNotification($transaction, $endDate);
+
+        Log::info("Subscription {$type} created/updated", [
+            'transaction_id' => $transaction->id,
+            'end_date' => $endDate->format('Y-m-d')
         ]);
     }
 
-    // Kondisional untuk pesan
-    $isNewSubscription = !$latestActiveSubscription; // Jika tidak ada langganan aktif sebelumnya
-    $message = '';
+    /**
+     * Memproses langganan combo secara terpisah.
+     * Membuat atau memperbarui langganan sistem dan pengguna.
+     *
+     * @param \App\Models\Transaction $transaction Transaksi combo.
+     * @param int $duration Durasi langganan.
+     * @param object $status Status transaksi dari Midtrans.
+     * @return \App\Models\SubscriptionCombo
+     */
+    protected function handleComboSubscription($transaction, $duration, $status)
+    {
+        $metadata = json_decode($transaction->metadata, true);
 
-    if ($type === 'system') {
-        $message = $isNewSubscription
-            ? "Selamat! Anda telah mengaktifkan langganan sistem sampai " . $endDate->format('d F Y')
-            : "Selamat! Anda telah memperpanjang langganan sistem sampai " . $endDate->format('d F Y');
-    } elseif ($type === 'user') {
-        $message = $isNewSubscription
-            ? "Selamat! Anda telah mengaktifkan langganan ke pengguna sampai " . $endDate->format('d F Y')
-            : "Selamat! Anda telah memperpanjang langganan ke pengguna sampai " . $endDate->format('d F Y');
-    } elseif ($type === 'combo') {
-        $message = $isNewSubscription
-            ? "Selamat! Anda telah mengaktifkan langganan kombo sampai " . $endDate->format('d F Y')
-            : "Selamat! Anda telah memperpanjang langganan kombo sampai " . $endDate->format('d F Y');
-    }
+        if (!isset($metadata['system_price']) || !isset($metadata['user_price'])) {
+            throw new \Exception('Invalid metadata for combo subscription');
+        }
 
-    // Simpan pesan ke session
-    session()->flash('subscription_message', $message);
+        $systemPrice = $metadata['system_price'];
+        $userPrice = $metadata['user_price'];
 
-    $this->createNotification($transaction, $endDate);
+        // Process system subscription
+        $systemSubscription = SubscriptionSystem::where('user_id', $transaction->user_id)
+            ->where('end_date', '>=', now())
+            ->orderBy('end_date', 'desc')
+            ->first();
 
-    Log::info("Subscription {$type} created/updated", [
-        'transaction_id' => $transaction->id,
-        'end_date' => $endDate->format('Y-m-d')
-    ]);
-}
+        $systemEndDate = $systemSubscription 
+            ? Carbon::parse($systemSubscription->end_date)->addMonths($duration)
+            : now()->addMonths($duration);
 
-/**
- * Handle combo subscription separately
- */
-protected function handleComboSubscription($transaction, $duration, $status)
-{
-    $metadata = json_decode($transaction->metadata, true);
+        SubscriptionSystem::updateOrCreate(
+            ['user_id' => $transaction->user_id],
+            [
+                'price' => $systemPrice,
+                'start_date' => $systemSubscription ? $systemSubscription->start_date : now(),
+                'end_date' => $systemEndDate,
+                'transaction_id' => $transaction->id
+            ]
+        );
 
-    if (!isset($metadata['system_price']) || !isset($metadata['user_price'])) {
-        throw new \Exception('Invalid metadata for combo subscription');
-    }
+        // Process user subscription
+        $userSubscription = SubscriptionUser::where('user_id', $transaction->user_id)
+            ->where('target_user_id', $transaction->target_user_id)
+            ->where('end_date', '>=', now())
+            ->orderBy('end_date', 'desc')
+            ->first();
 
-    $systemPrice = $metadata['system_price'];
-    $userPrice = $metadata['user_price'];
+        $userEndDate = $userSubscription 
+            ? Carbon::parse($userSubscription->end_date)->addMonths($duration)
+            : now()->addMonths($duration);
 
-    // Process system subscription
-    $systemSubscription = SubscriptionSystem::where('user_id', $transaction->user_id)
-        ->where('end_date', '>=', now())
-        ->orderBy('end_date', 'desc')
-        ->first();
+        SubscriptionUser::updateOrCreate(
+            [
+                'user_id' => $transaction->user_id,
+                'target_user_id' => $transaction->target_user_id
+            ],
+            [
+                'price' => $userPrice,
+                'start_date' => $userSubscription ? $userSubscription->start_date : now(),
+                'end_date' => $userEndDate,
+                'transaction_id' => $transaction->id
+            ]
+        );
 
-    $systemEndDate = $systemSubscription 
-        ? Carbon::parse($systemSubscription->end_date)->addMonths($duration)
-        : now()->addMonths($duration);
-
-    SubscriptionSystem::updateOrCreate(
-        ['user_id' => $transaction->user_id],
-        [
-            'price' => $systemPrice,
-            'start_date' => $systemSubscription ? $systemSubscription->start_date : now(),
-            'end_date' => $systemEndDate,
-            'transaction_id' => $transaction->id
-        ]
-    );
-
-    // Process user subscription
-    $userSubscription = SubscriptionUser::where('user_id', $transaction->user_id)
-        ->where('target_user_id', $transaction->target_user_id)
-        ->where('end_date', '>=', now())
-        ->orderBy('end_date', 'desc')
-        ->first();
-
-    $userEndDate = $userSubscription 
-        ? Carbon::parse($userSubscription->end_date)->addMonths($duration)
-        : now()->addMonths($duration);
-
-    SubscriptionUser::updateOrCreate(
-        [
+        // Create combo record
+        $comboSubscription = SubscriptionCombo::create([
             'user_id' => $transaction->user_id,
-            'target_user_id' => $transaction->target_user_id
-        ],
-        [
-            'price' => $userPrice,
-            'start_date' => $userSubscription ? $userSubscription->start_date : now(),
+            'target_user_id' => $transaction->target_user_id,
+            'system_price' => $systemPrice,
+            'user_price' => $userPrice,
+            'total_price' => $transaction->gross_amount,
+            'start_date' => now(),
             'end_date' => $userEndDate,
             'transaction_id' => $transaction->id
-        ]
-    );
-
-    // Create combo record
-    $comboSubscription = SubscriptionCombo::create([
-        'user_id' => $transaction->user_id,
-        'target_user_id' => $transaction->target_user_id,
-        'system_price' => $systemPrice,
-        'user_price' => $userPrice,
-        'total_price' => $transaction->gross_amount,
-        'start_date' => now(),
-        'end_date' => $userEndDate,
-        'transaction_id' => $transaction->id
-    ]);
-
-    // Add balance to creator
-    $targetUser = User::find($transaction->target_user_id);
-    if ($targetUser && $userPrice > 0) {
-        $targetUser->balance += $userPrice;
-        $targetUser->save();
-
-        BalanceHistory::create([
-            'user_id' => $targetUser->id,
-            'type' => 'income',
-            'amount' => $userPrice,
-            'source_id' => $transaction->id,
-            'source_type' => 'subscription',
-            'status' => 'success',
-            'note' => 'Pendapatan dari langganan kombo'
         ]);
-    }
 
-    // Update user role
-    $transaction->user->update([
-        'role' => 'pro',
-        'subscription_ends_at' => $systemEndDate
-    ]);
-
-    // Create notification
-    $this->createNotification($transaction, $userEndDate);
-
-    Log::info("Combo subscription processed", [
-        'user_id' => $transaction->user_id,
-        'system_end' => $systemEndDate->format('Y-m-d'),
-        'user_end' => $userEndDate->format('Y-m-d'),
-        'combo_id' => $comboSubscription->id
-    ]);
-
-    return $comboSubscription;
-}
-
-/**
- * Add balance to creator
- */
-protected function addCreatorBalance($transaction, $type)
-{
-    $targetUser = User::find($transaction->target_user_id);
-    
-    if ($targetUser) {
-        $metadata = is_array($transaction->metadata) ? $transaction->metadata : [];
-        $amountToAdd = ($type === 'combo') 
-            ? ($metadata['user_price'] ?? 0) 
-            : $transaction->gross_amount;
-        
-        if ($amountToAdd > 0) {
-            $targetUser->balance += $amountToAdd;
+        // Add balance to creator
+        $targetUser = User::find($transaction->target_user_id);
+        if ($targetUser && $userPrice > 0) {
+            $targetUser->balance += $userPrice;
             $targetUser->save();
 
             BalanceHistory::create([
                 'user_id' => $targetUser->id,
                 'type' => 'income',
-                'amount' => $amountToAdd,
+                'amount' => $userPrice,
                 'source_id' => $transaction->id,
                 'source_type' => 'subscription',
                 'status' => 'success',
-                'note' => 'Pendapatan dari langganan ' . $type,
+                'note' => 'Pendapatan dari langganan kombo'
             ]);
         }
+
+        // Update user role
+        $transaction->user->update([
+            'role' => 'pro',
+            'subscription_ends_at' => $systemEndDate
+        ]);
+
+        // Create notification
+        $this->createNotification($transaction, $userEndDate);
+
+        Log::info("Combo subscription processed", [
+            'user_id' => $transaction->user_id,
+            'system_end' => $systemEndDate->format('Y-m-d'),
+            'user_end' => $userEndDate->format('Y-m-d'),
+            'combo_id' => $comboSubscription->id
+        ]);
+
+        return $comboSubscription;
     }
-}
 
     /**
-     * Get or create subscription record
+     * Menambahkan saldo ke kreator berdasarkan transaksi langganan.
+     *
+     * @param \App\Models\Transaction $transaction Transaksi langganan.
+     * @param string $type Jenis langganan (user atau combo).
+     */
+    protected function addCreatorBalance($transaction, $type)
+    {
+        $targetUser = User::find($transaction->target_user_id);
+        
+        if ($targetUser) {
+            $metadata = is_array($transaction->metadata) ? $transaction->metadata : [];
+            $amountToAdd = ($type === 'combo') 
+                ? ($metadata['user_price'] ?? 0) 
+                : $transaction->gross_amount;
+            
+
+
+            if ($amountToAdd > 0) {
+                // Hitung potongan 20%
+                $deduction = $amountToAdd * 0.2;
+                $netAmount = $amountToAdd - $deduction;
+                
+                // Tambahkan saldo setelah dipotong
+                $targetUser->balance += $netAmount;
+                $targetUser->save();
+    
+                BalanceHistory::create([
+                    'user_id' => $targetUser->id,
+                    'type' => 'income', // Pastikan ini sesuai dengan nilai yang diizinkan
+                    'amount' => $netAmount,
+                    'source_id' => $transaction->id,
+                    'source_type' => 'subscription',
+                    'status' => 'success',
+                    'note' => 'Pendapatan dari langganan ' . $type,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Membuat atau mendapatkan langganan berdasarkan transaksi.
+     *
+     * @param \App\Models\Transaction $transaction Transaksi langganan.
+     * @param array $config Konfigurasi model langganan.
+     * @param int $duration Durasi langganan.
+     * @return \App\Models\Transaction
      */
     protected function getOrCreateSubscription($transaction, $config, $duration)
     {
@@ -989,7 +1103,11 @@ protected function addCreatorBalance($transaction, $type)
     }
 
     /**
-     * Calculate new end date
+     * Menghitung tanggal akhir baru untuk langganan.
+     *
+     * @param \App\Models\Transaction $subscription Langganan yang aktif.
+     * @param int $duration Durasi langganan baru.
+     * @return \Carbon\Carbon Tanggal akhir baru.
      */
     protected function calculateNewEndDate($subscription, $duration)
     {
@@ -1003,7 +1121,10 @@ protected function addCreatorBalance($transaction, $type)
     }
 
     /**
-     * Create notification for subscription
+     * Membuat notifikasi untuk langganan.
+     *
+     * @param \App\Models\Transaction $transaction Transaksi langganan.
+     * @param string $endDate Tanggal akhir langganan.
      */
     protected function createNotification($transaction, $endDate)
     {
@@ -1020,7 +1141,11 @@ protected function addCreatorBalance($transaction, $type)
     }
 
     /**
-     * Get notification message based on subscription type
+     * Mendapatkan pesan notifikasi berdasarkan jenis langganan.
+     *
+     * @param \App\Models\Transaction $transaction Transaksi langganan.
+     * @param string $endDateFormatted Tanggal akhir langganan yang diformat.
+     * @return string Pesan notifikasi.
      */
     protected function getNotificationMessage($transaction, $endDateFormatted)
     {
@@ -1039,7 +1164,12 @@ protected function addCreatorBalance($transaction, $type)
     }
 
     /**
-     * Get duration from payment based on type
+     * Mendapatkan durasi langganan berdasarkan pembayaran.
+     *
+     * @param \App\Models\Transaction $transaction Transaksi langganan.
+     * @param object $status Status transaksi dari Midtrans.
+     * @param string $type Jenis langganan (system, user, combo).
+     * @return int Durasi langganan dalam bulan.
      */
     protected function getDurationFromPayment($transaction, $status, $type)
     {
@@ -1077,7 +1207,10 @@ protected function addCreatorBalance($transaction, $type)
     }
 
     /**
-     * Convert duration string to months
+     * Mengonversi string durasi menjadi jumlah bulan.
+     *
+     * @param string $duration String durasi (1_month, 3_months, dll.).
+     * @return int Jumlah bulan.
      */
     protected function getDurationInMonths($duration)
     {
@@ -1091,7 +1224,10 @@ protected function addCreatorBalance($transaction, $type)
     }
 
     /**
-     * Convert months to duration text
+     * Mengonversi jumlah bulan menjadi teks durasi.
+     *
+     * @param string $endDate Tanggal akhir langganan.
+     * @return string Teks durasi.
      */
     protected function getDurationText($endDate)
     {
@@ -1121,6 +1257,12 @@ protected function addCreatorBalance($transaction, $type)
         }
     }
 
+    /**
+     * Menghitung sisa bulan secara akurat dari tanggal akhir langganan.
+     *
+     * @param string $endDate Tanggal akhir langganan.
+     * @return int Jumlah bulan yang tersisa.
+     */
     protected function calculateAccurateRemainingMonths($endDate)
     {
         $now = Carbon::now();

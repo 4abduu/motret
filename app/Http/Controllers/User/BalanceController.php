@@ -7,14 +7,25 @@ use Illuminate\Http\Request;
 use App\Models\Withdrawal;
 use App\Models\BalanceHistory;
 use App\Models\Notif;
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
 class BalanceController extends Controller
 {
+    /**
+     * Constructor untuk mengatur middleware.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Menampilkan halaman penarikan saldo.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $user = Auth::user();
@@ -23,6 +34,12 @@ class BalanceController extends Controller
         return view('user.withdrawal', compact('balance'));
     }
 
+    /**
+     * Menyimpan pengajuan penarikan saldo.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function storeWithdrawal(Request $request)
     {
         $validated = $request->validate([
@@ -93,6 +110,12 @@ class BalanceController extends Controller
         }
     }
 
+    /**
+     * Menampilkan riwayat saldo pengguna.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\View\View
+     */
     public function historyBalance(Request $request)
     {
         $user = Auth::user();

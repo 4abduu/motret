@@ -11,6 +11,13 @@ class MidtransServiceProvider extends ServiceProvider
         //
     }
 
+    /**
+     * Melakukan bootstrap layanan Midtrans dengan mengatur konfigurasi yang dibutuhkan.
+     *
+     * Method ini menginisialisasi konfigurasi untuk Midtrans dengan menggunakan nilai yang ada 
+     * pada file konfigurasi `midtrans.php`. Ini memastikan aplikasi menggunakan kunci server yang benar 
+     * serta pengaturan untuk mode produksi, sanitasi data, dan 3D Secure.
+     */
     public function boot()
     {
         \Midtrans\Config::$serverKey = config('midtrans.server_key');

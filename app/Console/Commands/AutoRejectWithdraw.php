@@ -14,6 +14,23 @@ class AutoRejectWithdraw extends Command
     protected $signature = 'withdraw:auto-reject';
     protected $description = 'Tolak otomatis penarikan yang pending lebih dari 2x24 jam';
 
+    /**
+     * Menjalankan proses utama untuk menolak otomatis penarikan yang pending lebih dari 48 jam.
+     * 
+     * Langkah-langkah:
+     * 1. Memulai transaksi database.
+     * 2. Menghitung batas waktu (48 jam yang lalu).
+     * 3. Mengambil data penarikan yang kadaluarsa.
+     * 4. Jika tidak ada data, proses selesai.
+     * 5. Memproses setiap penarikan kadaluarsa:
+     *    a. Mengubah status penarikan menjadi "rejected".
+     *    b. Memperbarui riwayat saldo terkait.
+     *    c. Membuat notifikasi untuk pengguna.
+     * 6. Melakukan commit transaksi jika semua berhasil.
+     * 7. Melakukan rollback jika terjadi kesalahan.
+     *
+     * @return int Status eksekusi command (SUCCESS atau FAILURE).
+     */
     public function handle()
     {
         // 1. Start database transaction

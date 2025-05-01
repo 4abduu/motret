@@ -18,15 +18,32 @@ use Illuminate\Support\Facades\Log;
 
 class SettingController extends Controller
 {
+    /**
+     * Constructor untuk mengatur middleware.
+     * Middleware `auth` diterapkan untuk semua fungsi dalam controller ini.
+     */
     public function __construct()
     {
         $this->middleware('auth');
     }
+
+    /**
+     * Menampilkan halaman pengaturan pengguna.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         return view('user.settings');
     }
     
+    /**
+     * Memeriksa apakah username sudah digunakan.
+     * Memvalidasi format username dan memeriksa keberadaannya di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan pengecekan username.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkUsername(Request $request)
     {
         $username = trim($request->username);
@@ -39,6 +56,12 @@ class SettingController extends Controller
         return response()->json(['exists' => $exists]);
     }
 
+    /**
+     * Memeriksa apakah username yang dimasukkan sesuai dengan username pengguna yang sedang login.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan pengecekan username.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkVerificationUsername(Request $request)
     {
         $username = $request->input('username');
@@ -50,12 +73,28 @@ class SettingController extends Controller
         return response()->json(['isValid' => $isValid]);
     }
 
+    /**
+     * Memeriksa apakah email sudah digunakan.
+     * Memvalidasi format email dan memeriksa keberadaannya di database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan pengecekan email.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function checkEmail(Request $request)
     {
         $exists = User::where('email', $request->email)->exists();
         return response()->json(['exists' => $exists]);
     }
 
+    /**
+     * Memperbarui username pengguna yang sedang login.
+     *
+     * Username baru harus unik, maksimal 20 karakter,
+     * dan hanya boleh berisi huruf kecil, angka, titik, atau garis bawah.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateUsername(Request $request)
     {
         $validated = $request->validate([
@@ -75,6 +114,15 @@ class SettingController extends Controller
         return redirect()->route('user.settings')->with('success', 'Username berhasil diperbarui.');
     }
 
+    /**
+     * Memperbarui password pengguna yang sedang login.
+     *
+     * Password baru harus memiliki minimal 8 karakter,
+     * dan harus mengandung huruf dan angka.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updatePassword(Request $request)
     {
         $validated = $request->validate([
@@ -96,6 +144,14 @@ class SettingController extends Controller
         }
     }
 
+    /**
+     * Memperbarui email pengguna yang sedang login.
+     *
+     * Email baru harus unik dan valid.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateEmail(Request $request)
     {
         $validated = $request->validate([
@@ -127,6 +183,18 @@ class SettingController extends Controller
         return redirect()->route('user.settings')->with('success', 'Email berhasil diperbarui.');
     }
     
+    /**
+     * Mengirimkan pengajuan verifikasi akun oleh pengguna.
+     *
+     * Pengguna wajib mengisi nama lengkap, username yang sesuai dengan akun saat ini,
+     * alasan pengajuan, serta mengunggah dokumen berupa KTP dan foto selfie.
+     * Dokumen tambahan seperti portofolio dan sertifikat bersifat opsional.
+     *
+     * Jika pengajuan berhasil, data akan disimpan dan notifikasi akan dikirimkan ke pengguna.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function submitVerification(Request $request)
     {
         $validated = $request->validate([

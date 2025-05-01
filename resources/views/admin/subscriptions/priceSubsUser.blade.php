@@ -26,6 +26,7 @@
                     <table id="example" class="table table-striped" style="width:100%">
                         <thead>
                             <tr>
+                                <th>No</th>
                                 <th>User</th>
                                 <th>Harga 1 Bulan</th>
                                 <th>Harga 3 Bulan</th>
@@ -33,8 +34,9 @@
                                 <th>Harga 1 Tahun</th>
                             </tr>
                         </thead>
-                        @foreach($prices as $price)
+                        @foreach($prices as $index => $price)
                         <tr>
+                            <td>{{ $index + 1 }}</td>
                             <td>{{ $price->user->name }}</td>
                             <td>{{ $price->price_1_month }}</td>
                             <td>{{ $price->price_3_months }}</td>

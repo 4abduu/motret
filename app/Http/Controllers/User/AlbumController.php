@@ -12,11 +12,24 @@ use Illuminate\Support\Facades\Log;
 
 class AlbumController extends Controller
 {
+
+    /**
+     * Constructor untuk mengatur middleware.
+     * Middleware `auth` diterapkan kecuali untuk fungsi `index`.
+     */
     public function __construct()
     {
-        //
+        $this->middleware('auth')->except(['index']);
     }
 
+    /**
+     * Menampilkan daftar album untuk pengguna yang tidak terautentikasi.
+     * Jika pengguna adalah admin, akses ditolak.
+     * Hanya menampilkan foto yang tidak dibanned dan tidak premium.
+     *
+     * @param int $id
+     * @return \Illuminate\View\View
+     */
     public function index($id)
     {
         if (Auth::check() && Auth::user()->role === 'admin') {
@@ -31,6 +44,13 @@ class AlbumController extends Controller
         return view('albums.show', compact('album'));
     }
 
+    /**
+     * Membuat album baru untuk pengguna yang sedang login.
+     * Memvalidasi input dan menyimpan data album ke database.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi informasi album.
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -83,6 +103,14 @@ class AlbumController extends Controller
         }
     }
 
+    /**
+     * Memperbarui informasi album tertentu.
+     * Memvalidasi input dan memastikan hanya pemilik album yang dapat mengedit.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi informasi album.
+     * @param int $id ID album.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, $id)
     {
         $album = Album::findOrFail($id);
@@ -122,6 +150,12 @@ class AlbumController extends Controller
         }
     }
 
+    /**
+     * Mengambil data album tertentu untuk diedit.
+     *
+     * @param int $id ID album.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function edit($id)
     {
         $album = Album::findOrFail($id);
@@ -132,6 +166,13 @@ class AlbumController extends Controller
         ]);
     }
 
+    /**
+     * Menghapus album tertentu.
+     * Memastikan hanya pemilik album yang dapat menghapus.
+     *
+     * @param int $id ID album.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy($id)
     {
         $album = Album::findOrFail($id);
@@ -159,6 +200,14 @@ class AlbumController extends Controller
         }
     }
 
+    /**
+     * Menambahkan foto ke dalam album tertentu.
+     * Memastikan hanya pemilik album yang dapat menambahkan foto.
+     *
+     * @param int $albumId ID album.
+     * @param int $photoId ID foto.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function addPhoto($albumId, $photoId)
     {
         $album = Album::findOrFail($albumId);
@@ -183,6 +232,14 @@ class AlbumController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Menghapus foto dari album tertentu.
+     * Memastikan hanya pemilik album yang dapat menghapus foto.
+     *
+     * @param int $albumId ID album.
+     * @param int $photoId ID foto.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function removePhoto($albumId, $photoId)
     {
         $album = Album::findOrFail($albumId);
@@ -199,6 +256,14 @@ class AlbumController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Memperbarui judul album.
+     * Memastikan hanya pemilik album yang dapat memperbarui judul.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi informasi album.
+     * @param int $id ID album.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateTitle(Request $request, $id)
     {
         $request->validate([
@@ -224,6 +289,14 @@ class AlbumController extends Controller
         ]);
     }
 
+    /**
+     * Memperbarui deskripsi album.
+     * Memastikan hanya pemilik album yang dapat memperbarui deskripsi.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi informasi album.
+     * @param int $id ID album.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateDescription(Request $request, $id)
     {
         $request->validate([
@@ -255,7 +328,14 @@ class AlbumController extends Controller
         ]);
     }  
     
-
+    /**
+     * Memperbarui visibilitas album.
+     * Memastikan hanya pemilik album yang dapat memperbarui visibilitas.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi status visibilitas.
+     * @param int $id ID album.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateVisibility(Request $request, $id)
     {
         // Validate the request

@@ -110,6 +110,13 @@
         font-size: 16px;
     }
 }
+
+.photo-profile-navbar{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
 </style>
     
     
@@ -131,9 +138,9 @@
                     <li class="nav-item nav-profile dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
                             @if(Auth::user()->profile_photo)
-                                <img src="{{ asset('storage/photo_profile/' . Auth::user()->profile_photo) }}" alt="profile" />
+                                <img src="{{ asset('storage/photo_profile/' . Auth::user()->profile_photo) }}" class="photo-profile-navbar" alt="profile" />
                             @else
-                                <img src="{{ asset('images/foto profil.jpg') }}" alt="profile" />
+                                <img src="{{ asset('images/foto profil.jpg') }}" class="photo-profile-navbar" alt="profile" />
                             @endif                    
                         </a>
                         <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
@@ -184,9 +191,9 @@
                         <li class="nav-item nav-profile dropdown">
                             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
                                 @if(Auth::user()->profile_photo)
-                                    <img src="{{ asset('storage/photo_profile/' . Auth::user()->profile_photo) }}" alt="profile" />
+                                    <img src="{{ asset('storage/photo_profile/' . Auth::user()->profile_photo) }}" class="photo-profile-navbar" alt="profile" />
                                 @else
-                                    <img src="{{ asset('images/foto profil.jpg') }}" alt="profile" />
+                                    <img src="{{ asset('images/foto profil.jpg') }}" class="photo-profile-navbar" alt="profile" />
                                 @endif                    
                             </a>
                             <div class="dropdown-menu dropdown-menu-end navbar-dropdown" aria-labelledby="profileDropdown">

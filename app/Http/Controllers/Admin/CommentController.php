@@ -11,6 +11,20 @@ use Carbon\Carbon;
 
 class CommentController extends Controller
 {
+    /**
+     * Menginisialisasi middleware untuk mengautentikasi admin.
+     */
+    public function __construct()
+    {
+        $this->middleware('role:admin');
+    }
+
+    /**
+     * Menampilkan halaman utama manajemen komentar.
+     * Mengambil jumlah komentar, balasan, persentase perubahan, dan aktivitas terbaru.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         // Jumlah data 
@@ -33,6 +47,12 @@ class CommentController extends Controller
         ));
     }
 
+    /**
+     * Menghitung persentase perubahan data dalam 7 hari terakhir dibandingkan dengan 7 hari sebelumnya.
+     *
+     * @param string $model Nama model yang akan dihitung.
+     * @return string Persentase perubahan dalam format string (misalnya "+50%" atau "-25%").
+     */
     private function calculatePercentageChange($model)
     {
         // Hitung jumlah data 7 hari terakhir
@@ -60,18 +80,36 @@ class CommentController extends Controller
         }
     }
 
+    /**
+     * Menampilkan semua komentar.
+     *
+     * @return \Illuminate\View\View
+     */
     public function comments()
     {
         $comments = Comment::all();
         return view('admin.comments.comments', compact('comments'));
     }
 
+    /**
+     * Menampilkan semua balasan.
+     *
+     * @return \Illuminate\View\View
+     */
     public function replies()
     {
         $replies = Reply::all();
         return view('admin.comments.replies', compact('replies'));
     }
 
+    /**
+     * Membanned komentar tertentu.
+     * Menandai komentar sebagai dibanned dan memperbarui status laporan terkait.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan.
+     * @param int $id ID komentar.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function banComment(Request $request, $id)
     {
         try {
@@ -98,6 +136,14 @@ class CommentController extends Controller
         }
     }
     
+    /**
+     * Membanned balasan tertentu.
+     * Menandai balasan sebagai dibanned dan memperbarui status laporan terkait.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan.
+     * @param int $id ID balasan.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function banReplies(Request $request, $id)
     {
         try {
@@ -124,6 +170,12 @@ class CommentController extends Controller
         }
     }
     
+    /**
+     * Menghapus komentar tertentu.
+     *
+     * @param int $id ID komentar yang akan dihapus.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteComment($id)
     {
         try {
@@ -133,6 +185,13 @@ class CommentController extends Controller
             return response()->json(['success' => false, 'message' => 'Failed to delete comment.']);
         }
     }
+
+    /**
+     * Menghapus balasan tertentu.
+     *
+     * @param int $id ID balasan yang akan dihapus.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteReply($id)
     {
         try {

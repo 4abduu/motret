@@ -425,33 +425,27 @@ body.modal-open {
                 <button type="button" class="btn btn-link p-0 me-3" id="delete-photo-button">
                     <i class="bi bi-trash text-dark fw-bold fs-5"></i>
                 </button>
+               <button type="button" class="btn btn-link p-0 me-3" onclick="window.location.href='{{ route('photos.edit', $photo->id) }}'">
+                    <i class="bi bi-pencil me-2"></i>
+                </button>
                 @endif
             </div>            
             <div class="mt-4 text-start comment-container">
                 <h3 class="mb-4 text-start">{{ $photo->title }}</h3>
-                <h5 class="text-start">{{ $photo->description }}</h5>
-                @php
-                    $rawHashtags = $photo->hashtags;
-
-                    // Coba decode dulu
-                    $hashtags = json_decode($rawHashtags);
-
-                    // Kalau hasil decode bukan array (berarti string biasa), convert aja jadi array
-                    if (!is_array($hashtags)) {
-                        $hashtags = [$rawHashtags];
-                    }
-                @endphp
-
-                <div class="most-searched-container mb-2">
-                    <h4 class="most-searched-title">Hashtags:</h4>
-                    <div class="most-searched-keywords">
-                        @foreach($hashtags as $hashtag)
-                            <a href="{{ route('search', ['query' => $hashtag]) }}" class="keyword-item badge bg-secondary text-decoration-none me-1">
-                                {{ $hashtag }}
-                            </a>
-                        @endforeach
+                <h5 class="mb-4 text-start">{{ $photo->description }}</h5>
+                    
+                    <div class="most-searched-container mb-2">
+                        <h4 class="most-searched-title">Hashtags:</h4>
+                        <div class="most-searched-keywords d-flex flex-wrap">
+                            @foreach($hashtags as $hashtag)
+                                <div class="keyword-item badge bg-secondary text-decoration-none me-1 mb-1">
+                                    <a href="{{ route('search', ['query' => trim($hashtag)]) }}" class="text-white text-decoration-none">
+                                        {{ trim($hashtag) }}
+                                    </a>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
                 <p class="text-start d-flex align-items-center mb-3">
                     @if($photo->user->profile_photo)
                         <img src="{{ asset('storage/photo_profile/' . $photo->user->profile_photo) }}" alt="Profile Picture" class="rounded-circle me-2" width="40" height="40">
@@ -473,7 +467,7 @@ body.modal-open {
                             <button class="btn btn-sm {{ Auth::user()->isFollowing($photo->user) ? 'btn-danger' : 'btn-success' }} ms-3 follow-button" 
                                     data-user-id="{{ $photo->user->id }}"
                                     data-following="{{ Auth::user()->isFollowing($photo->user) ? 'true' : 'false' }}">
-                                {{ Auth::user()->isFollowing($photo->user) ? 'Unfollow' : 'Follow' }}
+                                {{ Auth::user()->isFollowing($photo->user) ? 'Batal Ikuti' : 'Ikuti' }}
                             </button>
                         @endif
                     @endif
@@ -1000,13 +994,13 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault(); // Biar form gak langsung submit
 
             @if(!Auth::check())
-                Swal.fire({
-                    title: 'Login Required',
-                    text: 'Downloads as a guest will be low quality. Log in for high-quality downloads.',
+               Swal.fire({
+                    title: 'Login Diperlukan',
+                    text: 'Unduhan sebagai tamu akan berkualitas rendah. Masuk untuk unduhan berkualitas tinggi.',
                     icon: 'info',
                     showCancelButton: true,
-                    confirmButtonText: 'Log In',
-                    cancelButtonText: 'Continue as Guest',
+                    confirmButtonText: 'Masuk',
+                    cancelButtonText: 'Lanjut sebagai Tamu',
                     cancelButtonColor: '#d33',
                     reverseButtons: true
                 }).then((result) => {
@@ -1014,21 +1008,22 @@ document.addEventListener("DOMContentLoaded", function () {
                         window.location.href = "{{ route('login') }}";
                     } else if (result.dismiss === Swal.DismissReason.cancel) {
                         Swal.fire({
-                            title: 'Low Quality Download',
-                            text: 'Since you are a guest, this download will be in low resolution.',
+                            title: 'Unduhan Kualitas Rendah',
+                            text: 'Karena Anda tidak masuk, file akan diunduh dalam resolusi rendah.',
                             icon: 'warning',
-                            confirmButtonText: 'Proceed',
-                            cancelButtonText: 'Cancel',  // Tambahin tombol Cancel
-                            showCancelButton: true,      // Aktifin tombol Cancel
+                            confirmButtonText: 'Lanjutkan',
+                            cancelButtonText: 'Batal',
+                            showCancelButton: true,
                             reverseButtons: true
                         }).then((res) => {
                             if (res.isConfirmed) {
                                 document.getElementById('downloadForm').submit();
                             }
-                            // Kalau user klik di luar modal atau cancel, gak ngapa-ngapain
+                            // Jika pengguna klik di luar modal atau batal, tidak melakukan apa-apa
                         });
                     }
                 });
+
             @else
                 document.getElementById('downloadForm').submit();
             @endif
@@ -2136,12 +2131,12 @@ handleReportForms();
         // Function to update follow button appearance
         function updateFollowButton(button, following) {
             if (following) {
-                button.textContent = 'Unfollow';
+                button.textContent = 'Batal Ikuti';
                 button.classList.remove('btn-success');
                 button.classList.add('btn-danger');
             } else {
-                button.textContent = 'Follow';
-                button.classList.remove('btn-danger');
+                button.textContent = 'Ikuti';
+                button.classList.remove('btn-dark');
                 button.classList.add('btn-success');
             }
             button.setAttribute('data-following', following);

@@ -17,17 +17,44 @@ use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
+    /**
+     * Menginisialisasi middleware untuk mengautentikasi admin.
+     */
+    public function __construct()
+    {
+        $this->middleware('role:admin');
+    }
+
+    /**
+     * Menampilkan daftar semua pengguna.
+     * Data diurutkan berdasarkan tanggal pembuatan secara descending.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $users = User::orderBy('created_at', 'desc')->get();
         return view('admin.manageUsers', compact('users'));
     }
 
+    /**
+     * Menampilkan halaman untuk mengedit informasi pengguna tertentu.
+     *
+     * @param int $id ID pengguna.
+     * @return \Illuminate\View\View
+     */
     public function editUser($id)
     {
         $user = User::findOrFail($id);
         return view('admin.editUser', compact('user'));
     }
+
+    /**
+     * Menampilkan pratinjau profil pengguna tertentu.
+     *
+     * @param int $id ID pengguna.
+     * @return \Illuminate\View\View
+     */
     public function previewProfile($id)
     {
         $user = User::findOrFail($id);
@@ -42,18 +69,37 @@ class UserController extends Controller
         return view('admin.preview.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice', 'subscribers'));
     }
 
+    /**
+     * Menampilkan pratinjau foto tertentu.
+     *
+     * @param int $id ID foto.
+     * @return \Illuminate\View\View
+     */
     public function previewPhotos($id)
     {
         $photo = Photo::findOrFail($id);
         return view('admin.preview.photos', compact('photo'));
     }
 
+    /**
+     * Menampilkan pratinjau album tertentu.
+     *
+     * @param int $albumId ID album.
+     * @return \Illuminate\View\View
+     */
     public function previewAlbum($albumId)
     {
         $album = Album::with('photos')->findOrFail($albumId);
         return view('admin.preview.albums', compact('album'));
     }
-
+    
+    /**
+     * Menampilkan pratinjau komentar atau balasan tertentu.
+     *
+     * @param int $id ID komentar atau balasan.
+     * @param string $type Tipe pratinjau ('comment' atau 'reply').
+     * @return \Illuminate\View\View
+     */
     public function previewCommentReplies($id, $type)
     {
         Log::info("Type: $type, ID: $id");
@@ -73,6 +119,13 @@ class UserController extends Controller
         return view('admin.preview.comments', compact('highlighted', 'parentComment', 'type'));
     }
 
+    /**
+     * Membuat pengguna baru.
+     * Memvalidasi input, menyimpan data pengguna ke database, dan mengunggah foto profil jika ada.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi informasi pengguna.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function createUser(Request $request)
     {
         $messages = [
@@ -133,6 +186,14 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Memperbarui informasi pengguna tertentu.
+     * Memvalidasi input, memperbarui data pengguna di database, dan mengganti foto profil jika ada.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi informasi pengguna.
+     * @param int $id ID pengguna.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateUser(Request $request, $id)
     {
         $validated = $request->validate([
@@ -187,6 +248,13 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Menghapus foto profil pengguna tertentu.
+     * Menghapus file foto profil dari penyimpanan dan mengosongkan kolom `profile_photo` di database.
+     *
+     * @param int $id ID pengguna.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function deleteProfilePhoto($id)
     {
         try {
@@ -204,6 +272,12 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Menghapus pengguna tertentu dari database.
+     *
+     * @param int $id ID pengguna.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteUser($id)
     {
         try {
@@ -214,6 +288,14 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Membanned pengguna tertentu.
+     * Menentukan jenis banned (sementara atau permanen), alasan banned, dan durasi banned jika sementara.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi informasi banned.
+     * @param int $id ID pengguna.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function banUser(Request $request, $id)
     {
         $user = User::findOrFail($id);

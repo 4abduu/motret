@@ -11,6 +11,17 @@ class UnbanExpiredUsers extends Command
     protected $signature = 'users:unban';
     protected $description = 'Menghapus status banned dari user yang masa banned-nya sudah habis';
 
+    /**
+     * Menjalankan proses utama untuk menghapus status banned dari pengguna yang masa banned-nya telah berakhir.
+     * 
+     * Langkah-langkah:
+     * 1. Mengambil data pengguna yang memiliki status banned sementara dan masa banned telah habis.
+     * 2. Menghapus status banned, alasan banned, dan tanggal berakhir banned dari pengguna.
+     * 3. Menyimpan perubahan ke database.
+     * 4. Menampilkan jumlah pengguna yang berhasil di-unban.
+     *
+     * @return void
+     */
     public function handle()
     {
         $now = Carbon::now('UTC');

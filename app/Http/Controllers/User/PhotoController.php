@@ -14,11 +14,21 @@ use Illuminate\Support\Facades\Log;
 
 class PhotoController extends Controller
 {
+    /**
+     * Constructor untuk mengatur middleware.
+     * Middleware `auth` diterapkan kecuali untuk fungsi `showPhoto`, `downloadPhoto`, dan `morePhotos`.
+     */
     public function __construct()
     {
-        $this->middleware('auth')->except(['showPhoto', 'downloadPhoto']);
+        $this->middleware('auth')->except(['showPhoto', 'downloadPhoto', 'morePhotos']);
     }
 
+    /**
+     * Menampilkan halaman foto pengguna.
+     * Mengambil foto dan album yang dimiliki oleh pengguna yang sedang login.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $photos = Photo::where('user_id', Auth::id())->get();
@@ -26,17 +36,53 @@ class PhotoController extends Controller
         return view('user.photos', compact('photos', 'albums'));
     }    
 
-    public function morePhotos()
+    /**
+     * Menampilkan foto berdasarkan kategori (most_viewed, most_liked, most_downloaded).
+     * Mengambil foto yang tidak dibanned, tidak premium, dan statusnya true.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\View\View
+     */
+    public function morePhotos(Request $request)
     {
-        // Ambil foto yang paling banyak dilihat (diurutkan berdasarkan views)
-        $mostViewedPhotos = Photo::where('status', true) // hanya foto yang statusnya aktif
-                                ->where('banned', false) // tidak dibanned
-                                ->orderBy('views', 'desc')
-                                ->paginate(20);
-        
-        return view('photos.more', compact('mostViewedPhotos'));
+        $type = $request->query('type', 'most_viewed'); // Default ke 'most_viewed'
+    
+        if ($type === 'most_liked') {
+            // Ambil foto berdasarkan jumlah likes
+            $photos = Photo::withCount('likes') // Menggunakan relasi likes
+                ->where('banned', false)
+                ->where('premium', false)
+                ->where('status', true)
+                ->get()
+                ->sortByDesc('likes_count'); // Urutkan berdasarkan jumlah likes
+        } elseif ($type === 'most_downloaded') {
+            // Ambil foto berdasarkan jumlah downloads
+            $photos = Photo::withCount('downloads') // Menggunakan relasi downloads
+                ->where('banned', false)
+                ->where('premium', false)
+                ->where('status', true)
+                ->get()
+                ->sortByDesc('downloads_count'); // Urutkan berdasarkan jumlah downloads
+        } else { // Default ke 'most_viewed'
+            // Ambil foto berdasarkan jumlah views
+            $photos = Photo::where('banned', false)
+                ->where('premium', false)
+                ->where('status', true)
+                ->get()
+                ->sortByDesc('views'); // Urutkan berdasarkan jumlah views
+        }
+    
+        return view('photos.more', compact('photos', 'type'));
     }
 
+    /**
+     * Menampilkan foto berdasarkan ID.
+     * Mengambil foto yang tidak dibanned, tidak premium, dan statusnya true, serta memeriksa akses pengguna terhadap foto premium.
+     *
+     * @param int $id
+     * @return \Illuminate\View\View
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function showPhoto($id)
     {
         if (Auth::check() && Auth::user()->role === 'admin') {
@@ -67,14 +113,31 @@ class PhotoController extends Controller
             }
         }
 
-        return view('photos.show', compact('photo', 'randomPhotos', 'albums'));
+        // Mengambil hashtags dari foto
+        $hashtags = json_decode($photo->hashtags, true);
+        if (!is_array($hashtags)) {
+            $hashtags = [$photo->hashtags];
+        }
+        return view('photos.show', compact('photo', 'randomPhotos', 'albums', 'hashtags'));
     }
 
+    /**
+     * Menampilkan halaman untuk membuat foto baru.
+     *
+     * @return \Illuminate\View\View
+     */
     public function createphotos()
     {
         return view('photos.create');
     }
 
+    /**
+     * Menampilkan halaman untuk mengedit foto berdasarkan ID.
+     * Memastikan pengguna yang sedang login adalah pemilik foto.
+     *
+     * @param int $id
+     * @return \Illuminate\View\View
+     */
     public function editPhoto($id)
     {
         $photo = Photo::findOrFail($id);
@@ -84,58 +147,13 @@ class PhotoController extends Controller
         return view('photos.edit', compact('photo'));
     }
 
-    // public function storePhoto(Request $request)
-    // {
-    //     try {
-    //         $validated = $request->validate([
-    //             'title' => 'required|string|max:255',
-    //             'description' => 'required|string|max:255',
-    //             'photo' => 'required|image|mimes:jpeg,png,jpg',
-    //             'hashtags' => 'required|string',
-    //             'premium' => 'boolean',
-    //             'status' => 'in:1,0',
-    //         ]);
-    
-    //             // Cek apakah foto dengan judul yang sama sudah diupload oleh user yang sama dalam waktu 5 menit terakhir
-    //                 $recentPhoto = Photo::where('user_id', Auth::id())
-    //                 ->where('title', $validated['title'])
-    //                 ->where('created_at', '>=', now()->subMinutes(5))
-    //                 ->first();
-    
-    //             if ($recentPhoto) {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Anda sudah mengupload foto dengan judul yang sama dalam 5 menit terakhir.'
-    //             ], 400);
-    //             }
-        
-    //         $path = $request->file('photo')->store('photos', 'public');
-        
-    //         // Buat versi buram dari foto
-
-        
-    //         Photo::create([
-    //             'user_id' => Auth::id(),
-    //             'title' => $validated['title'],
-    //             'description' => $validated['description'],
-    //             'path' => $path,
-    //             'hashtags' => json_encode(explode(',', $validated['hashtags'])),
-    //             'premium' => $request->input('premium', false),
-    //             'status' => $request->input('status', true),
-    //         ]);
-        
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Foto berhasil diupload.',
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Gagal mengupload foto: ' . $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
+    /**
+     * Menyimpan foto baru ke dalam database dan storage.
+     * Memastikan tidak ada duplikat judul foto dalam 5 menit terakhir.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function storePhoto(Request $request)
     {
         try {
@@ -205,9 +223,14 @@ class PhotoController extends Controller
             ], 500);
         }
     }
-    
 
-
+    /**
+     * Mengunduh foto berdasarkan resolusi (original atau low).
+     * Memeriksa batas unduhan untuk pengguna biasa dan tamu.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan.
+     * @param int $id ID foto.
+     */
     public function downloadPhoto(Request $request, $id)
     {
         $photo = Photo::findOrFail($id);
@@ -249,25 +272,31 @@ class PhotoController extends Controller
             }
             // === User Biasa: Terbatas 5x per minggu ===
             elseif ($user->role === 'user') {
+                // Cek status verified
+                $isVerified = $user->verified == 1 || $user->verified === true;
+            
+                // Tentuin limit tergantung status verified
+                $downloadLimit = $isVerified ? 10 : 5;
+            
                 // Hitung total download user dalam 7 hari terakhir
                 $weeklyDownloads = Download::where('user_id', $user->id)
-                    ->where('created_at', '>=', Carbon::now()->subDays(7))
+                    ->where('updated_at', '>=', Carbon::now()->subDays(7))
                     ->sum('count_downloads');
-                
-                if ($weeklyDownloads >= 5) {
+            
+                if ($weeklyDownloads >= $downloadLimit) {
                     return back()->with('error', 'Anda telah mencapai batas download minggu ini.');
                 }
-                
+            
                 // Buat atau update record download untuk foto ini
                 $download = Download::firstOrNew([
                     'user_id' => $user->id,
                     'photo_id' => $photo->id
                 ]);
-                
+            
                 $download->resolution = 'original';
                 $download->count_downloads = $download->exists ? $download->count_downloads + 1 : 1;
                 $download->save();
-                
+            
                 return $this->processDownload($photo, 'original');
             }
         } 
@@ -297,6 +326,14 @@ class PhotoController extends Controller
 
     }    
 
+    /**
+     * Memproses unduhan foto berdasarkan resolusi.
+     * Memastikan file tersedia sebelum mengunduh.
+     *
+     * @param \App\Models\Photo $photo Foto yang akan diunduh.
+     * @param string $resolution Resolusi foto (original atau low).
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse|\Illuminate\Http\RedirectResponse
+     */
     private function processDownload($photo, $resolution)
     {
         $filePath = storage_path('app/public/' . $photo->path);
@@ -338,6 +375,14 @@ class PhotoController extends Controller
         ]);
     }
 
+    /**
+     * Memperbarui informasi foto tertentu.
+     * Memvalidasi input dan memastikan hanya pemilik foto yang dapat mengedit.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi informasi foto.
+     * @param int $id ID foto.
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updatePhoto(Request $request, $id)
     {
         $photo = Photo::findOrFail($id);
@@ -364,6 +409,14 @@ class PhotoController extends Controller
         return redirect()->route('user.profile')->with('success', 'Foto berhasil diperbarui.');
     }
 
+    /**
+     * Menghapus foto tertentu.
+     * Memastikan hanya pemilik foto yang dapat menghapus, dan menghapus file dari storage.
+     *
+     * @param int $id ID foto.
+     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroyPhoto($id)
     {
         try{

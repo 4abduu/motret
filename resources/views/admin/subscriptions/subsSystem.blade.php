@@ -26,6 +26,7 @@
                     <table id="example" class="table table-striped" style="width:100%">
                         <thead>
                             <tr>
+                                <th>No</th>
                                 <th>User</th>
                                 <th>Harga</th>
                                 <th>Start Date</th>
@@ -33,8 +34,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($subscriptions as $subscription)
+                            @foreach($subscriptions as $index => $subscription)
                             <tr>
+                                <td>{{ $index + 1 }}</td>
                                 <td>{{ $subscription->user->name }}</td>
                                 <td>{{ $subscription->price }}</td>
                                 <td>{{ $subscription->start_date }}</td>

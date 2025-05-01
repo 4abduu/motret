@@ -15,87 +15,128 @@ use Illuminate\Support\Facades\Log;
 
 class BalanceController extends Controller
 {
+
+    /**
+     * Menginisialisasi middleware untuk mengautentikasi admin.
+     */
+    public function __construct()
+    {
+        $this->middleware('role:admin');
+    }
+
+    /**
+     * Menampilkan halaman utama manajemen saldo.
+     * Mengambil data statistik, persentase perubahan, aktivitas terbaru, dan pengguna dengan saldo tertinggi.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
-{
-    // Get total verified users
-    $totalUsers = User::where('verified', true)->count();
-    
-    // Get total balance across all users
-    $totalBalance = User::where('verified', true)->sum('balance');
-    
-    // Get pending withdrawals count
-    $pendingWithdrawals = Withdrawal::where('status', 'pending')->count();
-    
-    // Get successful withdrawals this month
-    $monthlyWithdrawals = Withdrawal::where('status', 'success')
-        ->whereMonth('created_at', now()->month)
-        ->sum('amount');
-    
-    // Calculate percentage changes
-    $balancePercentage = $this->calculatePercentageChange(User::where('verified', true), 'balance');
-    $withdrawalPercentage = $this->calculatePercentageChange(Withdrawal::where('status', 'success'), 'amount');
-    
-    // Recent activities
-    $recentWithdrawals = Withdrawal::with('user')
-        ->latest()
-        ->take(10)
-        ->get();
-    
-    // Top users by balance
-    $topUsers = User::where('verified', true)
-        ->orderBy('balance', 'desc')
-        ->take(5)
-        ->get();
+    {
+        // Get total verified users
+        $totalUsers = User::where('verified', true)->count();
+        
+        // Get total balance across all users
+        $totalBalance = User::where('verified', true)->sum('balance');
+        
+        // Get pending withdrawals count
+        $pendingWithdrawals = Withdrawal::where('status', 'pending')->count();
+        
+        // Get successful withdrawals this month
+        $monthlyWithdrawals = Withdrawal::where('status', 'success')
+            ->whereMonth('created_at', now()->month)
+            ->sum('amount');
+        
+        // Calculate percentage changes
+        $balancePercentage = $this->calculatePercentageChange(User::where('verified', true), 'balance');
+        $withdrawalPercentage = $this->calculatePercentageChange(Withdrawal::where('status', 'success'), 'amount');
+        
+        // Recent activities
+        $recentWithdrawals = Withdrawal::with('user')
+            ->latest()
+            ->take(10)
+            ->get();
+        
+        // Top users by balance
+        $topUsers = User::where('verified', true)
+            ->orderBy('balance', 'desc')
+            ->take(5)
+            ->get();
 
-    return view('admin.manageBalance', compact(
-        'totalUsers',
-        'totalBalance',
-        'pendingWithdrawals',
-        'monthlyWithdrawals',
-        'balancePercentage',
-        'withdrawalPercentage',
-        'recentWithdrawals',
-        'topUsers'
-    ));
-}
-
-private function calculatePercentageChange($model, $sumColumn = null)
-{
-    // For user balance
-    if ($sumColumn) {
-        $last7Days = $model->where('created_at', '>=', now()->subDays(7))->sum($sumColumn);
-        $previous7Days = $model->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->sum($sumColumn);
-    } 
-    // For counts
-    else {
-        $last7Days = $model->where('created_at', '>=', now()->subDays(7))->count();
-        $previous7Days = $model->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
+        return view('admin.manageBalance', compact(
+            'totalUsers',
+            'totalBalance',
+            'pendingWithdrawals',
+            'monthlyWithdrawals',
+            'balancePercentage',
+            'withdrawalPercentage',
+            'recentWithdrawals',
+            'topUsers'
+        ));
     }
 
-    if ($previous7Days == 0) {
-        return $last7Days > 0 ? "+100%" : "0%";
+    /**
+     * Menghitung persentase perubahan data dalam 7 hari terakhir dibandingkan dengan 7 hari sebelumnya.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $model Query model yang akan dihitung.
+     * @param string|null $sumColumn Kolom yang akan dijumlahkan (opsional).
+     * @return string Persentase perubahan dalam format string (misalnya "+50%" atau "-25%").
+     */
+    private function calculatePercentageChange($model, $sumColumn = null)
+    {
+        // For user balance
+        if ($sumColumn) {
+            $last7Days = $model->where('created_at', '>=', now()->subDays(7))->sum($sumColumn);
+            $previous7Days = $model->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->sum($sumColumn);
+        } 
+        // For counts
+        else {
+            $last7Days = $model->where('created_at', '>=', now()->subDays(7))->count();
+            $previous7Days = $model->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->count();
+        }
+
+        if ($previous7Days == 0) {
+            return $last7Days > 0 ? "+100%" : "0%";
+        }
+
+        $percentageChange = (($last7Days - $previous7Days) / $previous7Days) * 100;
+        $formattedPercentage = round($percentageChange, 2);
+        
+        return ($formattedPercentage > 0 ? "+" : "") . $formattedPercentage . "%";
     }
 
-    $percentageChange = (($last7Days - $previous7Days) / $previous7Days) * 100;
-    $formattedPercentage = round($percentageChange, 2);
-    
-    return ($formattedPercentage > 0 ? "+" : "") . $formattedPercentage . "%";
-}
-
+    /**
+     * Menampilkan daftar penarikan saldo.
+     *
+     * @return \Illuminate\View\View
+     */
     public function withdrawals()
     {
         $withdrawals = Withdrawal::with('user')->get();
         return view('admin.balance.withdrawals', compact('withdrawals'));
     }
 
+    /**
+     * Menampilkan daftar pengguna dengan saldo mereka.
+     * Data diurutkan berdasarkan saldo user tertinggi.
+     *
+     * @return \Illuminate\View\View
+     */
     public function balanceUser()
     {
         $users = User::where('verified', true)
                     ->orderBy('balance', 'desc')
-                    ->get();
+                    ->get(); 
         return view('admin.balance.balanceList', compact('users'));
     }
 
+    /**
+     * Menampilkan riwayat saldo pengguna tertentu.
+     * Termasuk total pemasukan, total penarikan, dan saldo saat ini.
+     *
+     * @param \Illuminate\Http\Request $request Data permintaan yang berisi filter bulan dan tahun.
+     * @param int $userId ID pengguna.
+     * @return \Illuminate\View\View
+     */
     public function historyBalance(Request $request, $userId)
     {
         $user = User::findOrFail($userId);
@@ -139,6 +180,13 @@ private function calculatePercentageChange($model, $sumColumn = null)
         ]);
     }
 
+    /**
+     * Menyetujui permintaan penarikan saldo.
+     * Memperbarui status penarikan menjadi "success", mengurangi saldo pengguna, dan membuat notifikasi.
+     *
+     * @param int $id ID permintaan penarikan.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function accPenarikan($id)
     {
 
@@ -182,6 +230,13 @@ private function calculatePercentageChange($model, $sumColumn = null)
         }
     }
 
+    /**
+     * Menolak permintaan penarikan saldo.
+     * Memperbarui status penarikan menjadi "rejected" dan membuat notifikasi.
+     *
+     * @param int $id ID permintaan penarikan.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function rejectPenarikan($id)
     {
         DB::beginTransaction();
@@ -222,6 +277,13 @@ private function calculatePercentageChange($model, $sumColumn = null)
 
     }
 
+    /**
+     * Menghapus permintaan penarikan saldo.
+     * Menghapus data penarikan dan riwayat saldo terkait dari database.
+     *
+     * @param int $id ID permintaan penarikan.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deletePenarikan($id)
     {
         DB::beginTransaction();

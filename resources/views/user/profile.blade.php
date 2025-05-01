@@ -401,6 +401,13 @@
   background-size: 100%;
   transition: background-size 0s;
 }
+.photo-profile {
+    width: 85px;
+    height: 85px;
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
 </style>
 @endpush
 
@@ -409,7 +416,7 @@
         <div class="card shadow-lg">
             <div class="card-body text-center">
                 <div>
-                    <img src="{{ $user->profile_photo_url }}" class="img-lg rounded-circle mb-2" alt="profile image" />
+                    <img src="{{ $user->profile_photo_url }}" class="img-lg rounded-circle mb-2 photo-profile" alt="profile image" />
                     <h4>{{ $user->name }} 
                         @if($user->verified)
                         <i class="ti-crown" style="color: gold;" title="Verified User"></i>
@@ -429,16 +436,16 @@
                     <div id="follow-section">
                         @if(Auth::check())
                             <button id="follow-button" 
-                                    class="btn {{ Auth::user()->isFollowing($user) ? 'btn-danger unfollow-button' : 'btn-primary follow-button' }} btn-sm mt-3 mb-4" 
+                                    class="btn {{ Auth::user()->isFollowing($user) ? 'btn-danger unfollow-button' : 'btn-success follow-button' }} btn-sm mt-3 mb-4" 
                                     data-user-id="{{ $user->id }}"
                                     data-initial-state="{{ Auth::user()->isFollowing($user) ? 'following' : 'not-following' }}">
-                                {{ Auth::user()->isFollowing($user) ? 'Unfollow' : 'Follow' }}
+                                {{ Auth::user()->isFollowing($user) ? 'Batal Ikuti' : 'Ikuti' }}
                             </button>
                             <button type="button" class="btn btn-link p-0 me-3" data-bs-toggle="modal" data-bs-target="#reportUserModal">
                                 <i class="bi bi-flag text-danger"></i>
                             </button>
                         @else
-                            <button class="btn btn-primary btn-sm mt-3 mb-4" onclick="window.location.href='{{ route('login') }}'">
+                            <button class="btn btn-success btn-sm mt-3 mb-4" onclick="window.location.href='{{ route('login') }}'">
                                 Follow
                             </button>
                         @endif
@@ -448,11 +455,11 @@
                     <div class="row">
                         <div class="col-6">
                             <h6 id="followers-count">{{ $user->followers()->count() }}</h6>
-                            <p class="btn btn-link text-success" data-bs-toggle="modal" data-bs-target="#followersModal">Followers</p>
+                            <p class="btn btn-link text-success" data-bs-toggle="modal" data-bs-target="#followersModal">Pengikut</p>
                         </div>
                         <div class="col-6">
                             <h6 id="following-count">{{ $user->following()->count() }}</h6>
-                            <p class="btn btn-link text-success" data-bs-toggle="modal" data-bs-target="#followingModal">Following</p>
+                            <p class="btn btn-link text-success" data-bs-toggle="modal" data-bs-target="#followingModal">Mengikuti</p>
                         </div>
                     </div>
                 </div>
@@ -963,7 +970,7 @@
                                                                 <small class="text-muted">
                                                                     {{ $photo->created_at->format('d M Y') }}
                                                                 </small>
-                                                                <div class="dropdown">
+                                                                <div class="dropdown dropup">
                                                                     <button class="btn btn-sm btn-link p-0" type="button" 
                                                                             id="photoDropdown-{{ $photo->id }}" 
                                                                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -1045,9 +1052,33 @@
                                                                 <small class="text-muted">
                                                                     {{ $photo->created_at->format('d M Y') }}
                                                                 </small>
-                                                                <span class="badge bg-secondary">
-                                                                    {{ $photo->downloads }} <i class="bi bi-download ms-1"></i>
-                                                                </span>
+                                                                <div class="dropdown dropup">
+                                                                    <button class="btn btn-sm btn-link p-0" type="button" 
+                                                                            id="photoDropdown-{{ $photo->id }}" 
+                                                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                                                        <i class="bi bi-three-dots-vertical"></i>
+                                                                    </button>
+                                                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="photoDropdown-{{ $photo->id }}">
+                                                                        <li>
+                                                                            <button class="dropdown-item d-flex align-items-center" onclick="copyToClipboard('{{ route('photos.show', $photo->id) }}')">
+                                                                                <i class="bi bi-share me-2"></i> Bagikan
+                                                                            </button>
+                                                                        </li>
+                                                                        <li>
+                                                                            <button class="dropdown-item d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#reportPhotoModal-{{ $photo->id }}">
+                                                                                <i class="bi bi-flag me-2"></i> Laporkan
+                                                                            </button>
+                                                                        </li>
+                                                                        <li>
+                                                                            <form method="POST" action="{{ route('photos.download', $photo->id) }}" class="download-button" id="downloadForm-{{ $photo->id }}">
+                                                                                @csrf
+                                                                                <button type="button" class="dropdown-item d-flex align-items-center w-100 download-btn" data-id="{{ $photo->id }}">
+                                                                                    <i class="bi bi-download me-2"></i> Download
+                                                                                </button>
+                                                                            </form>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1140,7 +1171,7 @@
                                     <button 
                                         class="btn btn-sm {{ Auth::user()->isFollowing($subscriber->user) ? 'btn-danger unfollow-button' : 'btn-success follow-button' }}" 
                                         data-user-id="{{ $subscriber->user->id }}">
-                                        {{ Auth::user()->isFollowing($subscriber->user) ? 'Unfollow' : 'Follow' }}
+                                        {{ Auth::user()->isFollowing($subscriber->user) ? 'Batal Ikuti' : 'Ikuti' }}
                                     </button>
                                 @endif
                             </li>
@@ -1225,7 +1256,7 @@
                         @endif
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-success">Buat Album</button>
                     </div>
                 </form>
@@ -1239,19 +1270,29 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="followersModalLabel">Followers</h5>
+                <h5 class="modal-title" id="followersModalLabel">Pengikut</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <ul class="list-group" id="followers-list">
                     @foreach($user->followers as $follower)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{{ route('user.showProfile', $follower->username) }}" style="color: black;"><b>{{ $follower->username }}</b></a>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ $follower->profile_photo_url }}" 
+                                     alt="{{ $follower->username }}" 
+                                     class="rounded-circle me-3" 
+                                     style="width: 40px; height: 40px; object-fit: cover;">
+                                <a href="{{ route('user.showProfile', $follower->username) }}" 
+                                   style="color: black; text-decoration: none;">
+                                   <b>{{ $follower->username }}</b>
+                                </a>
+                            </div>
+                            
                             @if(Auth::check() && Auth::id() !== $follower->id)
                                 <button 
                                     class="btn btn-sm {{ Auth::user()->isFollowing($follower) ? 'btn-danger unfollow-button' : 'btn-success follow-button' }}" 
                                     data-user-id="{{ $follower->id }}">
-                                    {{ Auth::user()->isFollowing($follower) ? 'Unfollow' : 'Follow' }}
+                                    {{ Auth::user()->isFollowing($follower) ? 'Batal Ikuti' : 'Ikuti' }}
                                 </button>
                             @endif
                         </li>
@@ -1267,19 +1308,29 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="followingModalLabel">Following</h5>
+                <h5 class="modal-title" id="followingModalLabel">Mengikuti</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <ul class="list-group" id="following-list">
                     @foreach($user->following as $following)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <a href="{{ route('user.showProfile', $following->username) }}" style="color: black;"><b>{{ $following->username }}</b></a>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ $following->profile_photo_url }}" 
+                                     alt="{{ $following->username }}" 
+                                     class="rounded-circle me-3" 
+                                     style="width: 40px; height: 40px; object-fit: cover;">
+                                <a href="{{ route('user.showProfile', $following->username) }}" 
+                                   style="color: black; text-decoration: none;">
+                                   <b>{{ $following->username }}</b>
+                                </a>
+                            </div>
+                            
                             @if(Auth::check() && Auth::id() !== $following->id)
                                 <button 
                                     class="btn btn-sm {{ Auth::user()->isFollowing($following) ? 'btn-danger unfollow-button' : 'btn-success follow-button' }}" 
                                     data-user-id="{{ $following->id }}">
-                                    {{ Auth::user()->isFollowing($following) ? 'Unfollow' : 'Follow' }}
+                                    {{ Auth::user()->isFollowing($following) ? 'Batal Ikuti' : 'Ikuti' }}
                                 </button>
                             @endif
                         </li>
@@ -1504,7 +1555,7 @@
         function updateButtonAppearance(button, isFollowing) {
             if (!button) return;
             
-            button.textContent = isFollowing ? 'Unfollow' : 'Follow';
+            button.textContent = isFollowing ? 'Batal Ikuti' : 'Ikuti';
             button.className = isFollowing 
                 ? 'btn btn-danger btn-sm unfollow-button' 
                 : 'btn btn-success btn-sm follow-button';
