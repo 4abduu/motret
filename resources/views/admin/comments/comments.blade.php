@@ -1,28 +1,7 @@
 @extends('layouts.app')
 
 @push('link')
-    <style>
-        .custom-preview-btn {
-            transition: all 0.3s ease;
-            color: #32bd40;
-            border-color: #32bd40;
-        }
-
-        .custom-preview-btn:hover {
-            background-color: #32bd40 !important;
-            color: white !important;
-            border-color: #32bd40 !important;
-        }
-
-        .custom-preview-btn:hover i {
-            color: white !important;
-        }
-
-        .dt-length {
-            margin-left: 20px;
-            padding-bottom: 10px;
-        }
-    </style>
+<link rel="stylesheet" href="{{ asset('css/pages/admin-comments.css') }}">
 @endpush
 
 @section('content')
@@ -110,38 +89,11 @@
 
 @push('scripts')
 <script>
-    // SweetAlert2 untuk delete comment
-    document.addEventListener('click', function(event) {
-        if (event.target.classList.contains('delete-comment-btn')) {
-            const commentId = event.target.getAttribute('data-id');
-            Swal.fire({
-                title: 'Apakah anda yakin?',
-                text: "Anda tidak bisa mengembalikan data yang sudah dihapus!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#32bd40',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/admin/comments/${commentId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    }).then(response => {
-                        if (response.ok) {
-                            Swal.fire(
-                                'Deleted!',
-                                'Your comment has been deleted.',
-                                'success'
-                            ).then(() => location.reload());
-                        }
-                    });
-                }
-            });
-        }
-    });
+window.adminCommentsConfig = {
+    csrfToken: "{{ csrf_token() }}",
+    deleteCommentRouteTemplate: "/admin/comments/:id"
+};
 </script>
+<script src="{{ asset('js/pages/admin-comments-comments.js') }}"></script>
 @endpush
 

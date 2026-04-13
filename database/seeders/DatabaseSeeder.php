@@ -3,17 +3,13 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use PHPUnit\Event\Telemetry\System;
 
 class DatabaseSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $this->call([
-            UsersTableSeeder::class,
-            FotoTableSeeder::class,
-            SystemSubscriptionPriceSeeder::class,
-            SyncBalanceSeeder::class,
+            SqlDumpSeeder::class,
         ]);
     }
 }

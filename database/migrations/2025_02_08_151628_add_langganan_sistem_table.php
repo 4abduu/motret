@@ -1,10 +1,13 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    public function up() {
+return new class extends Migration
+{
+    public function up()
+    {
         Schema::create('langganan_sistem', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id'); // User yang berlangganan ke sistem
@@ -20,7 +23,8 @@ return new class extends Migration {
         });
     }
 
-    public function down() {
+    public function down()
+    {
         Schema::dropIfExists('langganan_sistem');
     }
 };

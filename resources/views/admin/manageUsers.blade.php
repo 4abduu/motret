@@ -3,35 +3,7 @@
 @section('title', 'Manage Users')
 
 @push('link')
-<style>
-    .custom-preview-btn {
-        transition: all 0.3s ease;
-        color: #32bd40;
-        border-color: #32bd40;
-    }
-
-    .custom-preview-btn:hover {
-        background-color: #32bd40;
-        color: white !important;
-        border-color: #32bd40;
-    }
-
-    .custom-preview-btn:hover i {
-        color: white !important;
-    }
-
-    .modal-body img.rounded-circle {
-        width: 120px;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 50%;
-    }
-
-    .dt-length {
-        margin-left: 20px;
-        padding-bottom: 10px;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/pages/admin-manage-users.css') }}">
 @endpush
 
 @section('content')
@@ -258,131 +230,10 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Inisialisasi DataTables
-    const table = $('#example').DataTable();
-
-    // Fungsi untuk menampilkan SweetAlert2
-    function showAlert(icon, title, text, callback = null) {
-        Swal.fire({
-            icon: icon,
-            title: title,
-            text: text,
-            confirmButtonText: 'OK'
-        }).then(() => {
-            if (callback) callback();
-        });
-    }
-
-    // Handle form submission untuk tambah user
-    const addUserForm = document.querySelector('#createUserModal form');
-    if (addUserForm) {
-        addUserForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
-
-            try {
-                const response = await fetch("{{ route('admin.users.create') }}", {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    },
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('success', 'Berhasil!', data.message || 'User berhasil ditambahkan.', () => {
-                        window.location.reload(); // Reload halaman setelah berhasil
-                    });
-                } else {
-                    showAlert('error', 'Gagal!', data.message || 'Terjadi kesalahan saat menambahkan user.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('error', 'Oops...', 'Terjadi kesalahan saat memproses permintaan.');
-            }
-        });
-    }
-
-    // Handle form submission untuk edit user
-    document.addEventListener('submit', async function (e) {
-        if (e.target && e.target.matches('.edit-user-form')) {
-            e.preventDefault();
-
-            const formData = new FormData(e.target);
-            const userId = e.target.getAttribute('data-id');
-            formData.append('_method', 'PUT');
-
-            try {
-                const response = await fetch(`/admin/users/${userId}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    },
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('success', 'Berhasil!', data.message || 'User berhasil diupdate.', () => {
-                        window.location.reload(); // Reload halaman setelah berhasil
-                    });
-                } else {
-                    showAlert('error', 'Gagal!', data.message || 'Terjadi kesalahan saat mengupdate user.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('error', 'Oops...', 'Terjadi kesalahan saat memproses permintaan.');
-            }
-        }
-    });
-
-    // Handle delete user dengan event delegation
-    document.addEventListener('click', function (e) {
-        if (e.target && e.target.closest('.delete-user-btn')) {
-            const button = e.target.closest('.delete-user-btn');
-            const userId = button.getAttribute('data-id');
-
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: "Anda tidak akan bisa mengembalikan user ini!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/admin/users/${userId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            },
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            showAlert('success', 'Berhasil!', data.message || 'User berhasil dihapus.', () => {
-                                window.location.reload(); // Reload halaman setelah berhasil
-                            });
-                        } else {
-                            showAlert('error', 'Gagal!', data.message || 'Terjadi kesalahan saat menghapus user.');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showAlert('error', 'Oops...', 'Terjadi kesalahan saat memproses permintaan.');
-                    }
-                }
-            });
-        }
-    });
-});
+window.manageUsersConfig = {
+    createUrl: "{{ route('admin.users.create') }}",
+    csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+};
 </script>
+<script src="{{ asset('js/pages/admin-manage-users.js') }}"></script>
 @endpush

@@ -1,23 +1,7 @@
 @extends('layouts.app')
 
 @push('link')
-  <style>
-    .card-hover:hover {
-    transform: translateY(-5px);
-    transition: transform 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn-success {
-    background-color: #32bd40;
-    border-color: #32bd40;
-}
-
-.btn-success:hover {
-    background-color: #2aa835;
-    border-color: #2aa835;
-}
-  </style>
+<link rel="stylesheet" href="{{ asset('css/pages/admin-subscriptions-dashboard.css') }}">
 @endpush
 
 @section('content')

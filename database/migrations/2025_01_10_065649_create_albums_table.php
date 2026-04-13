@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('album', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
             $table->string('name');
             $table->text('description')->nullable();
             $table->enum('status', ['1', '0'])->default('1');

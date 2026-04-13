@@ -21,9 +21,9 @@ return new class extends Migration
             $table->string('destination_name'); // atas nama rekening / e-wallet
             $table->text('note')->nullable(); // catatan tambahan
             $table->timestamps();
-        
+
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });        
+        });
     }
 
     /**

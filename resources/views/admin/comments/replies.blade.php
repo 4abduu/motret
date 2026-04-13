@@ -1,28 +1,7 @@
 @extends('layouts.app')
 
 @push('link')
-    <style>
-        .custom-preview-btn {
-            transition: all 0.3s ease;
-            color: #32bd40;
-            border-color: #32bd40;
-        }
-
-        .custom-preview-btn:hover {
-            background-color: #32bd40 !important;
-            color: white !important;
-            border-color: #32bd40 !important;
-        }
-
-        .custom-preview-btn:hover i {
-            color: white !important;
-        }
-
-        .dt-length {
-            margin-left: 20px;
-            padding-bottom: 10px;
-        }
-    </style>
+<link rel="stylesheet" href="{{ asset('css/pages/admin-comments.css') }}">
 @endpush
 
 @section('content')
@@ -109,37 +88,10 @@
 
 @push('scripts')
 <script>
-    // SweetAlert2 untuk delete reply
-    document.addEventListener('click', function(event) {
-        if (event.target.classList.contains('delete-reply-btn')) {
-            const replyId = event.target.getAttribute('data-id');
-            Swal.fire({
-                title: 'Apakah anda yakin?',
-                text: "Anda tidak bisa mengembalikan data yang sudah dihapus!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#32bd40',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/admin/replies/${replyId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        }
-                    }).then(response => {
-                        if (response.ok) {
-                            Swal.fire(
-                                'Deleted!',
-                                'Your reply has been deleted.',
-                                'success'
-                            ).then(() => location.reload());
-                        }
-                    });
-                }
-            });
-        }
-    });
+window.adminRepliesConfig = {
+    csrfToken: "{{ csrf_token() }}",
+    deleteReplyRouteTemplate: "/admin/replies/:id"
+};
 </script>
+<script src="{{ asset('js/pages/admin-comments-replies.js') }}"></script>
 @endpush

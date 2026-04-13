@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('downloads', function (Blueprint $table) {
             $table->id();
             $table->foreignId('photo_id')
-                  ->references('id')
-                  ->on('foto')
-                  ->onDelete('cascade');
+                ->references('id')
+                ->on('foto')
+                ->onDelete('cascade');
             $table->foreignId('user_id')
-                  ->nullable()
-                  ->references('id')
-                  ->on('users')
-                  ->onDelete('cascade');
+                ->nullable()
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
             $table->string('resolution')->default('low');
             $table->enum('status', ['1', '0'])->default('1');
             $table->timestamps();

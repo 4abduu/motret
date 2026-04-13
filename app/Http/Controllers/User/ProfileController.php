@@ -3,19 +3,18 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Photo;
 use App\Models\Album;
-use App\Models\User;
+use App\Models\Photo;
 use App\Models\SubscriptionPriceUser;
 use App\Models\SubscriptionUser;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
-
     /**
      * Constructor untuk mengatur middleware.
      * Middleware `auth` diterapkan kecuali untuk fungsi `showProfile`.
@@ -33,34 +32,33 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         // Hanya ambil foto dan album milik user sendiri
         $photos = Photo::where('user_id', $user->id)
-                        ->where('premium', false)
-                        ->get();
-        
+            ->where('premium', false)
+            ->get();
+
         $premiumPhotos = Photo::where('user_id', $user->id)
-                              ->where('premium', true)
-                              ->get();
-        
+            ->where('premium', true)
+            ->get();
+
         $albums = Album::where('user_id', $user->id)
-                       ->with(['photos' => function ($query) {
-                           $query->where('status', 1)
-                           ->where('premium', 0); // Ambil hanya foto publik dalam album
-                       }])
-                       ->get();
-        
+            ->with(['photos' => function ($query) {
+                $query->where('foto.status', 1)
+                    ->where('foto.premium', 0); // Ambil hanya foto publik dalam album
+            }])
+            ->get();
+
         $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
         $subscribers = SubscriptionUser::where('target_user_id', $user->id)->with('user')->get();
 
-        
         return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'hasSubscriptionPrice', 'subscribers'));
     }
-    
+
     /**
      * Menampilkan halaman profil pengguna berdasarkan username.
      *
-     * @param string $username
+     * @param  string  $username
      * @return \Illuminate\View\View
      */
     public function showProfile($username)
@@ -70,7 +68,7 @@ class ProfileController extends Controller
         }
         $user = User::where('username', $username)->firstOrFail();
         $isOwner = Auth::check() && Auth::user()->id == $user->id;
-        
+
         // Jika pemilik akun yang buka, tampilkan semua foto
         if ($isOwner) {
             $photos = Photo::where('user_id', $user->id)->where('premium', false)->get();
@@ -81,18 +79,17 @@ class ProfileController extends Controller
             $photos = Photo::where('user_id', $user->id)->where('premium', false)->where('status', 1)->get();
             $premiumPhotos = Photo::where('user_id', $user->id)->where('premium', true)->where('status', 1)->get();
             $albums = Album::where('user_id', $user->id)->where('status', 1)->with(['photos' => function ($query) {
-                $query->where('status', 1);
+                $query->where('foto.status', 1);
             }])->get();
         }
-        
+
         $isSubscribed = Auth::check() && Auth::user()->subscriptions()->where('target_user_id', $user->id)->exists();
         $hasSubscriptionPrice = SubscriptionPriceUser::where('user_id', $user->id)->exists();
         $subscribers = SubscriptionUser::where('target_user_id', $user->id)->with('user')->get();
 
-        
         return view('user.profile', compact('user', 'photos', 'premiumPhotos', 'albums', 'isSubscribed', 'hasSubscriptionPrice', 'subscribers'));
     }
-    
+
     /**
      * Memproses edit profil pengguna.
      *
@@ -109,17 +106,17 @@ class ProfileController extends Controller
                 'website' => 'nullable|string|max:255',
                 'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             ]);
-            
+
             if ($request->hasFile('profile_photo')) {
                 // Hapus foto lama
                 if ($user->profile_photo) {
-                    Storage::delete('public/photo_profile/' . $user->profile_photo);
+                    Storage::delete('public/photo_profile/'.$user->profile_photo);
                 }
 
                 // Upload foto baru
                 $profilePhotoPath = $request->file('profile_photo')->storeAs(
                     'public/photo_profile',
-                    Str::random(40) . '.' . $request->file('profile_photo')->getClientOriginalExtension()
+                    Str::random(40).'.'.$request->file('profile_photo')->getClientOriginalExtension()
                 );
 
                 $user->profile_photo = basename($profilePhotoPath);
@@ -134,10 +131,10 @@ class ProfileController extends Controller
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Profil berhasil diperbarui.',
-                    'data' => ['user' => $user]
+                    'data' => ['user' => $user],
                 ]);
             }
-    
+
             return redirect()->back()->with('success', 'Profil berhasil diperbarui.');
         } catch (\Throwable $e) {
             if ($request->expectsJson()) {
@@ -147,7 +144,7 @@ class ProfileController extends Controller
                     'error' => $e->getMessage(),
                 ], 500);
             }
-    
+
             return redirect()->back()->with('error', 'Gagal memperbarui profil.');
         }
     }
@@ -162,7 +159,7 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         if ($user->profile_photo) {
-            Storage::delete('public/photo_profile/' . $user->profile_photo);
+            Storage::delete('public/photo_profile/'.$user->profile_photo);
             $user->profile_photo = null;
             $user->save();
         }
@@ -174,24 +171,26 @@ class ProfileController extends Controller
      * Memeriksa apakah username sudah digunakan.
      * Memvalidasi format username dan memeriksa keberadaannya di database.
      *
-     * @param \Illuminate\Http\Request $request Data permintaan pengecekan username.
+     * @param  \Illuminate\Http\Request  $request  Data permintaan pengecekan username.
      * @return \Illuminate\Http\JsonResponse
      */
     public function checkUsername(Request $request)
     {
         $exists = User::where('username', $request->username)->exists();
+
         return response()->json(['exists' => $exists]);
     }
 
     /**
      * Memeriksa apakah email sudah digunakan dan memeriksa keberadaannya di database.
      *
-     * @param \Illuminate\Http\Request $request Data permintaan pengecekan username.
+     * @param  \Illuminate\Http\Request  $request  Data permintaan pengecekan username.
      * @return \Illuminate\Http\JsonResponse
      */
     public function checkEmail(Request $request)
     {
         $exists = User::where('email', $request->email)->exists();
+
         return response()->json(['exists' => $exists]);
     }
 }

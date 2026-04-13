@@ -13,14 +13,8 @@ return new class extends Migration
     {
         Schema::create('album_foto', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('album_id')
-                  ->references('id')
-                  ->on('album')
-                  ->onDelete('cascade');
-            $table->foreignId('photo_id')
-                  ->references('id')
-                  ->on('foto')
-                  ->onDelete('cascade');
+            $table->foreignId('album_id');
+            $table->foreignId('photo_id');
             $table->enum('status', ['1', '0'])->default('1');
             $table->timestamps();
         });

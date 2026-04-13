@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->decimal('balance', 15, 2)->default(0)->after('verified');
-        });        
+        });
     }
 
     /**

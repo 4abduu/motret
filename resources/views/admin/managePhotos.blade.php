@@ -3,28 +3,7 @@
 @section('title', 'Manage Photos')
 
 @push('link')
-    <style>
-        .custom-preview-btn {
-            transition: all 0.3s ease;
-            color: #32bd40;
-            border-color: #32bd40;
-        }
-
-        .custom-preview-btn:hover {
-            background-color: #32bd40 !important;
-            color: white !important;
-            border-color: #32bd40 !important;
-        }
-
-        .custom-preview-btn:hover i {
-            color: white !important;
-        }
-
-        .dt-length {
-            margin-left: 20px;
-            padding-bottom: 10px;
-        }
-    </style>
+<link rel="stylesheet" href="{{ asset('css/pages/admin-manage-photos.css') }}">
 @endpush
 
 @section('content')
@@ -154,100 +133,11 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Inisialisasi DataTables
-    const table = $('#example').DataTable();
-
-    // Fungsi untuk menampilkan SweetAlert2
-    function showAlert(icon, title, text, callback = null) {
-        Swal.fire({
-            icon: icon,
-            title: title,
-            text: text,
-            confirmButtonText: 'OK'
-        }).then(() => {
-            if (callback) callback();
-        });
-    }
-
-    // Handle form submission untuk edit photo
-    document.addEventListener('submit', async function (e) {
-        if (e.target && e.target.matches('.edit-photo-form')) {
-            e.preventDefault();
-
-            const formData = new FormData(e.target);
-            const photoId = e.target.getAttribute('data-id');
-            formData.append('_method', 'PUT');
-
-            try {
-                const response = await fetch(`/admin/photos/${photoId}`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    },
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showAlert('success', 'Berhasil!', data.message || 'Photo berhasil diupdate.', () => {
-                        window.location.reload(); // Reload halaman setelah berhasil
-                    });
-                } else {
-                    showAlert('error', 'Gagal!', data.message || 'Terjadi kesalahan saat mengupdate photo.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert('error', 'Oops...', 'Terjadi kesalahan saat memproses permintaan.');
-            }
-        }
-    });
-
-    // Handle delete photo dengan event delegation
-    document.addEventListener('click', function (e) {
-        if (e.target && e.target.closest('.delete-photo-btn')) {
-            const button = e.target.closest('.delete-photo-btn');
-            const photoId = button.getAttribute('data-id');
-
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: "Anda tidak akan bisa mengembalikan foto ini!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/admin/photos/${photoId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            },
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            showAlert('success', 'Berhasil!', data.message || 'Photo berhasil dihapus.', () => {
-                                window.location.reload(); // Reload halaman setelah berhasil
-                            });
-                        } else {
-                            showAlert('error', 'Gagal!', data.message || 'Terjadi kesalahan saat menghapus photo.');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showAlert('error', 'Oops...', 'Terjadi kesalahan saat memproses permintaan.');
-                    }
-                }
-            });
-        }
-    });
-});
+window.adminManagePhotosConfig = {
+    csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+};
 </script>
+<script src="{{ asset('js/pages/admin-manage-photos.js') }}"></script>
 @endpush
 
 @endsection

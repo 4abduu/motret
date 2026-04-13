@@ -10,17 +10,20 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::table('users', function (Blueprint $table) {
-        $table->string('profile_photo')->nullable()->after('password'); // Kolom baru
-    });
-}
+    {
+        if (! Schema::hasColumn('users', 'profile_photo')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('profile_photo')->nullable()->after('password');
+            });
+        }
+    }
 
-public function down(): void
-{
-    // Schema::table('users', function (Blueprint $table) {
-    //    $table->dropColumn('profile_photo'); // Hapus kolom jika rollback
-    // });
-}
-
+    public function down(): void
+    {
+        if (Schema::hasColumn('users', 'profile_photo')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('profile_photo');
+            });
+        }
+    }
 };

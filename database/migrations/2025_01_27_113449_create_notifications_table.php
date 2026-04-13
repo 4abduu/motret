@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('notifs', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('notify_for'); // ID pengguna yang menerima notifikasi
-            $table->unsignedBigInteger('notify_from'); // ID pengguna yang mengirim notifikasi
+            $table->unsignedBigInteger('notify_from')->nullable(); // ID pengguna yang mengirim notifikasi
             $table->unsignedBigInteger('target_id')->nullable(); // ID target terkait (foto, komentar, dll.)
             $table->enum('type', ['follow', 'like', 'comment', 'reply', 'system']); // Tipe notifikasi
             $table->text('message')->nullable(); // Pesan tambahan (opsional)

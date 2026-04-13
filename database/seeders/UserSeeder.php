@@ -6,17 +6,17 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class UsersTableSeeder extends Seeder
+class UserSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        DB::table('users')->insert([
+        DB::table('users')->upsert([
             [
                 'id' => 1,
                 'username' => 'admin',
                 'name' => 'Admin User',
                 'email' => 'admin@gmail.com',
-                'password' => Hash::make('password123'), // Ganti sesuai kebutuhan
+                'password' => Hash::make('password123'),
                 'role' => 'admin',
                 'subscription_ends_at' => null,
                 'status' => '1',
@@ -41,7 +41,7 @@ class UsersTableSeeder extends Seeder
                 'id' => 3,
                 'username' => 'proo',
                 'name' => 'Pro User',
-                'email' => 'pro@gmail.com',
+                'email' => 'pro@gmail.com.com',
                 'password' => Hash::make('password123'),
                 'role' => 'pro',
                 'subscription_ends_at' => '2025-02-11 19:58:05',
@@ -76,6 +76,6 @@ class UsersTableSeeder extends Seeder
                 'updated_at' => now(),
                 'download_reset_at' => '2025-01-14 03:59:43',
             ],
-        ]);
+        ], ['email'], ['username', 'name', 'password', 'role', 'subscription_ends_at', 'status', 'updated_at', 'download_reset_at']);
     }
 }

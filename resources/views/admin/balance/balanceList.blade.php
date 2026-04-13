@@ -3,53 +3,7 @@
 @section('title', 'Daftar Saldo Pengguna')
 
 @push('link')
-    <style>
-        .card-header-custom {
-            background-color: #32bd40 !important;
-            color: white !important;
-        }
-        
-        .badge-success {
-            background-color: #28a745;
-            color: white;
-        }
-        
-        .badge-warning {
-            background-color: #ffc107;
-            color: #212529;
-        }
-        
-        .badge-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        
-        .action-btn {
-            margin: 2px;
-            min-width: 30px;
-        }
-        
-        .custom-preview-btn {
-            transition: all 0.3s ease;
-            color: #32bd40;
-            border-color: #32bd40;
-        }
-
-        .custom-preview-btn:hover {
-            background-color: #32bd40 !important;
-            color: white !important;
-            border-color: #32bd40 !important;
-        }
-
-        .custom-preview-btn:hover i {
-            color: white !important;
-        }
-
-        .dt-length {
-            margin-left: 20px;
-            padding-bottom: 10px;
-        }
-    </style>
+<link rel="stylesheet" href="{{ asset('css/pages/admin-balance-list.css') }}">
 @endpush
 
 @section('content')

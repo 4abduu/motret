@@ -3,39 +3,7 @@
 @section('title', 'Balance Management')
 
 @push('link')
-<style>
-    .card-hover:hover {
-        transform: translateY(-5px);
-        transition: transform 0.3s ease;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    
-    .balance-card-1 { background-color: #32bd40; color: white; }
-    .balance-card-2 { background-color: #2aa835; color: white; }
-    .balance-card-3 { background-color: #23922d; color: white; }
-    .balance-card-4 { background-color: #1c7a24; color: white; }
-    
-    .btn-success {
-        background-color: #32bd40;
-        border-color: #32bd40;
-    }
-    
-    .btn-success:hover {
-        background-color: #2aa835;
-        border-color: #2aa835;
-    }
-    
-    .badge-pending { background-color: #ffc107; color: #212529; }
-    .badge-success { background-color: #28a745; color: white; }
-    .badge-rejected { background-color: #dc3545; color: white; }
-    
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('css/pages/admin-manage-balance.css') }}">
 @endpush
 
 @section('content')

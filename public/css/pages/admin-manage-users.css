@@ -1,0 +1,27 @@
+.custom-preview-btn {
+    transition: all 0.3s ease;
+    color: #32bd40;
+    border-color: #32bd40;
+}
+
+.custom-preview-btn:hover {
+    background-color: #32bd40;
+    color: #fff !important;
+    border-color: #32bd40;
+}
+
+.custom-preview-btn:hover i {
+    color: #fff !important;
+}
+
+.modal-body img.rounded-circle {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.dt-length {
+    margin-left: 20px;
+    padding-bottom: 10px;
+}

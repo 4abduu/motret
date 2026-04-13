@@ -1,0 +1,20 @@
+.custom-preview-btn {
+    transition: all 0.3s ease;
+    color: #32bd40;
+    border-color: #32bd40;
+}
+
+.custom-preview-btn:hover {
+    background-color: #32bd40 !important;
+    color: #fff !important;
+    border-color: #32bd40 !important;
+}
+
+.custom-preview-btn:hover i {
+    color: #fff !important;
+}
+
+.dt-length {
+    margin-left: 20px;
+    padding-bottom: 10px;
+}

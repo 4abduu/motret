@@ -1,23 +1,7 @@
 @extends('layouts.app')
 
 @push('link')
-  <style>
-    .card-hover:hover {
-    transform: translateY(-5px);
-    transition: transform 0.3s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.btn-success {
-    background-color: #32bd40;
-    border-color: #32bd40;
-}
-
-.btn-success:hover {
-    background-color: #2aa835;
-    border-color: #2aa835;
-}
-  </style>
+<link rel="stylesheet" href="{{ asset('css/pages/admin-dashboard.css') }}">
 @endpush
 
 @section('content')
@@ -197,87 +181,16 @@
 @endsection
 
 @push('scripts')
-    
 <!-- Script untuk Chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // User Growth Chart
-    const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
-    new Chart(userGrowthCtx, {
-        type: 'line',
-        data: {
-            labels: @json($userGrowthData['labels']),
-            datasets: [{
-                label: 'User Growth',
-                data: @json($userGrowthData['data']),
-                backgroundColor: 'rgba(50, 189, 64, 0.2)',
-                borderColor: '#32bd40',
-                borderWidth: 2,
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // Photo Upload Chart
-    const photoUploadCtx = document.getElementById('photoUploadChart').getContext('2d');
-    new Chart(photoUploadCtx, {
-        type: 'line',
-        data: {
-            labels: @json($photoUploadData['labels']),
-            datasets: [{
-                label: 'Photo Uploads',
-                data: @json($photoUploadData['data']),
-                backgroundColor: 'rgba(42, 168, 53, 0.2)',
-                borderColor: '#2aa835',
-                borderWidth: 2,
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+window.adminDashboardConfig = {
+    userGrowthLabels: @json($userGrowthData['labels']),
+    userGrowthData: @json($userGrowthData['data']),
+    photoUploadLabels: @json($photoUploadData['labels']),
+    photoUploadData: @json($photoUploadData['data']),
+    loginSuccess: @json(session('login_success'))
+};
 </script>
-
-@if(session('login_success'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Cek apakah alert sudah ditampilkan sebelumnya
-        if (!localStorage.getItem('loginAlertShown')) {
-            Swal.fire({
-                icon: 'success',
-                title: '{{ session('login_success') }}',
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 1500,
-                toast: true,
-                background: '#32bd40',
-                color: '#fff',
-                iconColor: '#fff',
-                didOpen: (toast) => {
-                    toast.addEventListener('click', () => {
-                        Swal.close();
-                    })
-                }
-            });
-            // Set flag di localStorage
-            localStorage.setItem('loginAlertShown', 'true');
-            
-            // Hapus flag saat user navigasi ke halaman lain
-            window.addEventListener('beforeunload', function() {
-                localStorage.removeItem('loginAlertShown');
-            });
-        }
-    });
-</script>
-@endif
+<script src="{{ asset('js/pages/admin-dashboard.js') }}"></script>
 @endpush

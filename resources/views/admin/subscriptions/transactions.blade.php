@@ -1,11 +1,6 @@
 @extends('layouts.app')
 @push('link')
-    <style>
-                .dt-length {
-            margin-left: 20px;
-            padding-bottom: 10px;
-        }
-    </style>
+<link rel="stylesheet" href="{{ asset('css/pages/admin-datatable-page.css') }}">
 @endpush
 
 @section('content')
@@ -64,7 +59,5 @@
 
 @endsection
 @push('scripts')
-<script>
-    new DataTable('#example');
-</script>
+<script src="{{ asset('js/pages/admin-subscriptions-transactions.js') }}"></script>
 @endpush
